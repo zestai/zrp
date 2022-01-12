@@ -1,148 +1,133 @@
-# Contributors Guide
 
-Welcome to the Virtual Coffee contributors guide! Thank you so much for considering contributing to this repository. We really appreciate all the contributors who try to make this space better. This document serves as a guide that will show you the path of least resistance for making valuable contributions to this project. Reading and following this guide shows that you respect the time of the developers managing and developing this space. In return, they will reciprocate that respect in addressing your issue, assessing changes, and helping you finalize your pull requests. This is the only way we can produce anything of value.
+# Contributor Covenant Code of Conduct
 
-We take our [Code of Conduct](https://virtualcoffee.io/code-of-conduct/) very seriously, and all contributors must abide by it. Let’s treat each other with respect and remember we are all people who care and are trying. With that said, if you believe someone has violated the Code of Conduct, please fill out our [CoC Violation Form](https://virtualcoffee.io/report-coc-violation/), which you can do anonymously.
+## Our Pledge
 
-As an open source community, Virtual Coffee recognizes the importance of supporting our members and creating clear paths of communication. We know that sometimes things get lost in translation and we want to assume positive intent.
+We as members, contributors, and leaders pledge to make participation in our
+community a harassment-free experience for everyone, regardless of age, body
+size, visible or invisible disability, ethnicity, sex characteristics, gender
+identity and expression, level of experience, education, socio-economic status,
+nationality, personal appearance, race, caste, color, religion, or sexual identity
+and orientation.
 
-## Getting Started
+We pledge to act and interact in ways that contribute to an open, welcoming,
+diverse, inclusive, and healthy community.
 
-Before you begin:
+## Our Standards
 
-- Have you read our [Code of Conduct](https://virtualcoffee.io/code-of-conduct/)?
-- Check out [existing issues](https://github.com/Virtual-Coffee/virtualcoffee.io/issues) and the [discussion board](https://github.com/Virtual-Coffee/virtualcoffee.io/discussions) to ensure your issue hasn’t been brought up before.
+Examples of behavior that contributes to a positive environment for our
+community include:
 
-If you're looking to start learning how to work with this repo, this doc tries to provide all the resources to get you from confusion to productivity.
+* Demonstrating empathy and kindness toward other people
+* Being respectful of differing opinions, viewpoints, and experiences
+* Giving and gracefully accepting constructive feedback
+* Accepting responsibility and apologizing to those affected by our mistakes,
+  and learning from the experience
+* Focusing on what is best not just for us as individuals, but for the
+  overall community
 
-We're not here to reinvent the wheel, so where we feel appropriate, we reference and link to resources we feel do a good job of helping a newbie through that particular section of setup.
+Examples of unacceptable behavior include:
 
-Most of the docs are currently written using [markdown](https://www.markdownguide.org/basic-syntax/) to make it easy to add, modify, and edit what we need to.
+* The use of sexualized language or imagery, and sexual attention or
+  advances of any kind
+* Trolling, insulting or derogatory comments, and personal or political attacks
+* Public or private harassment
+* Publishing others' private information, such as a physical or email
+  address, without their explicit permission
+* Other conduct which could reasonably be considered inappropriate in a
+  professional setting
 
-We try not to take anything for granted, but in case we miss something, please reach out to the maintainers and let us know!
+## Enforcement Responsibilities
 
-We really want to make space for all developers to feel comfortable and supported while contributing, and docs like this provide a valuable resource for them to use.
+Community leaders are responsible for clarifying and enforcing our standards of
+acceptable behavior and will take appropriate and fair corrective action in
+response to any behavior that they deem inappropriate, threatening, offensive,
+or harmful.
 
-# Table of Contents
+Community leaders have the right and responsibility to remove, edit, or reject
+comments, commits, code, wiki edits, issues, and other contributions that are
+not aligned to this Code of Conduct, and will communicate reasons for moderation
+decisions when appropriate.
 
-- [Contrubutors Guide](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#contributors-guide)
-- [Getting Started](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#getting-started)
-- [What type of contributions are desired](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#what-type-of-contributions-are-desired)
-- [The Basics](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#the-basics)
-  - [Making a Github Account](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#making-a-github-account)
-  - [Discussions](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#discussions)
-  - [Working with Issues](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#working-with-issues)
-  - [Local development](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#local-development)
-  - [Making Pull Requests](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#creating-a-pull-request)
-  - [Awaiting Review](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#awaiting-review)
-  - [Suggested Changes](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#suggested-changes)
-  - [Tips and Gotchas](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#tips-and-gotchas)
-- [Bug Reporting](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#reporting-a-bug)
-- [Labelling conventions](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#labelling-conventions)
+## Scope
 
-# What type of contributions we're looking for.
+This Code of Conduct applies within all community spaces, and also applies when
+an individual is officially representing the community in public spaces.
+Examples of representing our community include using an official e-mail address,
+posting via an official social media account, or acting as an appointed
+representative at an online or offline event.
 
-This is an open source project and we love to receive contributions from our community — you! There are many ways to contribute, from writing tutorials or blog posts, improving the documentation, submitting bug reports and feature requests,
-or writing code which can be incorporated into the application codebase itself.
+## Enforcement
 
-# Asking to Pair
+Instances of abusive, harassing, or otherwise unacceptable behavior may be
+reported to the community leaders responsible for enforcement at
+internetobservatory@stanford.edu.
+All complaints will be reviewed and investigated promptly and fairly.
 
-This is a beginner friendly repo. Contributors can request a pairing (zoom/google hangouts) to pair with a maintainer on tackling an issue/submitting a PR/etc. If you want to do it for a pre-existing issue, simple indicate so in a comment under that issue. If not, you may open a new Question issue and request a pairing. Please understand that this is a volunteer effort; maintainers may not always be available for pairing.
+All community leaders are obligated to respect the privacy and security of the
+reporter of any incident.
 
-# The Basics
+## Enforcement Guidelines
 
-## Setting up a Github Account
+Community leaders will follow these Community Impact Guidelines in determining
+the consequences for any action they deem in violation of this Code of Conduct:
 
-We're going to assume you know what [github](https://www.howtogeek.com/180167/htg-explains-what-is-github-and-what-do-geeks-use-it-for/) is (otherwise, how would you be reading this?).
+### 1. Correction
 
-If you haven't made a github account as yet, make one [now](https://github.com). It's free!
+**Community Impact**: Use of inappropriate language or other behavior deemed
+unprofessional or unwelcome in the community.
 
-## Discussions
+**Consequence**: A private, written warning from community leaders, providing
+clarity around the nature of the violation and an explanation of why the
+behavior was inappropriate. A public apology may be requested.
 
-For questions, comments, or other discussion topics that don’t have a clear action, please use the [discussion board](https://github.com/Virtual-Coffee/virtualcoffee.io/discussions).
+### 2. Warning
 
-For example, if you want to ask “Should we do…” or “How do I do…”, you’ll start in the discussion board. This allows a whole-group conversation, and we can integrate the answer into docs or issues as necessary.
+**Community Impact**: A violation through a single incident or series
+of actions.
 
-## Working With Issues
+**Consequence**: A warning with consequences for continued behavior. No
+interaction with the people involved, including unsolicited interaction with
+those enforcing the Code of Conduct, for a specified period of time. This
+includes avoiding interactions in community spaces as well as external channels
+like social media. Violating these terms may lead to a temporary or
+permanent ban.
 
-Github uses a feature called _issues_. Issues are essentially a way to highlight bugs, features, problems, or any sort of suggestion or action you wish to happen on a github hosted project (you can find a more comprehensive explanation [here](https://guides.github.com/features/issues/)).
+### 3. Temporary Ban
 
-We highly recommend looking at the existing repository issues to find a good open issue to start with. We always try to keep them populated with some beginner friendly issues that anyone can attempt to solve.
+**Community Impact**: A serious violation of community standards, including
+sustained inappropriate behavior.
 
-If you find an issue you would like to work on, comment on the issue and a maintainer will respond and/or assign it to you. It can't be assigned to you unless you've commented on the issue.
+**Consequence**: A temporary ban from any sort of interaction or public
+communication with the community for a specified period of time. No public or
+private interaction with the people involved, including unsolicited interaction
+with those enforcing the Code of Conduct, is allowed during this period.
+Violating these terms may lead to a permanent ban.
 
-We also use a `PR Submitted` tag to indicate when an Pull Request has been submitted for an issue, but it hasn't yet been merged, as most people would rather would on an issue with no attempted PRs yet.
+### 4. Permanent Ban
 
-If you feel like there's a contribution you would like to make that isn't represented by an already existing issue, feel free to create your own! We have four issue templates that you can use which provide some (hopefully) helpful guidelines on how to form your issues. They are:
+**Community Impact**: Demonstrating a pattern of violation of community
+standards, including sustained inappropriate behavior,  harassment of an
+individual, or aggression toward or disparagement of classes of individuals.
 
-- FEATURE
-- BUG
-- QUESTION
-- DOCUMENTATION
+**Consequence**: A permanent ban from any sort of public interaction within
+the community.
 
-If you feel like you have an issue that doesn't match those categories though, go ahead and ignore the templates and create an issue the old fashioned way.
+## Attribution
 
-## Local development
+This Code of Conduct is adapted from the [Contributor Covenant][homepage],
+version 2.0, available at
+[https://www.contributor-covenant.org/version/2/0/code_of_conduct.html][v2.0].
 
-Follow the steps for local development [in our README](README.md#local-development)
+Community Impact Guidelines were inspired by
+[Mozilla's code of conduct enforcement ladder][Mozilla CoC].
 
-## Creating a Pull Request
+For answers to common questions about this code of conduct, see the FAQ at
+[https://www.contributor-covenant.org/faq][FAQ]. Translations are available
+at [https://www.contributor-covenant.org/translations][translations].
 
-> ⚠️ **Heads up!** If you'd like to make a Pull Request, please make sure you've created an issue (or a discussion board post) first, and **that you've been assigned to the issue**. This allows the maintainer team to provide guidance and prioritize tasks — otherwise you may run the risk of spending time on something that doesn't end up getting accepted for various reasons.
-
-We appreciate everyone’s efforts, and want to ensure that our communication is clear and open as much as possible. We strongly encourage communication and clarity before doing work.
-
-Once you've been assigned the issue, you have two options.
-
-**The first option** is using the github interface to fork the repo, making an edit right here in the github client, and then submit a Pull Request (no code or terminals or IDE required). [This guide](https://guides.github.com/activities/hello-world/) shows just how to do that for a small personal repo. You would simply replace the step of creating a new repository to just navigating to this one and forking that instead. This is a great idea if you simply plan to add to or edit one of the markdown files we use for documentation in this project.
-
-**The second option** is go the traditional route of forking the repo, creating a local copy of that fork, and working on your changes that way. This is also the only way to go if this project expands to include an associated application. For that we recommend [this guide](https://www.dataschool.io/how-to-contribute-on-github/).
-
-**Note:** The guide referenced above uses _master_ as the naming convention for the default branch in all its repos. In this project, _main_ is the default branch name. When following the instructions in the guide, simply replace _master_ with _main_ wherever it appears and it should proceed as normal. [This guide from Scott Hanselman](https://www.hanselman.com/blog/EasilyRenameYourGitDefaultBranchFromMasterToMain.aspx) can help you transition with your own personal repos from master to main, and explains the methodology as to why you should.
-
-## Awaiting Review
-
-Once you've submitted your pull request, the only thing left is to wait from feedback from one of the project maintainers. Since this is volunteer work for all of course, we ask for patience if you don't see a response immediately. Sometimes it takes about a day for someone's schedule to clear up to have the sit to properly review incoming PRs. We'd rather not rush a response after someone has put time and effort into submitted. If it's been over **one week** and you haven't received any acknowledgement, you can post a comment on your PR reminding of it's status.
-
-The purpose of reviews is to create the best experience we can for our contributors.
-
-- Reviews are always respectful, acknowledging that everyone did the best possible job with the knowledge they had at the time.
-- Reviews discuss content, not the person who created it.
-- Reviews are constructive and start conversation around feedback.
-
-If the PR looks good, a maintainer will typically give feedback and merge the request immediately, otherwise they'll let you know what questions they have or what needs to change before your work can be accepted. Once it is, you'll see your changes on the main branch and VOILA, open source contribution complete!
-
-### Suggested Changes
-
-We may ask for changes to be made before a PR can be merged, either using [suggested changes](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request) or pull request comments. You can apply suggested changes directly through the UI. You can make any other changes in your fork, then commit them to your branch.
-
-As you update your PR and apply changes, mark each conversation as [resolved](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/commenting-on-a-pull-request#resolving-conversations).
-
-## Tips and Gotchas
-
-This section is just little notes and bits of info that can smooth over some of the bumps and hiccups that can come along with contributing.
-
-- While this isn't absolutely required, we highly recommend **associating your Pull Requests with the Issue that they're intended to address**. This makes review much easier and avoids confusion when looking back at past commits. Github allows you to link a PR to an issue both during and after the PR's creation (the option should located in rightmost panel of the github PR interface).
-- **Please do not hesitate to ask for help** in any part of this process if you feel confused. As soon as they can, project maintainers can try and get you through the parts which are confusing you. Just be aware that no one here is a github expert :), we're just folks happy and willing to help others get some experience.
-- Be extra careful when working with git in the command line. Incorrectly typed names or commands can have strange results, and navigating git issues can be very perplexing. Fortunately, there's a plethora of resources on fixing said issues, and rest assured that any error you make has already been done, and solved, by someone.
-
-That's all for now. If you feel like anything is missing from this document that you wish were included, let us know. Or hey, open up a fresh issue and take a shot at helping us make it better!
-
-# Reporting a bug
-
-We have a bug report template already created for your use. Just select it when opening up an issue on github and follow the headers to formulating your issue.
-
-When filing an issue, make sure to answer these three questions:
-
-- What did you do?
-- What did you expect to see?
-- What did you see instead?
-
-# Labelling Conventions
-
-This repository has three basic types of labels:
-
-- `Type` - The nature of the issue. BUG, FEATURE, QUESTION, or DOCUMENTATION (will be pre-assigned if using issue templates). Only one active per issue
-- `Status` - What part of the process is this issue in. e.g. Active, Needs Review, Resolved, etc. (will be filled in by maintainers and some contributors). Only one active per issue.
-- `Context` - Additional info that helps people parse issues. e.g. "good first issue", "for maintainer only". Multiple may be active on one issue.
-
+[homepage]: https://www.contributor-covenant.org
+[v2.0]: https://www.contributor-covenant.org/version/2/0/code_of_conduct.html
+[Mozilla CoC]: https://github.com/mozilla/diversity
+[FAQ]: https://www.contributor-covenant.org/faq
+[translations]: https://www.contributor-covenant.org/translations
