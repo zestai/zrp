@@ -1,4 +1,3 @@
-# zrp
 Zest Race Predictor
 ____________________
 
