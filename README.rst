@@ -9,11 +9,11 @@ _______
 Authors
 _______
 
-Kasey Matthews (Zest AI Lead)
-Austin Li (Harvard T4SG)
-Christien Williams (Schmidt Futures)
-Sean Kamkar (Zest AI)
-Jay Budzik (Zest AI)
+ * Kasey Matthews (Zest AI Lead)
+ * Austin Li (Harvard T4SG)
+ * Christien Williams (Schmidt Futures)
+ * Sean Kamkar (Zest AI)
+ * Jay Budzik (Zest AI)
 
 Contributing
 _____________
