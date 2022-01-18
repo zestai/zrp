@@ -32,3 +32,8 @@ _________
 
 The package is released under the `Apache-2.0
 License <https://opensource.org/licenses/Apache-2.0>`__.
+
+Results and Feedback
+_____________________
+
+Generate interesting results with the tool and want to share it or other interesting feedback? Get in touch via abetterway@zest.ai. 
