@@ -3,6 +3,16 @@ ____________________
 
 The ZRP can be broken down into four main segments: preprocessing, geocoding, American Community Survey(ACS) integration, and modeling/predictions.
 
+Data
+_____
+
+Consult the following to download state voter registration data:
+ * `Alabama <https://www.alabamainteractive.org/sos/voter/voterWelcome.action>`_
+ * `South Carolina <https://www.scvotes.gov/sale-voter-registration-lists>`_
+ * `Georgia <https://sos.ga.gov/index.php/elections/order_voter_registration_lists_and_files>`_
+ * `North Carolina <https://www.ncsbe.gov/results-data/voter-registration-data>`_
+ * `Louisiana <https://www.sos.la.gov/ElectionsAndVoting/BecomeACandidate/PurchaseVoterLists/Pages/default.aspx>`_
+
 Install
 _______
 
