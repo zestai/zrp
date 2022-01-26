@@ -1,3 +1,94 @@
+Florida Voter Registration Data Statistics
+__________________________________________
+
+Dataset shape
+(15104450, 38)
+
+
+Column space
+Index(['county_code', 'voter_id', 'last_name', 'name_suffix', 'first_name',
+       'middle_name', 'pr_exempt', 'res_address_1', 'res_address_2',
+       'res_city', 'res_state', 'res_zip_code', 'mail_address_1',
+       'mail_address_2', 'mail_address_3', 'mail_city', 'mail_state',
+       'mail_zip_code', 'mail_country', 'gender', 'race', 'birthdate',
+       'reg_date', 'party', 'precinct', 'precinct_group', 'precinct_split',
+       'precinct_suffix', 'voter_status', 'cong_dist', 'house_dist',
+       'senate_dist', 'county_commission_dist', 'school_board_dist',
+       'area_code', 'phone_num', 'phone_ext', 'email'],
+      dtype='object')
+
+
+Race totals
+WHITE         9251241
+HISPANIC      2631894
+BLCAK         2040365
+UNKNOWN       455782
+AAPI          314110
+OTHER         273146
+MULTIRACIAL          89562
+AIAN          48350
+Name: race, dtype: int64
+
+
+Race by percentage
+WHITE         0.61
+HISPANIC      0.17
+BLACK         0.14
+UNKNOWN       0.03
+AAPI          0.02
+OTHER         0.02
+MULTIRACIAL   0.01
+AIAN          0.00
+Name: race, dtype: float64
+
+
+Gender by percentage
+F    0.52
+M    0.45
+U    0.03
+Name: gender, dtype: float64
+
+
+Age ranges by percentage
+County total
+67
+
+
+Counties by percentage
+DAD    0.11
+BRO    0.09
+PAL    0.07
+HIL    0.07
+ORA    0.06
+       ... 
+HAM    0.00
+UNI    0.00
+GLA    0.00
+LAF    0.00
+LIB    0.00
+Name: county_code, Length: 67, dtype: float64
+
+
+Zip Code Total
+703671
+
+
+Zip codes by percentage
+*            0.0048
+34787        0.0038
+33411        0.0034
+34711        0.0033
+34953        0.0033
+              ...  
+338534711    0.0000
+331761704    0.0000
+329034278    0.0000
+325501907    0.0000
+347368563    0.0000
+Name: res_zip_code, Length: 703671, dtype: float64
+
+
+
 North Carolina Voter Registration Data Statistics
 __________________________________________________
 
@@ -29,25 +120,25 @@ Index(['county_id', 'county_desc', 'voter_reg_num', 'status_cd',
 
 
 Race totals
-W    5341774
-B    1721713
-U     584121
-O     213544
-A     107783
-I      61668
-M      51543
+WHITE         5341774
+BLACK         1721713
+UNKOWN        584121
+OTHER         213544
+AAPI          107783
+AIAN          61668
+MULTIRACIAL   51543
            3
 Name: race_code, dtype: int64
 
 
 Race by percentage
-W    0.66
-B    0.21
-U    0.07
-O    0.03
-A    0.01
-I    0.01
-M    0.01
+WHITE         0.66
+BLACK         0.21
+UNKNOWN       0.07
+OTHER         0.03
+AAPI          0.01
+AIAN          0.01
+MULTIRACIAL   0.01
      0.00
 Name: race_code, dtype: float64
 
@@ -153,26 +244,26 @@ Index(['County', 'Registrant Status', 'Name Title', 'First Name',
 
 
 Race totals
-W     166749
-B      54145
-H       5649
-U       4378
-A       2526
-O        917
-AI       575
-F          8
+WHITE                                            166749
+BLACK                                            54145
+HISPANIC                                         5649
+UNKOWN                                           4378
+AAPI                                             2526
+OTHER                                            917
+AIAN                                             575
+UNKNOWN (FEDERALLY-REGISTERED IN AL)             8
 Name: Race, dtype: int64
 
 
 Race by percentage
-W     0.71
-B     0.23
-H     0.02
-U     0.02
-A     0.01
-O     0.00
-AI    0.00
-F     0.00
+WHITE                                     0.71
+BLACK                                     0.23
+HISPANIC                                  0.02
+UNKNOWN                                   0.02
+AAPI                                      0.01
+OTHER                                     0.00
+AIAN                                      0.00
+UNKNOWN (FEDERALLY-REGISTERED IN AL)      0.00
 Name: Race, dtype: float64
 
 
@@ -258,22 +349,22 @@ Index(['Jurisdiction_Parish', 'Jurisdiction_Ward', 'Jurisdiction_Precinct',
 
 
 Race totals
-W    1824983
-B     900863
-O      75552
-H      45072
-A      29302
-I      13488
+WHITE         1824983
+BLACK         900863
+OTHER         75552
+HISPANIC      45072
+AAPI          29302
+AIAN          13488
 Name: Personal_Race, dtype: int64
 
 
 Race by percentage
-W    0.63
-B    0.31
-O    0.03
-H    0.02
-A    0.01
-I    0.00
+WHITE         0.63
+BLACK         0.31
+OTHER         0.03
+HISPANIC      0.02
+AAPI          0.01
+AIAN          0.00
 Name: Personal_Race, dtype: float64
 
 
@@ -368,24 +459,24 @@ Index(['COUNTY_CODE', 'REGISTRATION_NUMBER', 'VOTER_STATUS', 'LAST_NAME',
 
 
 Race totals
-WH    3942674
-BH    2228912
-U      692780
-HP     280681
-AP     199593
-OT     148540
-AI      24701
+WHITE         3942674
+BLACK         2228912
+UNKNOWN       692780
+HISPANIC      280681
+AAPI          199593
+OTHER         148540
+AIAN          24701
 Name: RACE, dtype: int64
 
 
 Race by percentage
-WH    0.52
-BH    0.30
-U     0.09
-HP    0.04
-AP    0.03
-OT    0.02
-AI    0.00
+WHITE         0.52
+BLACK         0.30
+UNKNOWN       0.09
+HISPANIC      0.04
+AAPI          0.03
+OTHER         0.02
+AIAN          0.00
 Name: RACE, dtype: float64
 
 
