@@ -25,7 +25,7 @@ BLCAK         2040365
 UNKNOWN       455782
 AAPI          314110
 OTHER         273146
-MULTIRACIAL          89562
+MULTIRACIAL   89562
 AIAN          48350
 Name: race, dtype: int64
 
