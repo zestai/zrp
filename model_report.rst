@@ -94,8 +94,11 @@ Neural Networks can handle very complex problems but are very difficult to initi
 Data Pipeline
 =============
 
+For model training, we input dataframes consisting of ____________-. From the input, we map an individuals address to their census tract via computed geo lookup tables. We match on this census tract to derive an additional set of demographic data to add to the feature vector. Thus, __________________ are ultimately the predictive variables used in the model.
+
 We one hot encode the race labels. Using each bit of the encoding as a unique target, we then treat first, middle, and last names as categorical features, and target encode these features. In target encoding, features are replaced by a function of the posterior probability of the target (a race label) given a particular categorical value (first, middle, or last name), and the prior probability of the target over all the training data. Ultimately, an individual's name is represented in the final feature vector as multiple target encodings. 
 
+For inference, like with training, we feed in dataframes as input, addresses are mapped to census tracts and thus ACS demographic information, and feature vectors are built from these data and encoded name features. ........
 
 Model Outputs
 =============
