@@ -1,14 +1,25 @@
 Zest Race Predictor
 ____________________
 
-This tool allows users to predict race by only providing an individual's name and address as inputs. The nuance that this tool exploits, however, that gives it far superior accuracy to the Bayesian Improved Surname Geocoding (BISG) tool used by fair lending institutions today, is use of American Community Survey (ACS) data. By cross referencing with our ACS data lookup tables, we've trained models with data as low fedelity as an individuals census block group. Additionally, using ACS data, we've bolstered our training input feature vectors with additional insights such as percentages of a racial group in a census tract, or average houshold income of a census tract.
+This tool allows users to predict race by only providing an individual's name and address as inputs. The nuance that this tool exploits, however, that gives it far superior accuracy to the Bayesian Improved Surname Geocoding (BISG) tool used by fair lending institutions today, is use of American Community Survey (ACS) data. By cross referencing with our ACS data lookup tables, we've trained models with data as low fedelity as an individuals census block group. Additionally, using ACS data, we've bolstered our training input feature vectors with additional insights such as percentages of a racial group in a census tract, or average houshold income of a census tract. 
+
+Notes
+_____
+
+This is the preliminary version and implementation of the ZRP tool. We're dedicated to continue improving both the algorithm and documentation. 
 
 
 Install
 _______
 
-We recommend installing ______ inside a `python virtual environment <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`_.
+We recommend installing zrp inside a `python virtual environment <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`_.
+::
 
+ pip install zrp
+
+Or::
+
+ condaa install -c ___________ zrp
 
 Data
 _____
@@ -42,6 +53,11 @@ The ZRP can be broken down into four main segments: preprocessing, geocoding, Am
 
 Module Usage
 ___________
+
+* models
+* functions
+* data access
+^and file structure/locations for these
 
 
 CLI Usage
