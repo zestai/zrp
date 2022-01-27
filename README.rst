@@ -44,7 +44,7 @@ The US Census Bureau details that, "the American Community Survey (ACS) is an on
 ACS data is available in 1 or 5 year spans. The 5yr ACS data is the most comprehensive & is available at more granular levels than 1yr data. It is thus used in this work.
 
 
-The Models
+The Models and API
 __________
 
 The ZRP can be broken down into four main segments: preprocessing, geocoding, American Community Survey(ACS) integration, and modeling/predictions.
