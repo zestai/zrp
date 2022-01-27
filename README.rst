@@ -1,7 +1,7 @@
 Zest Race Predictor
 ____________________
 
-This tool allows users to predict race by only providing an individual's name and address as inputs. The nuance that this tool exploits, however, that gives it far superior accuracy to the Bayesian Improved Surname Geocoding (BISG) tool used by fair lending institutions today, is use of American Community Survey (ACS) data. By cross referencing with our ACS data lookup tables, we've trained models with data as low fedelity as an individuals census block group. Additionally, using ACS data, we've bolstered our training input feature vectors with additional insights ....
+This tool allows users to predict race by only providing an individual's name and address as inputs. The nuance that this tool exploits, however, that gives it far superior accuracy to the Bayesian Improved Surname Geocoding (BISG) tool used by fair lending institutions today, is use of American Community Survey (ACS) data. By cross referencing with our ACS data lookup tables, we've trained models with data as low fedelity as an individuals census block group. Additionally, using ACS data, we've bolstered our training input feature vectors with additional insights such as percentages of a racial group in a census tract, or average houshold income of a census tract.
 
 
 Install
