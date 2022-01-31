@@ -17,9 +17,18 @@ We recommend installing zrp inside a `python virtual environment <https://docs.p
 
  pip install zrp
 
-Or::
+Or:
+::
 
  condaa install -c ___________ zrp
+
+After installing via pip, you need to download the lookup tables using the following command:
+::
+
+ python -m zrp download
+
+Note: Due to the size and number of lookup tables necesary for the zrp package, total installation requires ___ GB of available space.
+
 
 Data
 _____
