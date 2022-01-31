@@ -93,6 +93,12 @@ _____________
 
 Contributions are encouraged! For small bug fixes and minor improvements, feel free to just open a PR. For larger changes, please open an issue first so that other contributors can discuss your plan, avoid duplicated work, and ensure it aligns with the goals of the project. Be sure to also follow the `Code of Conduct <./CODE_OF_CONDUCT.md>`_. Thanks!
 
+
+Releases
+________
+
+We provide new releases to ensure relevant data and look up tables requisite for package download and use are consistently up to date. With each release, the __version__ field in the about.py file must be updated correspondingly. 
+
 Wishlist
 __________
 
