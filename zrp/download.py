@@ -4,7 +4,8 @@ import os
 import sys
 from urllib.request import urlretrieve
 from tqdm import tqdm
-import about
+from zrp import about
+
 
 # This is used to show progress when downloading.
 # see here: https://github.com/tqdm/tqdm#hooks-and-callbacks
