@@ -10,13 +10,13 @@ README = (HERE / "README.rst").read_text()
 # This call to setup() does all the work
 setup(
     name="zrp",
-    version="1.0.0",
+    version="0.1.0",
     description="The Zest Race Predictor tool predicts race/ethnicity using a name and address as inputs.",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/zestai/zrp",
     author="Kasey Matthews et al.",
-    author_email="",  # TODO
+    author_email="abetterway@zest.ai",
     license="Apache-2.0",
     classifiers=[
         # How mature is this project? Common values are
