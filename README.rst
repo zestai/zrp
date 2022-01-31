@@ -97,7 +97,7 @@ Contributions are encouraged! For small bug fixes and minor improvements, feel f
 Releases
 ________
 
-We provide new releases to ensure relevant data and look up tables requisite for package download and use are consistently up to date. With each release, the __version__ field in the about.py file must be updated correspondingly. Follow the steps in the `releasing doc <./releasing.rst>`_.
+Follow the steps in the `releasing doc <./releasing.rst>`_ to push new releases to Pypi and Github releases. With respect to Github releases, we provide new releases to ensure relevant data and look up tables requisite for package download and use are consistently up to date. With each release, the __version__ field in the about.py file must be updated correspondingly (instructions in the resleasing doc). 
 
 Wishlist
 __________
