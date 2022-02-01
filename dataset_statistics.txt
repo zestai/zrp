@@ -210,7 +210,7 @@ Name: zip_code, Length: 859, dtype: float64
 
 
 
-Alamaba Voter Registration Data Statistics
+Alabama Voter Registration Data Statistics
 __________________________________________
 
 Dataset shape
