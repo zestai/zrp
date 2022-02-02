@@ -21,7 +21,7 @@ level =  'census_tract'
 
 out_data_path = f"/d/shared/zrp/model_artifacts/experiment/{model_version}/{level}/data/"
 
-src_path = f'/d/shared/zrp/zrp/zrp/modeling/models/{level}/'
+src_path = f'{home}/zrp/zrp/modeling/models/{level}/'
 sys.path.append(src_path)
 
 from src.app_preprocessor import HandleCompoundNames
