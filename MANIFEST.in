@@ -2,3 +2,5 @@ include MANIFEST.in
 include README.rst
 include LICENSE
 include setup.py
+include zrp/data/processed/acs/2019/5yr/*
+include zrp/data/processed/geo/2019/*
