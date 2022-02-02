@@ -1,5 +1,6 @@
+___________________________________________________________________________________________________________________________________________________________________
 Florida Voter Registration Data Statistics
-__________________________________________
+___________________________________________________________________________________________________________________________________________________________________
 
 Dataset shape
 (15104450, 38)
@@ -88,9 +89,9 @@ Zip codes by percentage
 Name: res_zip_code, Length: 703671, dtype: float64
 
 
-
+___________________________________________________________________________________________________________________________________________________________________
 North Carolina Voter Registration Data Statistics
-__________________________________________________
+___________________________________________________________________________________________________________________________________________________________________
 
 Dataset shape
 (8082149, 71)
@@ -209,9 +210,9 @@ Zip codes by percentage
 Name: zip_code, Length: 859, dtype: float64
 
 
-
+___________________________________________________________________________________________________________________________________________________________________
 Alabama Voter Registration Data Statistics
-__________________________________________
+___________________________________________________________________________________________________________________________________________________________________
 
 Dataset shape
 (235581, 69)
@@ -314,9 +315,9 @@ Zip codes by percentage
 Name: Residential Zip, Length: 1139, dtype: float64
 
 
-
+___________________________________________________________________________________________________________________________________________________________________
 Louisiana Voter Registration Data Statistics
-_____________________________________________
+___________________________________________________________________________________________________________________________________________________________________
 
 Dataset shape
 (2889260, 49)
@@ -426,9 +427,9 @@ Zip codes by percentage
 Name: Residence_ZipCode5, Length: 532, dtype: float64
 
 
-
+___________________________________________________________________________________________________________________________________________________________________
 Georgia Voter Registration Data Statistics
-__________________________________________
+___________________________________________________________________________________________________________________________________________________________________
 
 
 Dataset shape
@@ -524,3 +525,133 @@ Zip codes by percentage
 314052329.0    0.0000
 310891349.0    0.0000
 Name: RESIDENCE_ZIPCODE, Length: 572097, dtype: float64
+
+___________________________________________________________________________________________________________________________________________________________________
+South Carolina Voter Registration Data Statistics
+___________________________________________________________________________________________________________________________________________________________________
+
+
+Dataset shape
+(2108966, 40)
+
+
+Column space
+Index(['County', 'VoterRegistrationNumber', 'FirstName', 'MiddleName',
+       'LastName', 'Suffix', 'ResidenceLineNumber', 'ResidenceLineName',
+       'ResidenceLineSuite', 'ResidenceCity', 'ResidenceZipCode',
+       'MailingLineNumber', 'MailingLineName', 'MailingCity', 'MailingState',
+       'MailingZipCode', 'Gender', 'Race', 'RegistrationDate', 'DateOfBirth',
+       'DateLastVoted', 'GeneralElectionLastVoted',
+       'GeneralElectionPreviousVoted', 'DemocraticElectionLastVoted',
+       'DemocraticElectionPreviousVoted', 'RepublicanElectionLastVoted',
+       'RepublicanElectionPreviousVoted', 'WatershedDistrict', 'PrecinctCode',
+       'PrecinctName', 'Township', 'HouseDistrict', 'SenateDistrict',
+       'CntyCouncilDistrict', 'SchoolDistrict', 'CityCouncilDistrict',
+       'CongressionalDistrict', 'VoterStatus', 'MunicipalityCode',
+       'MunicipalityName'],
+      dtype='object')
+
+
+Race totals
+White              1479745
+Black/African       542882
+Hispanic             38763
+Asian                21652
+Other                10811
+M                     8613
+Native American       4164
+Unknown               2336
+Name: Race, dtype: int64
+
+
+Race by percentage
+White              0.70
+Black/African      0.26
+Hispanic           0.02
+Asian              0.01
+Other              0.01
+M                  0.00
+Native American    0.00
+Unknown            0.00
+Name: Race, dtype: float64
+
+
+Gender by percentage
+Female     0.55
+Male       0.45
+Unknown    0.00
+Name: Gender, dtype: float64
+
+
+Age ranges by percentage
+County total
+46
+
+
+Counties by percentage
+23    0.10
+10    0.09
+40    0.08
+26    0.08
+42    0.06
+46    0.06
+32    0.06
+8     0.04
+7     0.04
+4     0.04
+2     0.03
+18    0.03
+21    0.03
+39    0.02
+43    0.02
+29    0.02
+38    0.02
+37    0.02
+22    0.01
+16    0.01
+28    0.01
+24    0.01
+30    0.01
+11    0.01
+13    0.01
+15    0.01
+36    0.01
+14    0.01
+27    0.01
+34    0.01
+12    0.01
+45    0.01
+17    0.01
+19    0.01
+35    0.01
+44    0.00
+1     0.00
+20    0.00
+6     0.00
+25    0.00
+41    0.00
+31    0.00
+9     0.00
+5     0.00
+33    0.00
+3     0.00
+Name: County, dtype: float64
+
+
+Zip Code Total
+412
+
+
+Zip codes by percentage
+29072.0    0.0134
+29681.0    0.0133
+29464.0    0.0123
+29732.0    0.0120
+29485.0    0.0116
+            ...  
+29433.0    0.0000
+29834.0    0.0000
+29813.0    0.0000
+29589.0    0.0000
+29143.0    0.0000
+Name: ResidenceZipCode, Length: 412, dtype: float64
