@@ -27,7 +27,6 @@ class HandleCompoundNames(BaseEstimator, TransformerMixin):
         self.middle_name = middle_name
         
     def fit(self, X, y):
-        print("Handle Compounds:", X.shape, y.shape)
         return self
     
     def _upper_case(self, X, columns):
@@ -76,12 +75,8 @@ class HandleCompoundNames(BaseEstimator, TransformerMixin):
         return joint_result
 
     def transform(self, X):
-        print("Handle Compounds (in transform):", X.shape)
         data = X.copy()
         data.reset_index(drop=False, inplace=True)
-        print("Handle Compounds (in transform reset):", X.shape)
         # compound names (row indicies are not preserved!)
         data = self._handle_compounds(data)
-#         data = data.set_index(self.key)
-        print("Handle Compounds (end transform):", X.shape)
         return(data)
