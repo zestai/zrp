@@ -159,7 +159,7 @@ class NameAggregation(BaseEstimator, TransformerMixin):
         df = df.sort_values('ZEST_KEY')
         
         chunks = [df[x:x+10000] for x in range(0, len(df), 10000)]
-        results = Parallel(n_jobs=90, verbose=1, prefer='threads')(delayed(self.agg_col)(chunk) for chunk in tqdm(chunks))
+        results = Parallel(n_jobs=sel.n_jobs, verbose=1, prefer='threads')(delayed(self.agg_col)(chunk) for chunk in tqdm(chunks))
         
         aggd_data = pd.concat(results)  
         aggd_columns= list(aggd_data.columns)
