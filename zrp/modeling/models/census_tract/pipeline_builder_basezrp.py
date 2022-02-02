@@ -2,6 +2,7 @@ print('\n---\nloading packages')
 import os
 import re
 import sys
+import json
 import numpy as np
 import pandas as pd
 from os.path import expanduser
@@ -18,9 +19,8 @@ base_model = 'base_zrp'
 model_version  = 'exp_010'
 level =  'census_tract'
 out_data_path = f"/d/shared/zrp/model_artifacts/experiment/{model_version}/{level}/data/"
-src_path = '{}/zest-race-predictor/playground/kam/zrp'.format(home)
+src_path = '{}zest-race-predictor/playground/kam/zrp/modeling/models/census_tract/'.format(home)
 sys.path.append(src_path)
-from prepare.utils import load_json
 
 from src.app_preprocessor import HandleCompoundNames
 from src.acs_scaler import CustomRatios
@@ -36,6 +36,11 @@ last_name="last_name"
 key = "ZEST_KEY"
 geo_key = 'GEOID'
 n_jobs = -1
+
+def load_json(path):
+    with open(path, "r") as infile:
+        data = json.load(infile)
+    return data
 
 cwd = os.getcwd()
 feature_list = load_json(os.path.join(cwd, 'feature_list.json'))
@@ -103,11 +108,13 @@ valid_targ_dfs = []
 for file in valid_targ_files:
     tmp = pd.read_feather(os.path.join(sample_path, file))
     valid_targ_dfs.append(tmp)    
-y_valid = pd.concat(valid_targ_dfs)    
+y_valid = pd.concat(valid_targ_dfs)  
+
 print("")
 print("SHAPE:", X_train.shape, y_train.shape)
 print("KEYS:", X_train[key].nunique(), y_train[key].nunique())
 print("")
+
 X_train_keys = list(X_train[key].unique())
 y_train_keys = list(y_train[key].unique())
 train_keys = list(set(X_train_keys).intersection(set(y_train_keys)))
@@ -185,7 +192,6 @@ X_test.sort_index(inplace=True)
 y_test.sort_index(inplace=True)
 print("")
 print("SHAPE:", X_train.shape, y_train.shape)
-print("KEYS:", X_train[key].nunique(), y_train[key].nunique())
 print("")
 
 cols = list(set(X_train.columns) - set([key, geo_key, 'GEOID_BG',  'GEOID_CT',
@@ -209,7 +215,6 @@ X_test.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"test_raw
 
 print("")
 print("SHAPE:", X_train.shape, y_train.shape)
-print("KEYS:", X_train[key].nunique(), y_train[key].nunique())
 print("")
 
 ### Build Pipeline
@@ -253,12 +258,7 @@ start_transform_time = time.time()
 print(start_transform_time)
 print("")
 X_train_fe = pipe.transform(X = X_train)
-X_valid_fe = pipe.transform(X = X_valid)
-X_test_fe = pipe.transform(X = X_test)
 
-X_train_fe.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"train_fe_data.feather"))
-X_valid_fe.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"valid_fe_data.feather"))
-X_test_fe.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"test_fe_data.feather"))
 
 end_transform_time = time.time()
 print("Total Time:", end_transform_time - start_transform_time, "\n",
@@ -299,13 +299,21 @@ print("Total Time:", end_model_time - start_model_time, "\n",
      "Total Time Adjusted:", (end_model_time - start_model_time)/60, "\n",
     "End Time:", end_model_time)
 
-##### Set the model to the pipeline
+print("True Race Distribution: \n", y_train[race].value_counts(dropna=False))
+print(X_train_fe.shape, y_train.shape, len(sample_weights))
+
 
 
 CLF.save_model(f'/d/shared/zrp/model_artifacts/experiment/{model_version}/{level}/data/xgb_model.json')
 #save model
 joblib.dump(CLF, f"/d/shared/zrp/model_artifacts/experiment/{model_version}/{level}/data/model.joblib") 
 
+X_valid_fe = pipe.transform(X = X_valid)
+X_test_fe = pipe.transform(X = X_test)
+
+X_train_fe.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"train_fe_data.feather"))
+X_valid_fe.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"valid_fe_data.feather"))
+X_test_fe.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"test_fe_data.feather"))
 
 ##### Return Race Probabilities
 print('\n---\nrace predictions')
@@ -318,9 +326,10 @@ y_hat_valid.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"val
 y_hat_test.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"test_proxies.feather"))
 
 print('\n---\nrace predictions')
-y_phat_train = pd.DataFrame({'race' :CLF.predict_proba(X_train_fe)}, index=y_train.index)
-y_phat_valid = pd.DataFrame({'race' :CLF.predict_proba(X_valid_fe)}, index=y_valid.index)
-y_phat_test = pd.DataFrame({'race' :CLF.predict_proba(X_test_fe)}, index=y_test.index)
+y_phat_train = pd.DataFrame(CLF.predict_proba(X_train_fe), index=y_train.index)
+y_phat_valid = pd.DataFrame(CLF.predict_proba(X_valid_fe), index=y_valid.index)
+y_phat_test = pd.DataFrame(CLF.predict_proba(X_test_fe), index=y_test.index)
+
 
 y_phat_train.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"train_proxy_probs.feather"))
 y_phat_valid.reset_index(drop=False).to_feather(os.path.join(out_data_path, f"valid_proxy_probs.feather"))
