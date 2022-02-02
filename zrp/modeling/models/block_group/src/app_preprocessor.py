@@ -75,11 +75,8 @@ class HandleCompoundNames(BaseEstimator, TransformerMixin):
         return joint_result
 
     def transform(self, X):
-        
         data = X.copy()
         data.reset_index(drop=False, inplace=True)
-
         # compound names (row indicies are not preserved!)
         data = self._handle_compounds(data)
-#         data = data.set_index(self.key)
         return(data)
