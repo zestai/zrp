@@ -17,11 +17,6 @@ We recommend installing zrp inside a `python virtual environment <https://docs.p
 
  pip install zrp
 
-Or:
-::
-
- condaa install -c ___________ zrp
-
 After installing via pip, you need to download the lookup tables using the following command:
 ::
 
