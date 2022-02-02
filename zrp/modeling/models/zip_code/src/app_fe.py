@@ -47,7 +47,6 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
         self.keys = [self.key, self.geo_key]
 
     def _process_target(self, y): 
-
         y_unique = y.unique()
         y_unique.sort()
         self.n_classes = len(y_unique)
@@ -57,7 +56,6 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
         # handle multi-labeled output
         self.mlb = MultiLabelBinarizer(classes = y_unique)
         self.mlb_columns = list(set(possible_race_classes) & set(y_unique))
-        
         self.mlb.fit(y.values.reshape(-1,1))
         y_ohe = pd.DataFrame(self.mlb.transform(y.values.reshape(-1,1)), columns=self.mlb_columns)
 
@@ -70,8 +68,8 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
     def fit(self, X, y):
 
         targets = X[[self.key]].merge(y.reset_index(drop=False), on=self.key, how="left")
-        y = targets.set_index(self.key)[self.race]
-        
+        y = targets[self.race]
+#         y = targets.set_index(self.key)[self.race]
         X = X.reset_index(drop=True)
 #         y = y.reset_index(drop=True) 
 
@@ -79,7 +77,7 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
         self.acs_columns = list(set(self.data_columns) - set(self.label_encoded_columns) - set(self.keys))
         
         y_ohe = self._process_target(y)
-        
+
         # fit label encoded columns
         for i in range(self.n_classes):
             self.le[i].fit(X[self.label_encoded_columns], y_ohe.iloc[:,i])
@@ -90,7 +88,6 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
 
 
         X = X.reset_index(drop=False)
-
         data_fe = pd.concat([self.le[i].transform(X[self.label_encoded_columns]) for i in range(self.n_classes)],
                          axis=1, sort=False
                         )
@@ -99,7 +96,6 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
                           X[self.keys],
                              X[self.acs_columns]
                          ], axis=1, sort=False)
-    
         label_encoded_colname = []
         for label in self.mlb_columns:
             for col in self.label_encoded_columns:
@@ -109,7 +105,6 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
         data_fe[label_encoded_colname] = data_fe[label_encoded_colname].astype(float)
 
         
-
         return data_fe
     
 
@@ -167,20 +162,23 @@ class NameAggregation(BaseEstimator, TransformerMixin):
     def transform(self, X):
         df = X.copy()
         df = df.filter(self.mto_feats + [self.key])
+        df = df.sort_values('ZEST_KEY')
         
-        chunks = [df[x:x+50] for x in range(0, len(df), 50)]
+        chunks = [df[x:x+10000] for x in range(0, len(df), 10000)]
         results = Parallel(n_jobs=90, verbose=1, prefer='threads')(delayed(self.agg_col)(chunk) for chunk in tqdm(chunks))
 
         aggd_data = pd.concat(results)  
-
         aggd_columns= list(aggd_data.columns)
+        aggd_data = aggd_data[~aggd_data.index.duplicated(keep='first')]  
         aggd_data[aggd_columns] = aggd_data[aggd_columns].apply(lambda x: x.round(5))
         
-        X = X.drop(self.drop_cols, axis=1).drop_duplicates().set_index(self.key)
-        aggd_data.sort_index(inplace=True)
-        X.sort_index(inplace=True)
         
-        data_out = pd.concat([X, aggd_data], axis=1)        
+        X = X.drop(self.drop_cols, axis=1)
+        X = X.drop_duplicates().set_index(self.key)
+        aggd_data = aggd_data.sort_index()
+        X = X.sort_index()
         
+        data_out = pd.merge(X, aggd_data, left_index=True, right_index=True)
+                
         return(data_out)
     
