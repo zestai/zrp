@@ -48,7 +48,8 @@ def load_json(path):
         data = json.load(infile)
     return data
 
-cwd = f"{home}/zrp/zrp/modeling/models/{level}/"
+#cwd = f"{home}/zrp/zrp/modeling/models/{level}/"
+cwd = os.getcwd()
 feature_list = load_json(os.path.join(cwd, 'feature_list.json'))
 fl_ids = load_json(os.path.join(cwd, 'fl_ids.json'))
 
