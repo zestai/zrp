@@ -32,22 +32,27 @@ $ bumpversion --current-version 0.1.0 minor setup.py zrp/about.py
 
   python setup.py sdist bdist_wheel
   ls dist
- 
- 5. Upload the distribution files to pypi’s test server
+
+
+5. Remove the old package version distribution packages in '/dist'
+
+
+
+6. Upload the distribution files to pypi’s test server
  ::
  
   python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 * Check the upload on the test.pypi server [https://test.pypi.org/project/PACKAGE/VERSION/]
   
-6. Test the upload with a local installation
+7. Test the upload with a local installation
 ::
  
   python -m pip install --index-url https://test.pypi.org/simple/ --no-deps <PACKAGE>
   
 * Start Python, import the package, and test the version
 
- 7. Upload the distribution files to pypi
+8. Upload the distribution files to pypi
  ::
  
   python -m twine upload dist/*
