@@ -2,6 +2,7 @@ import shutil
 import zipfile
 import os
 import sys
+import warnings
 from urllib.request import urlretrieve
 from tqdm import tqdm
 from zrp import about
@@ -40,18 +41,21 @@ def download_progress(url, fname):
     return fname
 
 
-def download_and_clean(url, release_zip_fname):
+def download_and_clean(url, release_zip_fname, geo_yr="2019", acs_yr="2019", acs_range="5yr"):
     """
     Download look up tables and file them within the module.
     This downloads the zip file from the source, extracts it, renames the moves the
     tables to the correct directory, and removes large files not used at runtime.
+    :param acs_range: A string for the year range the acs lookup table data will be from.
+    :param acs_yr: A string for the year the acs lookup table data will be from.
+    :param geo_yr: A string for the year the geo lookup table data will be from.
     :param url: A string for the url of the release zip to download.
     :param release_zip_fname: A string for the name of the zip file downloaded.
     :return:
     """
     cwd = os.path.dirname(os.path.abspath(__file__))
     fname = os.path.join(cwd, release_zip_fname)
-    print("Downloading zrp extras...", file=sys.stderr)
+    print("Downloading zrp release...", file=sys.stderr)
     download_progress(url, fname)
     print("Finished download.")
     print("\n")
@@ -69,13 +73,24 @@ def download_and_clean(url, release_zip_fname):
         shutil.rmtree(geo_data_dir)
     if os.path.isdir(acs_data_dir):
         shutil.rmtree(acs_data_dir)
+    print("Old geo and acs lookup table data cleared out.")
 
     # Migrate lookup tables
     dl_folder = release_zip_fname.split(".zip")[0]
-    dl_geo_dir = os.path.join(cwd, dl_folder, 'extras', 'geo')
-    dl_acs_dir = os.path.join(cwd, dl_folder, 'extras', 'acs')
-    shutil.move(dl_geo_dir, geo_data_dir)
-    shutil.move(dl_acs_dir, acs_data_dir)
+    dl_geo_dir = os.path.join(cwd, dl_folder, f'extras/processed/geo/{geo_yr}')
+    dl_acs_dir = os.path.join(cwd, dl_folder, f'extras/processed/acs/{acs_yr}/{acs_range}')
+    if os.path.isdir(dl_geo_dir):
+        shutil.move(dl_geo_dir, geo_data_dir)
+        print("New geo lookup tables successfully migrated.")
+    else:
+        warnings.warn(f"The geo lookup data was not found in {dl_geo_dir}. Ensure you're requesting a valid year. "
+                      "Consult the zrp release to troubleshoot.")
+    if os.path.isdir(dl_acs_dir):
+        shutil.move(dl_acs_dir, acs_data_dir)
+        print("New acs lookup tables successfully migrated.")
+    else:
+        warnings.warn(f"The acs lookup table was not found in {dl_acs_dir}. Ensure you're requesting a valid year and/or"
+                      f"year range. Consult the zrp release to troubleshoot.")
 
     # Remove rest of release folder
     shutil.rmtree(dl_folder)
@@ -85,7 +100,7 @@ def download_and_clean(url, release_zip_fname):
     with open(vpath, 'w') as vfile:
         vfile.write('zrp release --> {}'.format(dl_folder))
 
-    print("Filed zrp extras", file=sys.stderr)
+    print("Filed zrp extras successfully.", file=sys.stderr)
 
 
 def get_release():
