@@ -34,7 +34,7 @@ setup(
         "Development Status :: 4 - Beta",
         # Indicate who your project is intended for
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: Apache-2.0 License",
+        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Topic :: Scientific/Engineering :: Information Analysis",
@@ -103,7 +103,7 @@ setup(
         ],
     },
     include_package_data=True,
-    install_requires=requirements,  # TODO
+    install_requires=[],  # TODO: put back requirements variable
     entry_points={
         "console_scripts": [
 
