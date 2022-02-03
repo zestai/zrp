@@ -12,7 +12,7 @@ This is the preliminary version and implementation of the ZRP tool. We're dedica
 Install
 _______
 
-We recommend installing zrp inside a `python virtual environment <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`_.
+Install requires an internet connection. We recommend installing zrp inside a `python virtual environment <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`_.
 ::
 
  pip install zrp
