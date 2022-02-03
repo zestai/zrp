@@ -20,7 +20,10 @@ model_version  = 'exp_013'
 level =  'census_tract'
 
 out_data_path = f"/d/shared/zrp/model_artifacts/experiment/{model_version}/{level}/data/"
-
+gcwd = os.getcwd()
+if 'home' not in gcwd:
+    home = '/d/shared'
+    
 src_path = f'{home}/zrp/zrp/modeling/models/{level}/'
 sys.path.append(src_path)
 
@@ -44,7 +47,7 @@ def load_json(path):
         data = json.load(infile)
     return data
 
-cwd = os.getcwd()
+cwd = f"{home}/zrp/zrp/modeling/models/{level}/"
 feature_list = load_json(os.path.join(cwd, 'feature_list.json'))
 fl_ids = load_json(os.path.join(cwd, 'fl_ids.json'))
 
