@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+extras/processed/geo/2019/* filter=lfs diff=lfs merge=lfs -text
+=======
 zrp/data/processed/geo/2019 filter=lfs diff=lfs merge=lfs -text
 zrp/data/processed/geo/2019/Zest_Geo_Lookup_2019_State_51.parquet filter=lfs diff=lfs merge=lfs -text
 zrp/data/processed/geo/2019/Zest_Geo_Lookup_2019_State_04.parquet filter=lfs diff=lfs merge=lfs -text
@@ -51,3 +54,4 @@ zrp/data/processed/geo/2019/Zest_Geo_Lookup_2019_State_10.parquet filter=lfs dif
 zrp/data/processed/geo/2019/Zest_Geo_Lookup_2019_State_19.parquet filter=lfs diff=lfs merge=lfs -text
 zrp/data/processed/geo/2019/Zest_Geo_Lookup_2019_State_30.parquet filter=lfs diff=lfs merge=lfs -text
 zrp/data/processed/geo/2019/Zest_Geo_Lookup_2019_State_55.parquet filter=lfs diff=lfs merge=lfs -text
+>>>>>>> 2628bcbeece18d5df89f73dac6da4cf2b387ccdd
