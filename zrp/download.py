@@ -43,36 +43,36 @@ def download_progress(url, fname):
     return fname
 
 
-
-def download_and_clean(url, release_pkg_fname, release_zip_fname, geo_yr="2019", acs_yr="2019", acs_range="5yr"):
+def download_and_clean(url, lookup_tables_output_fname, lookup_tables_output_zip_fname, geo_yr="2019", acs_yr="2019", acs_range="5yr"):
     """
     Download look up tables and file them within the module.
     This downloads the zip file from the source, extracts it, renames the moves the
     tables to the correct directory, and removes large files not used at runtime.
+    :param lookup_tables_output_fname: A string for the name of the file downloaded after unzipping.
     :param acs_range: A string for the year range the acs lookup table data will be from.
     :param acs_yr: A string for the year the acs lookup table data will be from.
     :param geo_yr: A string for the year the geo lookup table data will be from.
     :param url: A string for the url of the release zip to download.
-    :param release_zip_fname: A string for the name of the zip file downloaded.
+    :param lookup_tables_output_zip_fname: A string for the name of the zip file downloaded.
     :return:
     """
     cwd = os.path.dirname(os.path.abspath(__file__))
-    path_release_zip_fname = os.path.join(cwd, release_zip_fname)
+    path_lt_zip_fname = os.path.join(cwd, lookup_tables_output_zip_fname)
     print("Downloading zrp release...", file=sys.stderr)
-    download_progress(url, path_release_zip_fname)
+    download_progress(url, path_lt_zip_fname)
     print("Finished download.")
     print("\n")
 
     print("Filing extras...")
-    with zipfile.ZipFile(path_release_zip_fname, 'r') as zf:
+    with zipfile.ZipFile(path_lt_zip_fname, 'r') as zf:
         zf.extractall(cwd)
-    os.remove(path_release_zip_fname)
+    os.remove(path_lt_zip_fname)
 
     # Get rid of prefix that unzipping prepends
     curr_folder = cwd.split("/")[-1]
-    extracted_src_fname = curr_folder + "-" + release_pkg_fname
+    extracted_src_fname = curr_folder + "-" + lookup_tables_output_fname
     path_extracted_src_fname = os.path.join(cwd, extracted_src_fname)
-    path_release_pkg_fname = os.path.join(cwd, release_pkg_fname)
+    path_release_pkg_fname = os.path.join(cwd, lookup_tables_output_fname)
     os.rename(path_extracted_src_fname, path_release_pkg_fname)
 
     # Clear old look up table directories
@@ -86,8 +86,8 @@ def download_and_clean(url, release_pkg_fname, release_zip_fname, geo_yr="2019",
     print("Old geo and acs lookup table data cleared out.")
 
     # Migrate lookup tables
-    dl_geo_dir = os.path.join(cwd, release_pkg_fname, f'extras/processed/geo/{geo_yr}')
-    dl_acs_dir = os.path.join(cwd, release_pkg_fname, f'extras/processed/acs/{acs_yr}/{acs_range}')
+    dl_geo_dir = os.path.join(cwd, lookup_tables_output_fname, f'geo/{geo_yr}')
+    dl_acs_dir = os.path.join(cwd, lookup_tables_output_fname, f'acs/{acs_yr}/{acs_range}')
 
     if os.path.isdir(dl_geo_dir):
         shutil.move(dl_geo_dir, geo_data_dir)
@@ -108,7 +108,7 @@ def download_and_clean(url, release_pkg_fname, release_zip_fname, geo_yr="2019",
     # save a version file so we can tell what it is
     vpath = os.path.join(data_dir, 'version')
     with open(vpath, 'w') as vfile:
-        vfile.write('zrp release --> {}'.format(release_pkg_fname))
+        vfile.write('zrp release --> {}'.format(lookup_tables_output_fname))
 
     print("Filed zrp extras successfully.", file=sys.stderr)
 
@@ -121,6 +121,7 @@ def get_release():
 
 def download():
     release_pkg = get_release()
-    release_pkg_zip = release_pkg + ".zip"
-    url = about.__download_url_prefix__ + release_pkg_zip
-    download_and_clean(url, release_pkg, release_pkg_zip)
+    lookup_tables_output_fname = release_pkg + "_lookup_tables"
+    lookup_tables_output_zip_fname = lookup_tables_output_fname + ".zip"
+    url = about.__download_url_prefix__ + release_pkg + "/lookup_tables.zip"
+    download_and_clean(url, lookup_tables_output_fname, lookup_tables_output_zip_fname)
