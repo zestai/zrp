@@ -6,7 +6,7 @@ import sys
 from os.path import join, expanduser
 import json
 from .utils import *
-from .base import ZRP
+from .base import BaseZRP
 from .preprocessing import *
 import statistics
 
@@ -117,21 +117,18 @@ def geo_range(geo_df):
 
     
 
-class ZGeo(ZRP):
+class ZGeo(BaseZRP):
     """
     This class geocodes addresses.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.out_geo_path = "/d/shared/zrp/shared_data/processed/geo/2019"
         self.key ='ZEST_KEY'
-
-
-
+        self.out_geo_path = os.path.join(self.support_files_path, "processed/geo/2019")
             
             
     def fit(self):
-        pass
+        return self
     
     def geo_match(self, geo_df):
         """
@@ -200,7 +197,7 @@ class ZGeo(ZRP):
                 file_name = f"Zest_Geocoded_{self.runname}_{self.year}__{geo}.parquet"
             else:
                 file_name = f"Zest_Geocoded__{self.year}__{geo}.parquet"
-            save_dataframe(geo_df, self.out_geo_path, file_name)        
+            save_dataframe(geo_df, self.out_path, file_name)        
         print("   [Completed] Mapping geo data")
         return(geo_df)
 

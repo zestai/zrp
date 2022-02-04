@@ -216,7 +216,8 @@ class CustomRatios(BaseEstimator, TransformerMixin):
             # add language, ethinicity, origin
             if ('B03001_003' in self.data_cols) & ('B03001_001' in self.data_cols):
                 data['ethnicity_hispanic'] = round(data['B03001_003']/data['B03001_001'], 6)
-            data['pct_multinational'] = round(data['B05012_003']/data['B05012_001'], 4)
+            if 'B05012_003' in self.data_cols:
+                data['pct_multinational'] = round(data['B05012_003']/data['B05012_001'], 4)
             if 'C16001_030' in self.data_cols:
                 data['pct_aapi_language'] = round((data["C16001_018"] + data["C16001_021"] + data["C16001_024"] + data["C16001_029"] + data["C16001_030"]) / data["C16001_001"], 6)
             if 'C16001_003' in self.data_cols:
@@ -229,7 +230,6 @@ class CustomRatios(BaseEstimator, TransformerMixin):
             raw_counts_list = list(set(data.columns).intersection(set(raw_counts)))
             data = data.drop(raw_counts_list, axis=1)
             data = data.replace([np.inf, -np.inf], np.nan)
-            
             return(data)
                 
 
