@@ -1,5 +1,5 @@
 from .utils import *
-from .base import ZRP
+from .base import BaseZRP
 from .preprocessing import *
 import pandas as pd
 import numpy as np 
@@ -26,13 +26,13 @@ def acs_search(support_files_path, year, span):
 
 
 
-class ACSModelPrep(ZRP):
+class ACSModelPrep(BaseZRP):
     """
     This class prepares ACS data & user input for modeling
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.out_data_path = os.path.join(self.support_files_path, f"processed/acs/{self.year}/{self.span}yr/dev") 
+        self.out_data_path = os.path.join(self.support_files_path, f"processed/acs/{self.year}/{self.span}yr") 
         #updated change back post dev
         
         
@@ -96,7 +96,7 @@ class ACSModelPrep(ZRP):
         print(" ...No match") # new changed updated
         prev_zkeys_1 = mbggk_zkeys + mctgk_zkeys + mbz_zkeys 
         nm = nm[~(nm.index.isin(prev_zkeys_1))]
-        
+        nm["acs_source"] = None
 
         print(" ...Merge") # new changed updated
         data_out = pd.concat([mbggk, mctgk, mbz], sort=True)#, ignore_index=True)
@@ -133,9 +133,10 @@ class ACSModelPrep(ZRP):
         
         data_out = self.acs_combine(data, acs_bg, acs_ct, acs_zip)
         
+        
         if save_table:
-            file_name = f"Zest_processed_data_dev_.parquet" # updated change back post dev
-            save_dataframe(data_out, self.out_data_path, file_name)          
+            file_name = f"Zest_processed_data_.parquet" # updated change back post dev
+            save_dataframe(data_out, self.out_path, file_name)          
         return(data_out)
         
         

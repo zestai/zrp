@@ -9,7 +9,7 @@ import json
 from joblib import Parallel, delayed
 import multiprocessing
 from tqdm import tqdm
-from .base import ZRP
+from .base import BaseZRP
 
 
 def norm_na(data, na_values):
@@ -46,7 +46,7 @@ def norm_na(data, na_values):
                     "\\bNONE\\b",
                     "^//(X//)$",
                     "^-$",
-                   "^\\s*$"] # may need to update to account for blanks/empty strings better
+                   "^\\s*$"] 
 
     if na_values:
         na_values = [word_border + s + word_border for s in na_values]
@@ -355,13 +355,6 @@ class  LongProcesStrings():
             street_addr_results = Parallel(n_jobs = self.n_jobs, prefer="threads", verbose=1)(delayed((address_mining))(street_addr_dict, i) for i in tqdm(list(data.index)))
 
             data[self.street_address] = street_addr_results
-#             for i in list(data.index):
-#                 # suuuuuuuuuuper slow need alternative for big batches (quick for 1000 or less ok for 1000 - 5000)
-#                 data.loc[i, self.street_address]  = re.sub("[^A-Za-z0-9\\s]",
-#                                        "",
-#                                        re.sub("[^A-Za-z0-9']",
-#                                               " ",
-#                                               str(data[self.street_address][i])))
 
             data[self.city]  = data[self.city].str.replace("[^\\w\\s]", "", regex=True)
 
@@ -379,11 +372,9 @@ class  LongProcesStrings():
             
             rep_addr_results = Parallel(n_jobs = self.n_jobs, prefer="threads", verbose=1)(delayed(replicate_address)(street_addr_dict, i, street_suffix_mapping, unit_mapping) for i in tqdm(list(data.index)))
             data[self.street_address] = rep_addr_results
-#             data = pd.concat(rep_addr_results)
-#             data = replicate_address(data, self.street_address, street_suffix_mapping, unit_mapping)
-                                                                          
+                   
             
-        if self.step=="glookup":  #self.geocode:
+        if self.step=="glookup":
             print("   Lookup Processing")
 
             # State
@@ -492,7 +483,7 @@ def replicate_address_2(data, street_address, street_suffix_mapping, unit_mappin
 
     
     
-class  ProcessStrings(ZRP):
+class  ProcessStrings(BaseZRP):
     """
     ProcessStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
     
@@ -548,25 +539,6 @@ class  ProcessStrings(ZRP):
     n_jobs: int (default 1)
         Number of jobs in parallel
     """
-#     def __init__(self, key, first_name, middle_name, last_name, house_number, street_address, city, state, zip_code, support_files_path, census_tract= None, street_address_2=None, name_prefix=None, name_suffix=None, na_values = None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=1, ):
-#         self.key = key
-#         self.first_name = first_name
-#         self.middle_name =  middle_name
-#         self.last_name = last_name
-#         self.name_suffix = name_suffix
-#         self.house_number = house_number
-#         self.street_address = street_address
-#         self.street_address_2 = street_address_2
-#         self.city = city
-#         self.state = state
-#         self.zip_code = zip_code
-#         self.census_tract = census_tract
-#         self.file_path = file_path
-#         self.support_files_path = support_files_path
-#         self.na_values = na_values
-#         self.geocode = geocode
-#         self.readout = readout
-#         self.n_jobs = n_jobs
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -587,10 +559,8 @@ class  ProcessStrings(ZRP):
         # Load Data
         try:
             data = data_in.copy()
-            print("Data is loaded")
         except AttributeError:
             data = load_file(self.file_path)
-            print("Data file is loaded")
             
         data_cols =  data.columns
         
@@ -634,7 +604,7 @@ class  ProcessStrings(ZRP):
 
     
         
-class  ProcessACS(ZRP):
+class  ProcessACS(BaseZRP):
     """
     ProcessStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
 
@@ -652,7 +622,7 @@ class  ProcessACS(ZRP):
         """
         """
         data = reduce_whitespace(data)
-        data = data.replace({'\\bN\\b': None}, regex=True) # more than 800 columns
+        data = data.replace({'\\bN\\b': None}, regex=True) # Note: 800+ columns
         data = data.reset_index(drop=False)
         data = data.astype(str)
         return(data)
@@ -661,7 +631,7 @@ class  ProcessACS(ZRP):
     
     
     
-class  ProcessGeo(ZRP):
+class  ProcessGeo(BaseZRP):
     """
     ProcessStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
     
@@ -790,7 +760,6 @@ class  ProcessGeo(ZRP):
         print("      ...formatting")
         addr_cols = list(set(list(data.columns)).intersection(set([self.zip_code, self.census_tract, self.house_number, self.city, self.state, self.street_address])))
         spec_cols =  addr_cols
-#         data[spec_cols] = norm_na(data[spec_cols], self.na_values)
         data = data.astype(str)
         data = reduce_whitespace(data)
         print("   [Completed] Processing geo data")
@@ -798,7 +767,7 @@ class  ProcessGeo(ZRP):
         return data
 
     
-class  ProcessGLookUp(ZRP):
+class  ProcessGLookUp(BaseZRP):
     """
     ProcessStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
     

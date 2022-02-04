@@ -3,22 +3,24 @@ from .utils import *
 from .preprocessing import *
 from .geo_geocoder import *
 from .acs_mapper import *
-from .base import ZRP
-import datetime as dt
+from .base import BaseZRP
+from .generate_bisg import *
 import pandas as pd
 import numpy as np
 import warnings
 import glob
 import json
-import tqdm
 import sys
 import os
 import re
-import tqdm
+import pycm
+import pickle
+import joblib
+import surgeo
 
 
 
-class ZRP_Prepare(ZRP):
+class ZRP_Prepare(BaseZRP):
     """
     Prepares data to generate race & ethnicity proxies
     
@@ -75,31 +77,6 @@ class ZRP_Prepare(ZRP):
         Number of jobs in parallel
     """
     
-   
-    
-#     def __init__(self, support_files_path="/d/shared/zrp/shared_data", key="ZEST_KEY", first_name="first_name", middle_name="middle_name", last_name="last_name", house_number="house_number", street_address="street_address", city="city", state="state", zip_code="zip_code", census_tract= None, street_address_2=None, name_prefix=None, name_suffix=None, na_values = None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=32, year="2019", span ="5", runname=None):
-#         self.key = key
-#         self.first_name = first_name
-#         self.middle_name =  middle_name
-#         self.last_name = last_name
-#         self.name_suffix = name_suffix
-#         self.house_number = house_number
-#         self.street_address = street_address
-#         self.street_address_2 = street_address_2
-#         self.city = city
-#         self.state = state
-#         self.zip_code = zip_code
-#         self.census_tract = census_tract
-#         self.file_path = file_path
-#         self.support_files_path = support_files_path
-#         self.na_values = na_values
-#         self.geocode = geocode
-#         self.readout = readout
-#         self.n_jobs = n_jobs
-#         self.year= year#"2019"
-#         self.span = span#"5"
-#         self.runname = runname#"test"
-#         self.span ="5"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
@@ -140,6 +117,7 @@ class ZRP_Prepare(ZRP):
             
         elif (self.census_tract is not None) & (self.street_address is not None):
             geocode = ZGeo()
+            geocode.fit()
 
             geocode_out = [] 
             geo_grps = data.groupby([self.state])
@@ -186,6 +164,7 @@ class ZRP_Prepare(ZRP):
         data_out = amp.transform(geo_coded, False)
         print("[Complete] Preparing ACS data")
         return(data_out)
-    
-        
 
+    
+
+    

@@ -19,6 +19,10 @@ def save_json(data, path, file_name):
 def save_dataframe(data, path, file_name):
     data.to_parquet(os.path.join(path, file_name))
     return(print("Output saved"))
+
+def save_feather(data, path, file_name):
+    data.reset_index(drop=False).to_feather(os.path.join(path, file_name))
+    return(print("Output saved"))
         
 def make_directory(output_directory=None):
     try:
