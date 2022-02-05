@@ -81,9 +81,9 @@ class BaseZRP():
         self.proxy = proxy
         self.race= race
         self.n_jobs = n_jobs
-        self.year= year#"2019"
-        self.span = span#"5"
-        self.runname = runname#"test"
+        self.year= year
+        self.span = span
+        self.runname = runname
         if file_path:
             self.out_path = os.path.join(self.file_path, "artifacts")
         else:
