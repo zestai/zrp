@@ -18,7 +18,10 @@ from zrp.zrp_modeling.src.app_preprocessor import HandleCompoundNames
 from zrp.zrp_modeling.src.acs_scaler import CustomRatios
 from zrp.zrp_modeling.src.app_fe import AppFeatureEngineering, NameAggregation
 from zrp.zrp_modeling.src.set_key import SetKey
-from zrp.prepare.utils import load_json, load_file, save_feather
+from zrp.prepare.utils import load_json, load_file, save_feather, make_directory
+
+
+curpath = dirname(__file__)
 
 
 class ZRP_Build_Pipeline(BaseZRP):
@@ -65,6 +68,7 @@ class ZRP_Build_Pipeline(BaseZRP):
 
 
     def transform(self, X):
+        make_directory(self.outputs_path)
         # Save pipeline
         pickle.dump(self.pipe, open( os.path.join(self.outputs_path, 'pipe.pkl'), 'wb'))
         #### Transform
@@ -126,9 +130,8 @@ class ZRP_Build_Model(BaseZRP):
     
 
     def transform(self, X):
+        make_directory(self.outputs_path)
         # Save zrp_model
-        self.zrp_model.save_zrp_model(os.path.join(self.outputs_path, 'xgb_zrp_model.json'))
-        joblib.dump(self.zrp_model, os.path.join(self.outputs_path,"zrp_model.joblib"))
         pickle.dump(self.zrp_model, open(os.path.join(self.outputs_path,"zrp_model.pkl", "wb"))) 
         
         ##### Return Race Probabilities
@@ -174,6 +177,7 @@ class ZRP_DataSampling(BaseZRP):
 
 
     def transform(self, data):
+        make_directory(self.outputs_path)
         df = data.copy()
         # Keep geocoded data & data with labels
         df = df[(df[self.geo_key].notna()) & (df[self.geo_key]!="None")]
@@ -212,7 +216,7 @@ class ZRP_DataSampling(BaseZRP):
     
     
     
-    class ZRP_Build():
+    class ZRP_Build(BaseZRP):
     """
     This class builds a new custom ZRP model trained off of user input data. Supply standard ZRP requirements including name, address, and race to build your custom model-pipeline. Race & ethnicity probablities and labels are returned from this class. The pipeline, model, and supporting data is saved automatically to "~/data/experiments/model_source/data/" in the support files path defined.
     
@@ -235,6 +239,8 @@ class ZRP_DataSampling(BaseZRP):
         return self 
     
     def transform(self, X, y):
+        make_directory(self.outputs_path)
+
         sample_path = self.outputs_path
 
         dsamp = ZRP_DataSampling(BaseZRP)
@@ -278,25 +284,3 @@ class ZRP_DataSampling(BaseZRP):
         pred_dict['labels'] = y_hat_train
         pred_dict['probablities'] = y_phat_train
         return(pred_dict)
-        
-        
-
-
-        
-        
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
