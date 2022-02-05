@@ -1,4 +1,5 @@
 from zrp.prepare.utils import load_file
+from zpr.prepare.preprocessing import set_id
 import pandas as pd
 import numpy as np
 import pycm
@@ -10,7 +11,6 @@ class ZRP_Performance():
     """
     Generates performance analysis artifacts
     
-    
     Parameters
     ----------
     data: dataframe
@@ -19,40 +19,44 @@ class ZRP_Performance():
         Key to set as index. If not provided, a key will be generated.
     race: str
         Name of race column 
-    proxy_data: str, pd.Series, or pd.DataFrame
+    proxy_data_path: str
         File path to proxy data
-    ground_truth: str, pd.Series, or pd.DataFrame
+    ground_truth_path: str
         File path to ground truth data
     """
 
-    def __init__(self, proxy_data, ground_truth, key = "ZEST_KEY", race="race"):
+    def __init__(self, proxy_data_path = None,
+ground_truth_path = None, key = "ZEST_KEY", race = "race"):
         self.key = key
-        self.proxy_data = proxy_data
-        self.ground_truth = ground_truth
+        self.proxy_data_path = proxy_data_path
+        self.ground_truth_path = ground_truth_path
         self.race = race
         
     def fit(self):
         return self
     
-    def transform(self, input_data):
+    def transform(self, proxy_data = None, ground_truth = None):
+        """
+        Parameters
+        ----------
+        proxy_data: pd.dataframe
+            Dataframe containing proxy race labels
+        ground_truth: pd.dataframe
+            Dataframe containing ground truth race labels"""
         # Load Data
         try:
-            proxies = input_data.copy()
-            print("Data is loaded")
+            proxies = proxy_data.copy()
         except AttributeError:
-            proxies = load_file(self.proxy_data)
-            print("Data file is loaded")
-            
+            proxies = load_file(self.proxy_data_path) 
         try:
-            ground_truth = input_data.copy()
-            print("Data is loaded")
+            ground_truth = ground_truth.copy()
         except AttributeError:
-            ground_truth = load_file(self.file_path)
-            print("Data file is loaded")
-        
-        
+            ground_truth = load_file(self.ground_truth_path)
+            
+        proxies = set_id(proxies, self.key)
+        ground_truth = set_id(ground_truth, self.key)
         proxies = proxies[race]
-        valid_proxies = valid_proxies[race]
+        ground_truth = ground_truth[race]
             
         cm = ConfusionMatrix(
             np.array(ground_truth),
@@ -71,5 +75,4 @@ class ZRP_Performance():
         performance_dict['AUC'] = cm.AUC
         
         return(performance_dict)
-        
-
+    
