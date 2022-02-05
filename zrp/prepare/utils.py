@@ -21,12 +21,13 @@ def save_dataframe(data, path, file_name):
     return(print("Output saved"))
 
 def save_feather(data, path, file_name):
-    data.reset_index(drop=False).to_feather(os.path.join(path, file_name))
+    data.reset_index(drop = False).to_feather(os.path.join(path,
+                                                         file_name))
     return(print("Output saved"))
         
-def make_directory(output_directory=None):
+def make_directory(output_directory = None):
     try:
-        if output_directory==None:
+        if output_directory ==None:
             os.makedirs("artifacts")
         else: 
             os.makedirs(os.path.join(output_directory))
@@ -47,14 +48,18 @@ def load_file(file_path):
                  "-666666666",
                  "-999999999",
                  "-888888888"
-                   ]
+                ]
     if file_path.endswith(".csv"):
-        data = pd.read_csv(file_path, dtype = str, na_values=na_values)
+        data = pd.read_csv(file_path,
+                           dtype = str,
+                           na_values = na_values)
     elif file_path.endswith(".feather"):
         data = pd.read_feather(file_path)
         data = data.astype(str)
     elif file_path.endswith(".xlsx"):
-        data = pd.read_excel(file_path, dtype = str, na_values=na_values)
+        data = pd.read_excel(file_path,
+                             dtype = str,
+                             na_values = na_values)
     elif file_path.endswith(".parquet"):
         data = pd.read_parquet(file_path)
         data = data.astype(str)
@@ -62,11 +67,20 @@ def load_file(file_path):
         with open(file_path) as f:
             first_line = f.readline()
             if "|" in first_line:
-                data = pd.read_csv(file_path, sep = "|", dtype = str, na_values=na_values)
+                data = pd.read_csv(file_path,
+                                   sep = "|",
+                                   dtype = str,
+                                   na_values = na_values)
             elif "," in first_line:
-                data = pd.read_csv(file_path, sep = ",", dtype = str, na_values=na_values)
+                data = pd.read_csv(file_path,
+                                   sep = ",",
+                                   dtype = str,
+                                   na_values = na_values)
             else:
-                data = pd.read_csv(file_path, sep = "\t", dtype = str, na_values=na_values)
+                data = pd.read_csv(file_path,
+                                   sep = "\t",
+                                   dtype = str,
+                                   na_values = na_values)
     else:
         raise ValueError("Unrecognizable table format")
     return(data)
@@ -100,7 +114,7 @@ def gdbToDf_short(file, indx):
                 dictList.append(next(src)["properties"])
     df = pd.DataFrame(
         dictList,
-        columns=dictList[0].keys(),
+        columns = dictList[0].keys(),
     )
     return df    
 
@@ -135,9 +149,8 @@ def acs_trt_split(data, feature):
     data["GEO_KEY"] = data["STATEFP"] + data["COUNTYFP"] + data["TRACTCE"]
     if "TRACTCE10" in data.columns:
         data["GEO_KEY_10"] = data["STATEFP"] + data["COUNTYFP"] + data["TRACTCE10"]
-        data = data.drop("TRACTCE10", axis=1)
-
-    data.drop([feature, "STATEFP", "COUNTYFP", "TRACTCE"], axis=1, inplace=True)
+        data = data.drop("TRACTCE10", axis = 1)
+    data = data.drop([feature, "STATEFP", "COUNTYFP", "TRACTCE"], axis=1)
     return data
 
 def acs_zip_split(dataframe, feature):
@@ -145,21 +158,16 @@ def acs_zip_split(dataframe, feature):
         re.split(f".*state:", re.split(r">", dataframe[feature].iloc[i])[0])[1]
         for i in range(len(dataframe))
     ]
-
     zcta5 = [
         re.split(f".*zip code tabulation area:", acs_zip["result"].iloc[i])[1]
         for i in range(len(acs_zip))
     ]
-
-
     dataframe["STATEFP"] = state
     dataframe["ZEST_ZIP"] = zcta5
-    dataframe.drop(
+    dataframe = dataframe.drop(
         ["Unnamed: 0", "result"],
-        axis=1,
-        inplace=True
+        axis = 1
     )
 
-
 def most_common(lizt):
-    return max(set(lizt), key=lizt.count)
+    return max(set(lizt), key = lizt.count)
