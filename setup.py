@@ -18,7 +18,7 @@ for r in requirements_raw:
 # This call to setup() does all the work
 setup(
     name="zrp",
-    version="0.1.5",
+    version="0.1.6",
     description="The Zest Race Predictor tool predicts race/ethnicity using a name and address as inputs.",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -48,7 +48,7 @@ setup(
         ],
     },
     include_package_data=True,
-    install_requires=requirements,  # TODO: put back requirements variable
+    install_requires=[],  # TODO: put back requirements variable
     entry_points={
         "console_scripts": [
 
