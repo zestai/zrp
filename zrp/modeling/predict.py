@@ -1,9 +1,9 @@
-from os.path import join, expanduser
-from zrp.prepare.utils import *
+from os.path import dirname, join, expanduser
 from zrp.prepare.preprocessing import *
 from zrp.prepare.geo_geocoder import *
 from zrp.prepare.acs_mapper import *
 from zrp.prepare.base import BaseZRP
+from zrp.prepare.utils import *
 import pandas as pd
 import numpy as np
 import warnings
@@ -63,7 +63,6 @@ class PredictPass(BaseZRP):
             
         if self.proxy =='labels':
             proxies = pd.DataFrame({'race' : None}, index = fe_data.index)
-       
         if self.proxy =='probs':
             proxies = pd.DataFrame({"AAPI":None, "AIAN":None, "BLACK":None,
                                     "HISPANIC": None, "WHITE": None}, index = fe_data.index)
@@ -127,7 +126,7 @@ class BISGWrapper(BaseZRP):
         combo['source_bisg'] = 1
         if self.proxy =='labels':
             proxies = combo[[self.race, "source_bisg"]]
-        if self.proxy =='labels':
+        if self.proxy =='probs':
             proxies = combo[['WHITE', 'BLACK', 'AAPI', 'AIAN', 'OTHER', 'HISPANIC', "source_bisg"]]
         return(proxies)
 
@@ -159,7 +158,7 @@ class ZRP_Predict_ZipCode(BaseZRP):
         return self
     
     def transform(self, input_data):
-        src_path = os.path.join(self.pipe_path,"zip_code/data")
+        src_path = os.path.join(self.pipe_path, "zip_code")
         sys.path.append(src_path)        
         # Load Data
         try:
@@ -170,7 +169,7 @@ class ZRP_Predict_ZipCode(BaseZRP):
         numeric_cols = list(data.filter(regex='^B|^C16').columns)
         data[numeric_cols] = data[numeric_cols].apply(pd.to_numeric, errors='coerce') 
         
-        model = joblib.load(os.path.join(src_path,"model.joblib") )
+        model = pd.read_pickle(os.path.join(src_path,"model.pkl") )
         pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl") )
         
         data = validate_case(data, self.key, self.last_name)
@@ -215,7 +214,7 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         return self
     
     def transform(self, input_data):
-        src_path = os.path.join(self.pipe_path,"block_group/data")
+        src_path = os.path.join(self.pipe_path,"block_group")
         sys.path.append(src_path)
         
         # Load Data
@@ -227,7 +226,7 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         numeric_cols = list(data.filter(regex='^B|^C16').columns)
         data[numeric_cols] = data[numeric_cols].apply(pd.to_numeric, errors='coerce') 
         
-        model = joblib.load(os.path.join(src_path,"model.joblib") )
+        model = pd.read_pickle(os.path.join(src_path,"model.pkl") )
         pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl") )
         
         data = validate_case(data, self.key, self.last_name)
@@ -273,7 +272,7 @@ class ZRP_Predict_CensusTract(BaseZRP):
         return self
     
     def transform(self, input_data):
-        src_path = os.path.join(self.pipe_path,"census_tract/data/")
+        src_path = os.path.join(self.pipe_path,"census_tract")
         sys.path.append(src_path)
         
         # Load Data
@@ -285,7 +284,7 @@ class ZRP_Predict_CensusTract(BaseZRP):
         numeric_cols = list(data.filter(regex='^B|^C16').columns)
         data[numeric_cols] = data[numeric_cols].apply(pd.to_numeric, errors='coerce') 
         
-        model = joblib.load(os.path.join(src_path,"model.joblib") )
+        model = pd.read_pickle(os.path.join(src_path,"model.pkl") )
         pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl") )
         
         data = validate_case(data, self.key, self.last_name)
@@ -294,7 +293,6 @@ class ZRP_Predict_CensusTract(BaseZRP):
         
         if self.proxy =='labels':
             proxies = pd.DataFrame({'race' : model.predict(fe_data)}, index = fe_data.index)
-       
         if self.proxy =='probs':
             proxies = pd.DataFrame(model.predict_proba(fe_data), index = fe_data.index)
             proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
@@ -332,11 +330,11 @@ class ZRP_Predict(BaseZRP):
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.proxy_data)
-            
-        home = expanduser('~')   
-        flb = load_json(f'{home}/zrp/zrp/modeling/models/block_group/feature_list.json')
-        flc = load_json(f'{home}/zrp/zrp/modeling/models/census_tract/feature_list.json')
-        flz = load_json(f'{home}/zrp/zrp/modeling/models/zip_code/feature_list.json')
+        curpath = dirname(__file__)
+
+        flb = load_json(f'{cur_path}/modeling/models/block_group/feature_list.json')
+        flc = load_json(f'{cur_path}/modeling/models/census_tract/feature_list.json')
+        flz = load_json(f'{cur_path}/modeling/models/zip_code/feature_list.json')
 
 
         if 'acs_source' in data.columns:    
@@ -382,6 +380,7 @@ class ZRP_Predict(BaseZRP):
         proxies_out = pd.concat(out_list)
         
         if save_table:
+            make_directory()
             file_name = f"proxy_{self.proxy}.feather"
             save_feather(proxies_out,
                          self.out_path,
@@ -424,11 +423,10 @@ class FEtoPredict(BaseZRP):
         except AttributeError:
             fe_data = load_file(self.proxy_data)
             
-        model = joblib.load(os.path.join(self.pipe_path, f"{pipe_type}/data/model.joblib") )
+        model = pd.read_pickle(os.path.join(self.pipe_path, f"{pipe_type}/model.pkl") )
          
         if self.proxy =='labels':
             proxies = pd.DataFrame({'race' : model.predict(fe_data)}, index=fe_data.index)
-       
         if self.proxy =='probs':
             proxies = pd.DataFrame(model.predict_proba(fe_data), index=fe_data.index)
             proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
@@ -437,12 +435,11 @@ class FEtoPredict(BaseZRP):
         proxies_out = proxies.copy()
         
         if save_table:
+            make_directory()
             file_name = f"{self.pipe_type}_proxy_{self.proxy}.feather"
             save_feather(proxies_out,
                          self.out_path,
                          file_name)
             
         return(proxies_out)
-
-
-
+    

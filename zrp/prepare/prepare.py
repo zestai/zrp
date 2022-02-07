@@ -1,10 +1,10 @@
-from os.path import join, expanduser
-from .utils import *
+from os.path import dirname, join, expanduser
+from .generate_bisg import *
 from .preprocessing import *
 from .geo_geocoder import *
 from .acs_mapper import *
 from .base import BaseZRP
-from .generate_bisg import *
+from .utils import *
 import pandas as pd
 import numpy as np
 import warnings
@@ -13,17 +13,11 @@ import json
 import sys
 import os
 import re
-import pycm
-import pickle
-import joblib
-import surgeo
-
 
 
 class ZRP_Prepare(BaseZRP):
     """
     Prepares data to generate race & ethnicity proxies
-    
     
     Parameters
     ----------
@@ -34,10 +28,8 @@ class ZRP_Prepare(BaseZRP):
         dictionary mapping state names & abbreviations
     key: str 
         Key to set as index. If not provided, a key will be generated.
-        
     first_name: str
-        Name of first name column
-        
+        Name of first name column 
     middle_name: str
         Name of middle name column
     last_name: str
@@ -54,9 +46,6 @@ class ZRP_Prepare(BaseZRP):
         Name of zip or postal code column
     census_tract: str
         Name of census tract column
-    support_files_path:
-        File path with support data
-
     street_address_2: str, optional
         Name of additional address column
     name_prefix: str, optional
@@ -69,7 +58,7 @@ class ZRP_Prepare(BaseZRP):
         Input data file path
     geocode: bool
         Whether to geocode
-    bisg=True
+    bisg: True
         Whether to return BISG proxies
     readout: bool
         Whether to return a readout
@@ -87,6 +76,14 @@ class ZRP_Prepare(BaseZRP):
             assert tract_len == 11,  "Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '010010202001')"
     
     def transform(self, input_data):
+        """
+        Parameters
+        ----------
+        input_data: pd.Dataframe
+            Dataframe to be transformed
+        """  
+        curpath = dirname(__file__)
+        
         # Load Data
         try:
             data = input_data.copy()
@@ -103,14 +100,15 @@ class ZRP_Prepare(BaseZRP):
         print("")
 
         print("[Start] Preparing geo data")
+        data_path = join(curpath, f'../data/processed')
         
-        inv_state_map = load_json(os.path.join(self.support_files_path, "processed/inv_state_mapping.json"))
+        inv_state_map = load_json(join(data_path, "inv_state_mapping.json"))
         data['zest_in_state_fips'] = data[self.state].replace(inv_state_map)
 
 
         if self.census_tract:
             data[self.zip_code] = np.where((data[self.zip_code].isna()) |\
-                                           (data[self.zip_code].str.contains("None")),
+                                        (data[self.zip_code].str.contains("None")),
                                            None,
                                            data[self.zip_code].apply(lambda x: x.zfill(5)))
             geo_coded = data.copy()
@@ -118,7 +116,6 @@ class ZRP_Prepare(BaseZRP):
         elif (self.census_tract is not None) & (self.street_address is not None):
             geocode = ZGeo()
             geocode.fit()
-
             geocode_out = [] 
             geo_grps = data.groupby([self.state])
             geo_dict = {}
@@ -134,18 +131,15 @@ class ZRP_Prepare(BaseZRP):
                 geocode_out.append(output)
             geo_coded = pd.concat(geocode_out)
             geo_coded = geo_coded.drop_duplicates()  
-
-            
-            
         else:
             geocode = ZGeo()
-
             geocode_out = [] 
             geo_grps = data.groupby([self.state])
             geo_dict = {}
             for s, g in geo_grps:
                 geo_dict[s] = g
-            print("  The following states are included in the data:", list(geo_dict.keys()))
+            print("  The following states are included in the data:",
+                  list(geo_dict.keys()))
 
             geo_out = [] 
             for s in list(geo_dict.keys()):
@@ -155,7 +149,6 @@ class ZRP_Prepare(BaseZRP):
                 geocode_out.append(output)
             geo_coded = pd.concat(geocode_out)
             
-            
         print("[Completed] Preparing geo data")
         print("")
         print("[Start] Preparing ACS data")
@@ -164,7 +157,3 @@ class ZRP_Prepare(BaseZRP):
         data_out = amp.transform(geo_coded, False)
         print("[Complete] Preparing ACS data")
         return(data_out)
-
-    
-
-    
