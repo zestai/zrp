@@ -332,9 +332,9 @@ class ZRP_Predict(BaseZRP):
             data = load_file(self.proxy_data)
         cur_path = dirname(__file__)
 
-        flb = load_json(f'{cur_path}/modeling/models/block_group/feature_list.json')
-        flc = load_json(f'{cur_path}/modeling/models/census_tract/feature_list.json')
-        flz = load_json(f'{cur_path}/modeling/models/zip_code/feature_list.json')
+        flb = load_json(f'{cur_path}/feature_list_bg.json')
+        flc = load_json(f'{cur_path}/feature_list_ct.json')
+        flz = load_json(f'{cur_path}/feature_list_zp.json')
 
 
         if 'acs_source' in data.columns:    

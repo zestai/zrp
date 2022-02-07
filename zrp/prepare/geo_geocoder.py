@@ -187,7 +187,7 @@ class ZGeo(BaseZRP):
         print("      ...mapping")
         all_keys = list(geo_df[self.key].unique())
         odf = geo_df.copy()
-        geo_df = geo_zoom(self.key, geo_df)
+        geo_df = geo_zoom(geo_df)
         geocoded_keys = list(geo_df[self.key].unique())
         add_na_keys = list(set(all_keys) - set(geocoded_keys))
         odf = odf[odf[self.key].isin(add_na_keys)]

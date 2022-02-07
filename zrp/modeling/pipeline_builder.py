@@ -1,4 +1,4 @@
-from os.path import expanduser
+from os.path import expanduser, dirname
 import pandas as pd
 import numpy as np
 import os
@@ -14,12 +14,12 @@ from sklearn.compose import ColumnTransformer
 from feature_engine.imputation import MeanMedianImputer
 from feature_engine.selection import SmartCorrelatedSelection, DropFeatures
 
-from zrp.zrp_modeling.src.app_preprocessor import HandleCompoundNames
-from zrp.zrp_modeling.src.acs_scaler import CustomRatios
-from zrp.zrp_modeling.src.app_fe import AppFeatureEngineering, NameAggregation
-from zrp.zrp_modeling.src.set_key import SetKey
+from zrp.modeling.src.app_preprocessor import HandleCompoundNames
+from zrp.modeling.src.acs_scaler import CustomRatios
+from zrp.modeling.src.app_fe import AppFeatureEngineering, NameAggregation
+from zrp.modeling.src.set_key import SetKey
 from zrp.prepare.utils import load_json, load_file, save_feather, make_directory
-
+from zrp.prepare.base import BaseZRP
 
 curpath = dirname(__file__)
 
@@ -43,7 +43,7 @@ class ZRP_Build_Pipeline(BaseZRP):
                                      self.zrp_model_name,
                                      self.zrp_model_source,
                                      "data")
-    def fit(self X, y):
+    def fit(self, X, y):
         ### Build Pipeline
         print('\n---\nBuilding pipeline')
 
@@ -216,7 +216,7 @@ class ZRP_DataSampling(BaseZRP):
     
     
     
-    class ZRP_Build(BaseZRP):
+class ZRP_Build(BaseZRP):
     """
     This class builds a new custom ZRP model trained off of user input data. Supply standard ZRP requirements including name, address, and race to build your custom model-pipeline. Race & ethnicity probablities and labels are returned from this class. The pipeline, model, and supporting data is saved automatically to "~/data/experiments/model_source/data/" in the support files path defined.
     

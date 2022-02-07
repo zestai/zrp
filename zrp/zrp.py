@@ -1,5 +1,5 @@
 from zrp.modeling.predict import BISGWrapper, ZRP_Predict
-from os.path import firname, join, expanduser
+from os.path import dirname, join, expanduser
 from zrp.prepare.prepare import ZRP_Prepare
 from zrp.prepare.base import BaseZRP
 from zrp.prepare.utils import *
