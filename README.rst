@@ -12,7 +12,7 @@ This is the preliminary version and implementation of the ZRP tool. We're dedica
 Install
 _______
 
-Install requires an internet connection. We recommend installing zrp inside a `python virtual environment <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`_.
+Install requires an internet connection. We recommend installing zrp inside a `python virtual environment <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`_. The package has been tested on 3.7.4, but should likely work with 3.7.X.
 ::
 
  pip install zrp
@@ -22,7 +22,7 @@ After installing via pip, you need to download the lookup tables using the follo
 
  python -m zrp download
 
-Note: Due to the size and number of lookup tables necesary for the zrp package, total installation requires ___ GB of available space.
+Note: Due to the size and number of lookup tables necesary for the zrp package, total installation requires 3 GB of available space.
 
 
 Data
