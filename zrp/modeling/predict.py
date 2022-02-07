@@ -330,7 +330,7 @@ class ZRP_Predict(BaseZRP):
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.proxy_data)
-        curpath = dirname(__file__)
+        cur_path = dirname(__file__)
 
         flb = load_json(f'{cur_path}/modeling/models/block_group/feature_list.json')
         flc = load_json(f'{cur_path}/modeling/models/census_tract/feature_list.json')
