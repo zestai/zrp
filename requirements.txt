@@ -98,6 +98,7 @@ parso==0.8.3
 patsy==0.5.2
 pexpect==4.8.0
 pickleshare==0.7.5
+plac
 plotly==4.9.0
 pluggy==0.13.1
 prometheus-client==0.12.0
@@ -146,6 +147,7 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 statsmodels==0.13.1
+surgeo
 tensorboard==1.13.1
 tensorboardX==2.4
 tensorflow==1.13.1
