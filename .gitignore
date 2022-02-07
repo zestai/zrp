@@ -3,6 +3,20 @@ extras/
 extras/processed.zip
 zrp/data/processed/geo/
 artifacts/
+
+zrp/modeling/models/block_group/fl_ids.json
+zrp/modeling/models/block_group/pipeline_builder.py
+zrp/modeling/models/block_group/pipeline_builder_basezrp.py
+
+zrp/modeling/models/census_tract/fl_ids.json
+zrp/modeling/models/census_tract/pipeline_builder.py
+zrp/modeling/models/census_tract/pipeline_builder_basezrp.py
+
+zrp/modeling/models/zip_code/fl_ids.json
+zrp/modeling/models/zip_code/pipeline_builder.py
+zrp/modeling/models/zip_code/pipeline_builder_basezrp.py
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
