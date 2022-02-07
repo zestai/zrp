@@ -1,23 +1,21 @@
-from .utils import *
 from .preprocessing import *
+from os.path import dirname, join, expanduser
+from joblib import Parallel, delayed
+from .utils import *
+from tqdm import tqdm
 import pandas as pd
 import numpy as np 
 import censusdata
+import json
+import sys
 import os
 import re
-import sys
-from os.path import join, expanduser
-from joblib import Parallel, delayed
-import json
-from tqdm import tqdm
 
-#year & span are required in class
+
 def pad_logrecno(data):
     data["LOGRECNO"] = data["LOGRECNO"].str.zfill(7)
     return(data)
-    
-def most_common(lst):
-    return max(set(lst), key=lst.count)
+
 
 class ACS_Parser():
     """
@@ -37,22 +35,25 @@ class ACS_Parser():
         Number of jobs in parallel        
     """
     
-    def __init__(self, support_files_path, year, span, state_level, n_jobs):
+    def __init__(self, support_files_path, state_level, n_jobs=-1,  year ='2019', span ='5'):
         self.support_files_path = support_files_path
         self.year = year
         self.span = span
         self.state_level = state_level
         self.n_jobs = n_jobs
-        
-        self.raw_acs_path = os.path.join(self.support_files_path, f"raw/acs/{self.year}/{self.span}yr")
-        self.out_acs_path = os.path.join(self.support_files_path, "parsed/acs", self.year, f"{self.span}yr")
+        self.raw_acs_path = os.path.join(self.support_files_path,
+                                         f"raw/acs/{self.year}/{self.span}yr")
+        self.out_acs_path = os.path.join(self.support_files_path,
+                                         "parsed/acs",
+                                         self.year, 
+                                         f"{self.span}yr")
         self.fol_acs_tmp = f"{self.year}_{self.span}yr_Summary_FileTemplates/"
+        
 
         
     def fit(self):
-        pass
+        return self
     
-
     
     def acs_geo(self, data):
         """
@@ -79,14 +80,17 @@ class ACS_Parser():
     
     def acs_track_5yr(self):
         """
-        Initializes sequence dictionary
+        Initializes 5 year sequence dictionary
             
         """            
         file_path_list = []
         sequence_dict = {}
-        for root, dirs, files in os.walk(os.path.join(self.raw_acs_path, "Tracts_Block_Groups")):
+        for root, dirs, files in os.walk(os.path.join(self.raw_acs_path,
+                                                      "Tracts_Block_Groups")):
             for file in files:
-                if ('000.txt' in file) & ('e' in file) & (f'{self.span}{self.state_level}' in file):
+                if ('000.txt' in file) &\
+                ('e' in file) &\
+                (f'{self.span}{self.state_level}' in file):
                     file_path_list.append("".join([root, file]))
                     sequence = file.split('000.txt')[0].split(self.state_level)[1]
                     sequence = str(int(sequence))
@@ -108,7 +112,8 @@ class ACS_Parser():
   
         for root, dirs, files in os.walk(os.path.join(self.raw_acs_path, "Not_Tracts_Block_Groups")):
             for file in files:
-                if ('000.txt' in file) & ('e' in file) & (f'{self.span}{self.state_level}' in file):
+                if ('000.txt' in file) & ('e' in file) &\
+                (f'{self.span}{self.state_level}' in file):
                     file_path_list.append("".join([root, file]))
                     sequence = file.split('000.txt')[0].split(self.state_level)[1]
                     sequence = str(int(sequence))
@@ -117,14 +122,17 @@ class ACS_Parser():
 
     def acs_track_1yr(self):
         """
-        Initializes sequence dictionary
+        Initializes 1 year sequence dictionary
             
         """        
         file_path_list = []
         sequence_dict = {}
-        for root, dirs, files in os.walk(os.path.join(self.raw_acs_path, "All_Geographies")):
+        for root, dirs, files in os.walk(os.path.join(self.raw_acs_path,
+                                                      "All_Geographies")):
             for file in files:
-                if ('000.txt' in file) & ('e' in file) & (f'{self.span}{self.state_level}' in file):
+                if ('000.txt' in file) &\
+                ('e' in file) &\
+                (f'{self.span}{self.state_level}' in file):
                     file_path_list.append("".join([root, file]))
                     sequence = file.split('000.txt')[0].split(self.state_level)[1]
                     sequence = str(int(sequence))
@@ -152,16 +160,21 @@ class ACS_Parser():
         """
         print("... Generating ACS table", self.state_level, "sequence", i)
 
-        dat_file_1 = os.path.join(self.raw_acs_path, "Tracts_Block_Groups", sequence_dict[str(i)]['Tracts_Block_Groups']['file'])
-        dat_file_2 = os.path.join(self.raw_acs_path, "Not_Tracts_Block_Groups", sequence_dict[str(i)]['Not_Tracts_Block_Groups']['file'])
+        dat_file_1 = os.path.join(self.raw_acs_path,
+                                  "Tracts_Block_Groups",
+                                  sequence_dict[str(i)]['Tracts_Block_Groups']['file'])
+        dat_file_2 = os.path.join(self.raw_acs_path,
+                                  "Not_Tracts_Block_Groups",
+                                  sequence_dict[str(i)]['Not_Tracts_Block_Groups']['file'])
         
         try:
             tmp_data_1 = pd.read_csv(dat_file_1, sep = ",", header=None, dtype=str)
             tmp_data_2 = pd.read_csv(dat_file_2, sep = ",", header=None, dtype=str)
 
-            seq_file = os.path.join(self.raw_acs_path, sequence_dict[str(i)]['sequence'])
+            seq_file = os.path.join(self.raw_acs_path,
+                                    sequence_dict[str(i)]['sequence'])
+            
             tmp_headers = pd.read_excel(seq_file, sheet_name = 'e', dtype=str)
-
             sequence_dict[str(i)]["headers"] = tmp_headers
 
             feature_mapping = sequence_dict[str(i)]['headers'].to_dict('records')
@@ -178,7 +191,8 @@ class ACS_Parser():
             print(f'   Note: {dat_file_1} was empty.')
             tmp_data = pd.read_csv(dat_file_2, sep = ",", header=None, dtype=str)
             
-            seq_file = os.path.join(self.raw_acs_path, sequence_dict[str(i)]['sequence'])
+            seq_file = os.path.join(self.raw_acs_path,
+                                    sequence_dict[str(i)]['sequence'])
             tmp_headers = pd.read_excel(seq_file, sheet_name = 'e', dtype=str)
 
             sequence_dict[str(i)]["headers"] = tmp_headers
@@ -197,7 +211,9 @@ class ACS_Parser():
         sequence_dict[str(i)]["data"] = tmp_data
         
         if save_table:
-            file_name = "".join(["Zest_ACS_", self.state_level, "_seq", str(i), "_", self.year, '_', self.span, 'yr.parquet'])
+            file_name = "".join(["Zest_ACS_", self.state_level,  "_seq",
+                                 str(i), "_", self.year, '_', self.span, 
+                                 'yr.parquet'])
             save_dataframe(tmp_data, self.out_acs_path, file_name)        
         return(sequence_dict[str(i)])  
 
@@ -216,38 +232,49 @@ class ACS_Parser():
             
         """        
         print("... Generating ACS table", self.state_level, "sequence", i)
-
-        dat_file = os.path.join(self.raw_acs_path, "All_Geographies", sequence_dict[str(i)]['file'])
+        dat_file = os.path.join(self.raw_acs_path, 
+                                "All_Geographies", 
+                                sequence_dict[str(i)]['file'])
         tmp_data = pd.read_csv(dat_file, sep = ",", header=None, dtype=str)
-
-        seq_file = os.path.join(self.raw_acs_path, sequence_dict[str(i)]['sequence'])
-        tmp_headers = pd.read_excel(seq_file, sep = ",", sheet_name = 'e', dtype=str)
+        seq_file = os.path.join(self.raw_acs_path,
+                                sequence_dict[str(i)]['sequence'])
+        tmp_headers = pd.read_excel(seq_file, sep = ",",
+                                    sheet_name = "e", dtype=str)
 
         sequence_dict[str(i)]["headers"] = tmp_headers
-
         feature_mapping = sequence_dict[str(i)]['headers'].to_dict('records')
         sequence_dict[str(i)]['description'] = feature_mapping[0]
 
         new_col_names = list(tmp_headers.columns)
         tmp_data.columns = new_col_names
-
-
         tmp_data = pad_logrecno(tmp_data)
         tmp_data = self.acs_geo(tmp_data)
-
 
         sequence_dict[str(i)]["data"] = tmp_data
         
         if save_table:
-            file_name = "".join(["Zest_ACS_", self.state_level, "_seq", str(i), "_", self.year, '_', self.span, 'yr.parquet'])
+            file_name = "".join(["Zest_ACS_", self.state_level, "_seq", str(i),
+                                 "_", self.year, '_', self.span, 'yr.parquet'])
             save_dataframe(tmp_data, self.out_acs_path, file_name)        
         return(sequence_dict[str(i)])  
                 
     
     def transform(self, save_table=True):
+        """
+        Parameters
+        ----------
+        save_table: bool
+            Optional save
+        """        
+        if save_table:
+            make_directory(output_directory=self.raw_acs_path)
+            make_directory(output_directory=self.out_acs_path)
+            make_directory(output_directory=os.path.join(self.raw_acs_path,
+                                                         self.fol_acs_tmp))        
         if self.span=='5':
             sequence_dict = self.acs_track_5yr()
-            for root, dirs, files in os.walk(os.path.join(self.raw_acs_path, self.fol_acs_tmp)):
+            for root, dirs, files in os.walk(os.path.join(self.raw_acs_path,
+                                                          self.fol_acs_tmp)):
                 for file in files:
                     if ('.xlsx' in file) & ('Geo' not in file):
 
@@ -260,7 +287,8 @@ class ACS_Parser():
             
         elif self.span=='1':
             sequence_dict = self.acs_track_1yr()
-            for root, dirs, files in os.walk(os.path.join(self.raw_acs_path, self.fol_acs_tmp)):
+            for root, dirs, files in os.walk(os.path.join(self.raw_acs_path,
+                                                          self.fol_acs_tmp)):
                 for file in files:
                     if ('.xlsx' in file) & ('Geo' not in file):
 
@@ -272,32 +300,27 @@ class ACS_Parser():
             results = Parallel(n_jobs=self.n_jobs, verbose=1)(delayed((self.acs_parse_1yr))(sequence_dict, sni, save_table) for sni in tqdm(list(sequence_dict.keys())))        
         else:
             raise ValueError('Improper ACS span provided. The only accepted values are 1 & 5')
-        
         results_out = {}
         for d in results:
             seqn = re.findall('[0-9]{1,3}', d['sequence'])[-1]
             results_out[seqn] = {}
             results_out[seqn].update(d)
-
-                
         return(results_out)
-            
-
     
 def acs_census_data(support_files_path, level):
     """Create ACS Lookup Tables using the censusdata package.
     
     Parameters:
     -----------
-    support_files_path: str
-        Support files path pointing to where the state list & ACS feature list are stored
     level:
         Geographic level to return ACS for, options include:
         ['block group' tract', 'zip', 'county', 'state']
     
     """
-    misc_args = load_json(os.path.join(support_files_path, 'misc_args.json'))
-    states = load_json(os.path.join(support_files_path, 'states.json'))
+    curpath = dirname(__file__)
+    data_path = join(curpath, '../data/')
+    misc_args = load_json(join(data_path, 'misc_args.json'))
+    states = load_json(join(data_path, 'states.json'))
     
     df = pd.DataFrame(columns = misc_args)
     if level == 'zip':
@@ -354,7 +377,6 @@ def acs_census_data(support_files_path, level):
                 misc_args,
             )
             df = df.append(temp)
-
     return(df)
 
 
@@ -363,8 +385,6 @@ class ACS_LookupBuilder():
     
     Parameter
     --------
-    support_files_path: str
-        Path to support files
     geo: str
         Geo key to identify which geographic level the ACS table will be made at. 
         Three levels are currently supported zip, tract, or block group
@@ -378,33 +398,34 @@ class ACS_LookupBuilder():
         List of ACS table names to select data to include in the Lookup table
     """
     
-    def __init__(self, support_files_path, geo, year, span, n_jobs, required_tables=None):
+    def __init__(self, support_files_path, geo, year = '2019', span = '5', n_jobs = -1, required_tables=None):
         self.support_files_path = support_files_path
         self.geo = geo
         self.year = year
         self.span = span
         self.n_jobs = n_jobs
-        self.raw_acs_path = os.path.join(self.support_files_path, f"parsed/acs/{self.year}/{self.span}yr")
-        self.out_acs_path = os.path.join(self.support_files_path, "processed/acs", self.year, f"{self.span}yr")
+        self.support_files_path = support_files_path
+        curpath = dirname(__file__)
+        parsed_path = join(support_files_path, f'../data/parsed/acs/{self.year}/{self.span}yr')
+        processed_path = join(curpath, f'../data/processed/acs/{self.year}/{self.span}yr')
+        self.raw_acs_path = parsed_path
+        self.out_acs_path = processed_path
         self.required_tables = required_tables
         if self.required_tables is None:
-            self.required_tables = ['B01003', 'B02001', 'B03001', 'B04004', 'B04006', 'B04007',
-       'B05011', 'B05012', 'B06009', 'B07101', 'B08301', 'B10051',
-       'B11017', 'B16001', 'B19001', 'B23020', 'B25004', 'B25075',
-       'B99021', 'B99162', 'C16001']
+            self.required_tables = ['B01003', 'B02001', 'B03001', 'B04004', 'B04006',
+                                    'B04007', 'B05011', 'B05012', 'B06009', 'B07101',
+                                    'B08301', 'B10051', 'B11017', 'B16001', 'B19001',
+                                    'B23020', 'B25004', 'B25075', 'B99021', 'B99162', 'C16001']
         
     def acs_select_features(self, data):
         """Selects predefined ACS tables to create a lookup table"""
-        
-        prts = "|".join(self.required_tables + ['GEO', 'Geography'] )
-        
+        prts = "|".join(self.required_tables + ['GEO', 'Geography'])
         data = data.filter(regex = prts)
         return(data)
         
     def acs_join_lookup(self, data, mco):
         """Appends new geo level to feature column"""    
         tbl_dict = {}
-        
         for rn in required_names:
             data = data.filter(regex = "|".join([rn, 'GEO']))
             tbl_dict[rn] = data
@@ -420,34 +441,41 @@ class ACS_LookupBuilder():
         geo_pattern: str
             Pattern to identify geo specific data
         """
-        drop_cols  = [] #'FILEID', 'FILETYPE', 'STUSAB', 'CHARITER', 'SEQUENCE', 'LOGRECNO', 'State']
+        drop_cols  = [] #'FILEID', 'FILETYPE', 'STUSAB', 'CHARITER', 'SEQUENCE', 'LOGRECNO', 'State'
         long_name = 'GEO_NAME'
         long_id = 'EXT_GEOID'
 
         tmp_data = load_file(os.path.join(self.raw_acs_path, file))
         tmp_data = self.acs_select_features(tmp_data)
-
         tmp_data = tmp_data.rename(columns= {'GEOID': long_id,
                                       'Geography Name': long_name})
 
-        tmp_data =  tmp_data[tmp_data[long_name].str.upper().str.contains(geo_pattern, regex=True)] 
+        tmp_data =  tmp_data[tmp_data[long_name].str.upper().str.contains(geo_pattern,
+                                                                          regex=True)] 
         na_cols = list(tmp_data.columns[tmp_data.isnull().all()])
         tmp_data = tmp_data.drop(drop_cols + na_cols,
                                      axis=1)
 
         tmp_data['GEOID'] = None
-        tmp_data['GEOID'] = tmp_data[long_id].apply(lambda x : x.split('US')[1]).astype(str)
+        tmp_data['GEOID'] = tmp_data[long_id].apply(lambda x: x.split('US')[1]).astype(str)
         
         if tmp_data.shape[1]<4:
             tmp_data = pd.DataFrame()
         else:
-            tmp_data = tmp_data.set_index(['GEOID', 'GEO_NAME', 'EXT_GEOID']).sort_index()
-
-            
+            tmp_data = tmp_data.set_index(['GEOID',
+                                           'GEO_NAME',
+                                           'EXT_GEOID']
+                                         ).sort_index()
         return(tmp_data)
 
         
     def transform(self, save_table):
+        """
+        Parameters
+        ----------
+        save_table: bool
+            Optional save
+        """
         assert self.geo in ['zip', 'tract', 'block group'], "Require `geo` to be specified as 'zip', 'tract' or 'block group'"
         output = []
 
@@ -511,14 +539,12 @@ class ACS_LookupBuilder():
             print("")
 
         df_out = pd.concat(output, axis=1)
-        
-#         else:
-#             raise(KeyValueError, "Required geo string not providd. Please choose from zip, block group, or tract")        
             
         # optional save 
         if save_table:
+            make_directory(output_directory=self.raw_acs_path)
+            make_directory(output_directory=self.out_acs_path)
             geo_name = "".join(self.geo.split())
-            make_directory(self.out_acs_path)
             filename = "".join(["Zest_ACS_Lookup_", self.year,  self.span, 'yr_', geo_name, '.parquet'])
             print(f"Saving {filename}")
             save_dataframe(df_out,  self.out_acs_path,  filename)
@@ -526,6 +552,4 @@ class ACS_LookupBuilder():
             print('No tables were saved')  
         
         return(df_out)
-        
-            
-
+    

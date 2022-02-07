@@ -1,14 +1,14 @@
+from os.path import dirname, join, expanduser
+from .preprocessing import *
+from .base import BaseZRP
+from .utils import *
 import pandas as pd
 import numpy as np 
+import statistics
+import json
+import sys
 import os
 import re
-import sys
-from os.path import join, expanduser
-import json
-from .utils import *
-from .base import ZRP
-from .preprocessing import *
-import statistics
 
 
 
@@ -62,12 +62,12 @@ def get_reduced(tmp_data):
 
 
 
-def geo_search(support_files_path, year, st_cty_code):
+def geo_search(geo_files_path, year, st_cty_code):
     """
     Returns a list of files associated with the state county code
     """
     file_list = []
-    for root, dirs, files in os.walk(os.path.join(support_files_path, "geo/lookup")):
+    for root, dirs, files in os.walk(os.path.join(geo_files_path)):
         for file in files:
             if (st_cty_code in file):
                 if year in file:
@@ -85,21 +85,27 @@ def geo_read(file_list):
         aef = pd.concat([aef, tmp], axis=0)
     return(aef)    
     
-def geo_zoom(key, geo_df):
+def geo_zoom(geo_df):
     """
-    matches census tract 
+    Matches census tract
+    
+    Parameters
+    ----------
+    geo_df: pd.DataFrame
+        Dataframe with geo data
     """
     geo_df = geo_df[(geo_df.HN_Match == 1) &
-                    (geo_df.ZIP_Match == 1)]# &
-                    #((geo_df.Parity_Match == 1))]
-
-#     geo_df["FINAL_TRACT"] = geo_df.groupby([key]).TRACTCE.agg(pd.Series.mode)
+                    (geo_df.ZIP_Match == 1)]
     return(geo_df)
-    
     
 def geo_range(geo_df):
     """
     Define house number range indicators
+    
+    Parameters
+    ----------
+    geo_df: pd.DataFrame
+        Dataframe with geo data
     """
     geo_df["small"] = np.where(
         geo_df.FROMHN > geo_df.TOHN,
@@ -114,24 +120,17 @@ def geo_range(geo_df):
     geo_df["big"] = pd.to_numeric(geo_df["big"], errors="coerce").fillna(0).astype(np.int64)
     return(geo_df)    
 
-
-    
-
-class ZGeo(ZRP):
+class ZGeo(BaseZRP):
     """
     This class geocodes addresses.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.out_geo_path = "/d/shared/zrp/shared_data/processed/geo/2019"
-        self.key ='ZEST_KEY'
-
-
-
-            
+        self.key ='ZEST_KEY'      
             
     def fit(self):
-        pass
+        return self
+    
     
     def geo_match(self, geo_df):
         """
@@ -148,6 +147,9 @@ class ZGeo(ZRP):
         return(geo_df)    
     
     def transform(self, input_data, geo, processed, replicate, save_table=True):
+        curpath = dirname(__file__)
+        out_geo_path = os.path.join(curpath, '../data/processed/geo/2019')
+        
         print("")
         # Load Data
         try:
@@ -170,10 +172,10 @@ class ZGeo(ZRP):
         
             
         if len(geo)>2:
-            file_list = geo_search(self.support_files_path, self.year, geo)
+            file_list = geo_search(out_geo_path, self.year, geo)
             aef = geo_read(file_list)
         if len(geo)<=2:
-            aef = load_file(os.path.join(self.out_geo_path, f"Zest_Geo_Lookup_{self.year}_State_{geo}.parquet"))
+            aef = load_file(os.path.join(out_geo_path, f"Zest_Geo_Lookup_{self.year}_State_{geo}.parquet"))
 
         
         
@@ -196,11 +198,12 @@ class ZGeo(ZRP):
         
         
         if save_table:
+            make_directory()
             if self.runname is not None:
                 file_name = f"Zest_Geocoded_{self.runname}_{self.year}__{geo}.parquet"
             else:
                 file_name = f"Zest_Geocoded__{self.year}__{geo}.parquet"
-            save_dataframe(geo_df, self.out_geo_path, file_name)        
+            save_dataframe(geo_df, self.out_path, file_name)        
         print("   [Completed] Mapping geo data")
         return(geo_df)
 

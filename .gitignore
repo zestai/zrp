@@ -1,6 +1,8 @@
 # GeoLookup Tables
-extras/processed/geo/
+extras/
+extras/processed.zip
 zrp/data/processed/geo/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
