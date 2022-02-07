@@ -69,11 +69,11 @@ def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tab
     os.remove(path_to_lt_zip)
 
     # Get rid of prefix that unzipping prepends
-    curr_folder = cwd.split("/")[-1]
-    unzipped_src_fname = curr_folder + "-" + lookup_tables_output_fname
-    path_to_unzipped_src = os.path.join(cwd, unzipped_src_fname)
+    # curr_folder = cwd.split("/")[-1]
+    # unzipped_src_fname = curr_folder + "-" + lookup_tables_output_fname
+    # path_to_unzipped_src = os.path.join(cwd, unzipped_src_fname)
     path_to_lookup_tables = os.path.join(cwd, lookup_tables_output_fname)
-    os.rename(path_to_unzipped_src, path_to_lookup_tables)
+    # os.rename(path_to_unzipped_src, path_to_lookup_tables)
 
     # Clear old look up table directories
     data_dir = os.path.join(cwd, 'data')
@@ -126,11 +126,11 @@ def download_and_clean_pipelines(url, pipelines_output_fname, pipelines_output_z
     os.remove(path_to_ppln_zip)
 
     # Get rid of prefix that unzipping prepends
-    curr_folder = cwd.split("/")[-1]
-    unzipped_src_fname = curr_folder + "-" + pipelines_output_fname
-    path_to_unzipped_src = os.path.join(cwd, unzipped_src_fname)
+    # curr_folder = cwd.split("/")[-1]
+    # unzipped_src_fname = curr_folder + "-" + pipelines_output_fname
+    # path_to_unzipped_src = os.path.join(cwd, unzipped_src_fname)
     path_to_pipelines = os.path.join(cwd, pipelines_output_fname)
-    os.rename(path_to_unzipped_src, path_to_pipelines)
+    # os.rename(path_to_unzipped_src, path_to_pipelines)
 
     # Clear old look up table directories
     model_dir = os.path.join(cwd, 'modeling/models')
@@ -143,11 +143,11 @@ def download_and_clean_pipelines(url, pipelines_output_fname, pipelines_output_z
     zip_code_pipeline = os.path.join(zip_code_dir, 'pipe.pkl')
 
     if os.path.isfile(block_group_pipeline):
-        shutil.rmtree(block_group_pipeline)
+        os.remove(block_group_pipeline)
     if os.path.isfile(census_tract_pipeline):
-        shutil.rmtree(census_tract_pipeline)
+        os.remove(census_tract_pipeline)
     if os.path.isfile(zip_code_pipeline):
-        shutil.rmtree(zip_code_pipeline)
+        os.remove(zip_code_pipeline)
     print("Old pipelines cleared out.")
 
     # Migrate pipelines
@@ -155,21 +155,21 @@ def download_and_clean_pipelines(url, pipelines_output_fname, pipelines_output_z
     dl_ct_pipe_file = os.path.join(path_to_pipelines, 'census_tract_pipe.pkl')
     dl_zp_pipe_file = os.path.join(path_to_pipelines, 'zip_code_pipe.pkl')
 
-    if os.path.isdir(dl_bg_pipe_file):
+    if os.path.isfile(dl_bg_pipe_file):
         shutil.move(dl_bg_pipe_file, os.path.join(block_group_dir, 'pipe.pkl'))
         print("Block group pipeline successfully migrated.")
     else:
         warnings.warn(f"The block group pipeline was not found in {dl_bg_pipe_file}."
                       "Consult the pipelines release to troubleshoot.")
 
-    if os.path.isdir(dl_ct_pipe_file):
+    if os.path.isfile(dl_ct_pipe_file):
         shutil.move(dl_ct_pipe_file, os.path.join(census_tract_dir, 'pipe.pkl'))
         print("Census tract pipeline successfully migrated.")
     else:
         warnings.warn(f"The census tract pipeline was not found in {dl_ct_pipe_file}."
                       "Consult the pipelines release to troubleshoot.")
 
-    if os.path.isdir(dl_zp_pipe_file):
+    if os.path.isfile(dl_zp_pipe_file):
         shutil.move(dl_zp_pipe_file, os.path.join(zip_code_dir, 'pipe.pkl'))
         print("Zip code pipeline successfully migrated.")
     else:
@@ -197,12 +197,13 @@ def get_release():
 def download():
     release_pkg = get_release()
 
-    lookup_tables_output_fname = release_pkg + "_lookup_tables"
-    lookup_tables_output_zip_fname = lookup_tables_output_fname + ".zip"
+    # lookup_tables_output_fname = release_pkg + "_lookup_tables"
+    lookup_tables_output_fname = "lookup_tables"
+    lookup_tables_output_zip_fname = release_pkg + "_lookup_tables" + ".zip"
     lookup_table_url = about.__download_url_prefix__ + release_pkg + "/lookup_tables.zip"
     download_and_clean_lookup_tables(lookup_table_url, lookup_tables_output_fname, lookup_tables_output_zip_fname)
 
-    pipelines_output_fname = release_pkg + "_pipelines"
-    pipelines_output_zip_fname = pipelines_output_fname + ".zip"
+    pipelines_output_fname = "pipelines"
+    pipelines_output_zip_fname = release_pkg + "_pipelines" + ".zip"
     pipelines_url = about.__download_url_prefix__ + release_pkg + "/pipelines.zip"
     download_and_clean_pipelines(pipelines_url, pipelines_output_fname, pipelines_output_zip_fname)
