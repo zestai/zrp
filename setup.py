@@ -18,7 +18,7 @@ for r in requirements_raw:
 # This call to setup() does all the work
 setup(
     name="zrp",
-    version="0.1.7",
+    version="0.1.8",
     description="The Zest Race Predictor tool predicts race/ethnicity using a name and address as inputs.",
     long_description=README,
     long_description_content_type="text/markdown",
