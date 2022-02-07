@@ -1,0 +1,17 @@
+{"NORTE\\b" : "N",
+"\\bNORESTE\\b" : "NE",
+"\\bNOROESTE\\b" : "NW",
+"\\bSUR\\b" : "S",
+"\\bSURESTE\\b" : "SE",
+"\\bSUROESTE\\b" : "SW",
+"\\bESTE\\b" : "E",
+"\\bOESTE\\b" : "W",
+"\\bNORTH\\b" : "N",
+"\\bNORTHEAST\\b" : "NE",
+"\\bNORTHWEST\\b" : "NW",
+"\\bSOUTH\\b" : "S",
+"\\bSOUTHEAST\\b" : "SE",
+"\\bSOUTHWEST\\b" : "SW",
+"\\bEAST\\b" : "E",
+"\\bWEST\\b" : "W"
+}
