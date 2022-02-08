@@ -55,29 +55,18 @@ The ZRP can be broken down into four main segments: preprocessing, geocoding, Am
 
 
 
-Module Usage
+Usage and Examples
 ___________
 
-* models
-* functions
-* data access
-^and file structure/locations for these
+To get started using the ZRP, first ensure the download is complete (as described above) and xgboost == 1.0.2 
 
-
-CLI Usage
-__________
-
-
-Examples
-_________
-
-To illustrate how the package can be used, we ...
+Next, check out the guide in the examples folder.
 
 
 Authors
 _______
 
- * Kasey Matthews (Zest AI Lead)
+ * `Kasey Matthews <https://www.linkedin.com/in/kasey-matthews-datadriven/>` (Zest AI Lead)
  * Austin Li (Harvard T4SG)
  * Christien Williams (Schmidt Futures)
  * Sean Kamkar (Zest AI)
