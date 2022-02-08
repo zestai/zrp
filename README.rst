@@ -66,11 +66,11 @@ Next, check out the guide in the examples folder.
 Authors
 _______
 
- * `Kasey Matthews <https://www.linkedin.com/in/kasey-matthews-datadriven/>` (Zest AI Lead)
- * Austin Li (Harvard T4SG)
- * Christien Williams (Schmidt Futures)
- * Sean Kamkar (Zest AI)
- * Jay Budzik (Zest AI)
+ * `Kasey Matthews <https://www.linkedin.com/in/kasey-matthews-datadriven/>`_ (Zest AI Lead)
+ * `Austin Li <https://www.linkedin.com/in/austinwli/>`_ (Harvard T4SG)
+ * `Christien Williams <https://www.linkedin.com/in/christienwilliams/>`_ (Schmidt Futures)
+ * `Sean Kamkar <https://www.linkedin.com/in/sean-kamkar/>`_ (Zest AI)
+ * `Jay Budzik <https://www.linkedin.com/in/jaybudzik/>`_ (Zest AI)
 
 Contributing
 _____________
