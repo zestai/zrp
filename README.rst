@@ -12,7 +12,7 @@ This is the preliminary version and implementation of the ZRP tool. We're dedica
 Install
 _______
 
-Install requires an internet connection. We recommend installing zrp inside a `python virtual environment <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`_.
+Install requires an internet connection. We recommend installing zrp inside a `python virtual environment <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`_. The package has been tested on 3.7.4, but should likely work with 3.7.X.
 ::
 
  pip install zrp
@@ -22,7 +22,7 @@ After installing via pip, you need to download the lookup tables using the follo
 
  python -m zrp download
 
-Note: Due to the size and number of lookup tables necesary for the zrp package, total installation requires ___ GB of available space.
+Note: Due to the size and number of lookup tables necesary for the zrp package, total installation requires 3 GB of available space.
 
 
 Data
@@ -55,33 +55,22 @@ The ZRP can be broken down into four main segments: preprocessing, geocoding, Am
 
 
 
-Module Usage
+Usage and Examples
 ___________
 
-* models
-* functions
-* data access
-^and file structure/locations for these
+To get started using the ZRP, first ensure the download is complete (as described above) and xgboost == 1.0.2 
 
-
-CLI Usage
-__________
-
-
-Examples
-_________
-
-To illustrate how the package can be used, we ...
+Next, check out the guide in the examples folder.
 
 
 Authors
 _______
 
- * Kasey Matthews (Zest AI Lead)
- * Austin Li (Harvard T4SG)
- * Christien Williams (Schmidt Futures)
- * Sean Kamkar (Zest AI)
- * Jay Budzik (Zest AI)
+ * `Kasey Matthews <https://www.linkedin.com/in/kasey-matthews-datadriven/>`_ (Zest AI Lead)
+ * `Austin Li <https://www.linkedin.com/in/austinwli/>`_ (Harvard T4SG)
+ * `Christien Williams <https://www.linkedin.com/in/christienwilliams/>`_ (Schmidt Futures)
+ * `Sean Kamkar <https://www.linkedin.com/in/sean-kamkar/>`_ (Zest AI)
+ * `Jay Budzik <https://www.linkedin.com/in/jaybudzik/>`_ (Zest AI)
 
 Contributing
 _____________
