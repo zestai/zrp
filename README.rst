@@ -7,12 +7,15 @@ ZRP leverages modern predictive algorithms (in particular gradient boosting) in 
 
 The models included here were trained on publicly-available voter registration data and validated on a national sample of PPP loan forgiveness data.  The training procedures are disclosed and example usage provided. 
 
-| FirstName     | LastName      | City  |
-| :------------ |   :---:       | --------: |
-| `John`        | Test1         | `NewYork`   |
-| `Bob`         | Test2         | `Los Angeles`   |
+A
 
-| African American | BISG | ZRP | Pct. Difference |
+| A | B |
+| -- | -- |
+| 0 | 1 |
+
+African American
+
+| Statistic | BISG | ZRP | Pct. Difference |
 | ------------- | ---- | ---- | ---- |
 | True Positive Rate | 0.571 | 0.700 | +23% |
 | True Negative Rate | 0.954 | 0.961 | +01% |
