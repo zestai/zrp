@@ -28,7 +28,7 @@ class ZRP(BaseZRP):
     def transform(self, input_data):
         """
         Parameters
-        ---------
+        -----------
         input_data: pd.Dataframe
             Dataframe to be transformed
         """
