@@ -1,7 +1,24 @@
 Zest Race Predictor
 ____________________
 
-This tool allows users to predict race by only providing an individual's name and address as inputs. The nuance that this tool exploits, however, that gives it far superior accuracy to the Bayesian Improved Surname Geocoding (BISG) tool used by fair lending institutions today, is use of American Community Survey (ACS) data. By cross referencing with our ACS data lookup tables, we've trained models with data as low fedelity as an individuals census block group. Additionally, using ACS data, we've bolstered our training input feature vectors with additional insights such as percentages of a racial group in a census tract, or average houshold income of a census tract. 
+Zest Race Predictor (ZRP) allows its users to estimate race and ethnicty based on an individual's name and home address. ZRP improves upon the Bayesian Improved Surname Geocoding (BISG) method developed by RAND Corporation that is used in fair lending analysis at institutions today.  Our intent is to improve the accuracy of fair lending analysis by using more data and better math, and thereby improve our understanding of disparate impact and disparate treatment of protected-status borrowers.  Armed with a better understanding of the disparities that exist in our financial system, we can highlight inequities create a roadmap to improve equity in access to finance.
+
+ZRP leverages modern predictive algorithms (in particular gradient boosting) in combination with block group and tract-level American Community Survey (ACS) data. By locating each address within a block group or census tract, and referencing demographic attributes associated with that granular geolocation, we can provide trained models with data as high fidelity as Census block group.  The predictive features used in the model include such demographic attributes as percentage of residences identifying as a particular race/ethnicity and average houshold income.  
+
+The models included here were trained on publicly-available voter registration data and validated on several additional datasets as described below.  The training procedures are disclosed and example usage provided. 
+
+{| class="wikitable"
+|+ Caption text
+|-
+! Header text !! Header text !! Header text
+|-
+| Example || Example || Example
+|-
+| Example || Example || Example
+|-
+| Example || Example || Example
+|}
+
 
 Notes
 _____
