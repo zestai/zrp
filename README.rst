@@ -5,19 +5,16 @@ Zest Race Predictor (ZRP) allows its users to estimate race and ethnicty based o
 
 ZRP leverages modern predictive algorithms (in particular gradient boosting) in combination with block group and tract-level American Community Survey (ACS) data. By locating each address within a block group or census tract, and referencing demographic attributes associated with that granular geolocation, we can provide trained models with data as high fidelity as Census block group.  The predictive features used in the model include such demographic attributes as percentage of residences identifying as a particular race/ethnicity and average houshold income.  
 
-The models included here were trained on publicly-available voter registration data and validated on several additional datasets as described below.  The training procedures are disclosed and example usage provided. 
+The models included here were trained on publicly-available voter registration data and validated on a national sample of PPP loan forgiveness data.  The training procedures are disclosed and example usage provided. 
 
-{| class="wikitable"
-|+ Caption text
-|-
-! Header text !! Header text !! Header text
-|-
-| Example || Example || Example
-|-
-| Example || Example || Example
-|-
-| Example || Example || Example
-|}
+| African American | BISG | ZRP | Pct. Difference ||
+| ------------- | ---- | ---- | ---- |
+| True Positive Rate | 0.571 | 0.700 | +23% |
+| True Negative Rate | 0.954 | 0.961 | +01% |
+| False Positive Rate | 0.046 | 0.039 | -15% |
+| False Negative Rate | 0.429 | 0.300 | -30% |
+
+
 
 
 Notes
