@@ -72,7 +72,7 @@ False Negative Rate    0.241       0.094       -61% (F)
 Notes
 _____
 
-This is the preliminary version and implementation of the ZRP tool. We're dedicated to continue improving both the algorithm and documentation. 
+This is the preliminary version and implementation of the ZRP tool. We're dedicated to continue improving both the algorithm and documentation and hope that government agencies, lenders, citizen data scientists and other interested parties will help us improve the model.
 
 
 Install
