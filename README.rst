@@ -1,12 +1,78 @@
 Zest Race Predictor
 ____________________
 
-This tool allows users to predict race by only providing an individual's name and address as inputs. The nuance that this tool exploits, however, that gives it far superior accuracy to the Bayesian Improved Surname Geocoding (BISG) tool used by fair lending institutions today, is use of American Community Survey (ACS) data. By cross referencing with our ACS data lookup tables, we've trained models with data as low fedelity as an individuals census block group. Additionally, using ACS data, we've bolstered our training input feature vectors with additional insights such as percentages of a racial group in a census tract, or average houshold income of a census tract. 
+Zest Race Predictor (ZRP) allows its users to estimate race and ethnicty based on an individual's name and home address. ZRP improves upon the Bayesian Improved Surname Geocoding (BISG) method developed by RAND Corporation that is used in fair lending analysis at institutions today.  Our intent is to improve the accuracy of fair lending analysis by using more data and better math, and thereby improve our understanding of disparate impact and disparate treatment of protected-status borrowers.  Armed with a better understanding of the disparities that exist in our financial system, we can highlight inequities create a roadmap to improve equity in access to finance.
+
+ZRP leverages modern predictive algorithms (in particular gradient boosting) in combination with block group and tract-level American Community Survey (ACS) data. By locating each address within a block group or census tract, and referencing demographic attributes associated with that granular geolocation, we can provide trained models with data as high fidelity as Census block group.  The predictive features used in the model include such demographic attributes as percentage of residences identifying as a particular race/ethnicity and average houshold income.  Example usage and model training procedures are provided. 
+
+The models included in this package were trained on publicly-available voter registration data and validated multiple times: on hold out sets of voter registration data and on a national sample of PPP loan forgiveness data.  The results were consistent across tests:  20-30% more African Americans correctily identified as African American, and 60% fewer whites identified as people of color as compared with the status quo BISG method.  
+
+Performance on the national PPP loan forgiveness dataset was as follows (comparing ZRP softmax with the BISG-80 method):
+
+*African American*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.571       0.700       +23% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.954       0.961       +01% (F)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.046       0.039       -15% (F)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.429       0.300       -30% (F)
+====================== =========== =========== ===========
+
+
+*Asian American and Pacific Islander*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.683       0.777       +14% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.982       0.977       -01% (U)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.018       0.023       -28% (F)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.317       0.223       -30% (F)
+====================== =========== =========== ===========
+
+
+*Non-White Hispanic*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.599       0.711       +19% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.979       0.973       -01% (U)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.021       0.027       -29% (F)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.401       0.289       -28% (F)
+====================== =========== =========== ===========
+
+*White, Non-Hispanic*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.758       0.906       +19% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.758       0.741       -02% (U)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.242       0.259       +07% (U)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.241       0.094       -61% (F)
+====================== =========== =========== ===========
+
+
 
 Notes
 _____
 
-This is the preliminary version and implementation of the ZRP tool. We're dedicated to continue improving both the algorithm and documentation. 
+This is the preliminary version and implementation of the ZRP tool. We're dedicated to continue improving both the algorithm and documentation and hope that government agencies, lenders, citizen data scientists and other interested parties will help us improve the model.
 
 
 Install
@@ -60,7 +126,7 @@ ___________
 
 To get started using the ZRP, first ensure the download is complete (as described above) and xgboost == 1.0.2 
 
-Next, check out the guide in the examples folder.
+Next, check out the guide in the examples folder. Clone the repo in order to obtain the example notebooks and data; this is not provided in the pip installable package.
 
 
 Authors
