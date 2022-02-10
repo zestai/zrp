@@ -3,7 +3,7 @@ CensusData==1.15
 feature_engine==1.2.0
 Fiona==1.8.20
 joblib==0.15.1
-numpy==1.22.1
+numpy
 pandas==1.2.5
 plac==1.3.4
 pycm==3.3
