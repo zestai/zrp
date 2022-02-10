@@ -7,7 +7,7 @@ ZRP leverages modern predictive algorithms (in particular gradient boosting) in 
 
 The models included in this package were trained on publicly-available voter registration data and validated multiple times: on hold out sets of voter registration data and on a national sample of PPP loan forgiveness data.  The results were consistent across tests:  20-30% more African Americans correctily identified as African American, and 60% fewer whites identified as people of color as compared with the status quo BISG method.  
 
-Performance on the national PPP loan forgiveness dataset was as follows:
+Performance on the national PPP loan forgiveness dataset was as follows (comparing ZRP softmax with the BISG-80 method):
 
 *African American*
 
@@ -22,6 +22,51 @@ False Positive Rate    0.046       0.039       -15% (F)
 ---------------------- ----------- ----------- ----------- 
 False Negative Rate    0.429       0.300       -30% (F)
 ====================== =========== =========== ===========
+
+
+*Asian American and Pacific Islander*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.683       0.777       +14% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.982       0.977       -01% (U)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.018       0.023       -28% (F)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.317       0.223       -30% (F)
+====================== =========== =========== ===========
+
+
+*Non-White Hispanic*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.599       0.711       +19% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.979       0.973       -01% (U)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.021       0.027       -29% (F)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.401       0.289       -28% (F)
+====================== =========== =========== ===========
+
+*White, Non-Hispanic*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.758       0.906       +19% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.758       0.741       -02% (U)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.242       0.259       +07% (U)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.241       0.094       -61% (F)
+====================== =========== =========== ===========
+
 
 
 Notes
