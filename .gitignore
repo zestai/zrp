@@ -2,6 +2,7 @@
 extras/
 extras/processed.zip
 zrp/data/processed/geo/
+zrp/data/processed/acs
 artifacts/
 
 zrp/modeling/models/block_group/fl_ids.json
