@@ -3,37 +3,25 @@ ____________________
 
 Zest Race Predictor (ZRP) allows its users to estimate race and ethnicty based on an individual's name and home address. ZRP improves upon the Bayesian Improved Surname Geocoding (BISG) method developed by RAND Corporation that is used in fair lending analysis at institutions today.  Our intent is to improve the accuracy of fair lending analysis by using more data and better math, and thereby improve our understanding of disparate impact and disparate treatment of protected-status borrowers.  Armed with a better understanding of the disparities that exist in our financial system, we can highlight inequities create a roadmap to improve equity in access to finance.
 
-ZRP leverages modern predictive algorithms (in particular gradient boosting) in combination with block group and tract-level American Community Survey (ACS) data. By locating each address within a block group or census tract, and referencing demographic attributes associated with that granular geolocation, we can provide trained models with data as high fidelity as Census block group.  The predictive features used in the model include such demographic attributes as percentage of residences identifying as a particular race/ethnicity and average houshold income.  
+ZRP leverages modern predictive algorithms (in particular gradient boosting) in combination with block group and tract-level American Community Survey (ACS) data. By locating each address within a block group or census tract, and referencing demographic attributes associated with that granular geolocation, we can provide trained models with data as high fidelity as Census block group.  The predictive features used in the model include such demographic attributes as percentage of residences identifying as a particular race/ethnicity and average houshold income.  Example usage and model training procedures are provided. 
 
-The models included here were trained on publicly-available voter registration data and validated on a national sample of PPP loan forgiveness data.  The training procedures are disclosed and example usage provided. 
+The models included in this package were trained on publicly-available voter registration data and validated multiple times: on hold out sets of voter registration data and on a national sample of PPP loan forgiveness data.  The results were consistent across tests:  20-30% more African Americans correctily identified as African American, and 60% fewer whites identified as people of color as compared with the status quo BISG method.  
 
-===== ========= =====
-Table Headings  Here
---------------- -----
-Sub   Headings  Too
-===== ========= =====
-column spanning no
---------------- -----
-cell  cell      row
-column spanning spans
-=============== =====
+Performance on the national PPP loan forgiveness dataset was as follows:
 
-A
+*African American*
 
-| A | B |
-| -- | -- |
-| 0 | 1 |
-
-African American
-
-| Statistic | BISG | ZRP | Pct. Difference |
-| ------------- | ---- | ---- | ---- |
-| True Positive Rate | 0.571 | 0.700 | +23% |
-| True Negative Rate | 0.954 | 0.961 | +01% |
-| False Positive Rate | 0.046 | 0.039 | -15% |
-| False Negative Rate | 0.429 | 0.300 | -30% |
-
-
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.571       0.700       +23% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.954       0.961       +01% (F)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.046       0.039       -15% (F)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.429       0.300       -30% (F)
+====================== =========== =========== ===========
 
 
 Notes
