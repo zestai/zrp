@@ -10,3 +10,6 @@ pycm==3.3
 scikit_learn==1.0.2
 tqdm==4.46.0
 xgboost==1.0.2
+surgeo==1.1.2
+pyarrow==7.0.0
+fastparquet
