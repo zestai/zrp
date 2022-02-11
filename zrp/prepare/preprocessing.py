@@ -410,6 +410,34 @@ def replicate_address_2(data, street_address, street_suffix_mapping, unit_mappin
     print(f"     Address dataframe expansion is complete! (n={len(dataout)})")
     return(dataout)
 
+
+def replicate_house_number(data, house_number):
+    """
+    Replicate street addresses 
+    
+    Parameters
+    ----------
+    data: dataframe
+       ACS dataFrame to make changes to 
+    house_number: str
+       Name of street address column 
+    """
+    # base
+    data = data.reset_index(drop=False)
+    print("         ...Base")
+    df_base =  data.copy()     # base is complete, containing the original record (1)
+#     data[house_number] = np.where(data[house_number]=='nan', None, data[house_number])
+    print("         ...Number processing...")
+    data[house_number].apply(lambda x: re.sub("[^0-9]",\
+                                                     "",\
+                                                    str(x))) 
+    dataout = pd.concat([df_base,
+                           data
+                          ], axis=0)
+    dataout = dataout.drop_duplicates()
+    print(f"     Address dataframe expansion is complete! (n={len(dataout)})")
+    return(dataout)
+
        
 class  ProcessStrings(BaseZRP):
     """
@@ -617,10 +645,6 @@ class  ProcessGeo(BaseZRP):
         if not processed:
             data_cols =  data.columns
             data = set_id(data, self.key)
-            if self.key in data.columns:
-                data["ZEST_KEY_COL"] = data[self.key]
-            else:
-                data["ZEST_KEY_COL"] = data.index
             
             numeric_cols =  list(set([self.zip_code,
                                       self.census_tract,
@@ -657,6 +681,11 @@ class  ProcessGeo(BaseZRP):
         data_path = join(curpath, f'../data/processed')
         state_mapping, street_suffix_mapping, directionals_mapping, unit_mapping = load_mappings(data_path)
         
+        if self.key in data.columns:
+            data["ZEST_KEY_COL"] = data[self.key]
+        else:
+            data["ZEST_KEY_COL"] = data.index        
+        
         print("      ...address cleaning")
         street_addr_dict = dict(zip(data.index, data[self.street_address])) 
         street_addr_results = Parallel(n_jobs = self.n_jobs, prefer="threads", verbose=1)(delayed((address_mining))(street_addr_dict, i) for i in tqdm(list(data.index)))
@@ -674,7 +703,8 @@ class  ProcessGeo(BaseZRP):
                                   data[self.zip_code].apply(lambda x: x.zfill(5)))
         if replicate:
             print("      ...replicating address")
-            data = replicate_address_2(data, self.street_address, street_suffix_mapping, unit_mapping)       
+            data = replicate_address_2(data, self.street_address, street_suffix_mapping, unit_mapping)  
+            data = replicate_house_number(data, self.house_number)
         
         print("      ...formatting")
         addr_cols = list(set(list(data.columns)).intersection(set([self.zip_code, self.census_tract, self.house_number, self.city, self.state, self.street_address])))
