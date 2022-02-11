@@ -2,7 +2,7 @@ from zrp.prepare.utils import load_file
 from zrp.prepare.preprocessing import set_id
 import pandas as pd
 import numpy as np
-import pycm
+from pycm import *
 import os
 import re
 
@@ -55,8 +55,8 @@ ground_truth_path = None, key = "ZEST_KEY", race = "race"):
             
         proxies = set_id(proxies, self.key)
         ground_truth = set_id(ground_truth, self.key)
-        proxies = proxies[race]
-        ground_truth = ground_truth[race]
+        proxies = proxies[self.race]
+        ground_truth = ground_truth[self.race]
             
         cm = ConfusionMatrix(
             np.array(ground_truth),

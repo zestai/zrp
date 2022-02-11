@@ -74,17 +74,17 @@ def set_id(data, key):
     data_cols: list
         List of data columns available
     """
-    data_cols = list(data.columns)
     if key == data.index.name:
         print("The key is already set")
-    elif key in data_cols:
+    elif key in list(data.columns):
         data = data.set_index(key)
     else:
-        data["tmp_key"] = data[data_cols].apply(lambda row:\
+        data["tmp_key"] = data[list(data.columns)].apply(lambda row:\
                                                 "_".join(row.values.astype(str)),
                                                 axis = 1)
         if data["tmp_key"].nunique() == len(data):
             data = data.rename(columns = {"tmp_key": key})
+            data = data.set_index(key)
         else:
             data = data.sort_values("tmp_key")
             data[key] = data["tmp_key"] + data.index.astype(str)
@@ -299,8 +299,9 @@ class  LongProcesStrings():
 
         # Convert to uppercase & trim whitespace
         print("   Formatting P1")
-        data = data.apply(lambda x: x.str.upper().str.strip())
-        
+        data = data.astype(str)
+        data = data.apply(lambda x: x.str.upper())
+            
         data = reduce_whitespace(data)
         # Remove/replace special characters
         for col in numeric_cols:
@@ -392,9 +393,10 @@ def replicate_address_2(data, street_address, street_suffix_mapping, unit_mappin
     df_base =  data.copy()     # base is complete, containing the original record (1)
     print("         ...Map street suffixes...")
     data[street_address] = data[street_address].replace(street_suffix_mapping, regex=True) # this mapping takes the longest but is ok for 10K records
+    data[street_address] = np.where(data[street_address]=='nan', None, data[street_address])
     print("         ...Mapped & split by street suffixes...")
     # Remove addtl "-"
-    data[street_address] = data[street_address].str.split("-", 1, expand=True)
+    data[street_address] = data[street_address].str.split("-", 1, expand=True)[0]
     data[street_address] = data[street_address].str.replace(pat = "-", repl = "", regex=False)
     print("         ...Number processing...")
     data[street_address] = data[street_address].str.replace("^([0-9]{1,6}[A-Z]{1,3})", "", regex=True)
@@ -494,9 +496,14 @@ class  ProcessStrings(BaseZRP):
 
         # Convert to uppercase & trim whitespace
         print("   Formatting P1")
+        data = data.astype(str)
         data = data.apply(lambda x: x.str.upper())
         
         data = reduce_whitespace(data)
+        
+        na_dict =  {"^\\s*$": None} # new added
+        data = data.replace(na_dict, regex=True) # new added
+        
         # Remove/replace special characters
         for col in numeric_cols:
             data[col] = data[col].apply(lambda x: re.sub("[^0-9]",\
@@ -605,19 +612,32 @@ class  ProcessGeo(BaseZRP):
 
     def transform(self, data, processed, replicate=False):
         curpath = dirname(__file__)
-        print("   [Start] Processing geo data")
+        print("   [Start] Processing geo data")       
         # Load Data
         if not processed:
             data_cols =  data.columns
             data = set_id(data, self.key)
+            if self.key in data.columns:
+                data["ZEST_KEY_COL"] = data[self.key]
+            else:
+                data["ZEST_KEY_COL"] = data.index
+            
             numeric_cols =  list(set([self.zip_code,
                                       self.census_tract,
                                       self.house_number
                                      ]).intersection(set(data_cols)))
+            
 
             print("      ...formatting")
+            data = data.astype(str)
             data = data.apply(lambda x: x.str.upper())
+            
             data = reduce_whitespace(data)
+            
+            na_dict =  {"^\\s*$": None,
+                       "^NAN$": None,
+                       "^None$": None} # new added
+            data = data.replace(na_dict, regex=True) # new added   
             
             # Remove/replace special characters
             for col in numeric_cols:
@@ -652,7 +672,6 @@ class  ProcessGeo(BaseZRP):
                                  (data[self.zip_code].str.contains("None")),
                                   None,
                                   data[self.zip_code].apply(lambda x: x.zfill(5)))
-
         if replicate:
             print("      ...replicating address")
             data = replicate_address_2(data, self.street_address, street_suffix_mapping, unit_mapping)       
@@ -743,7 +762,7 @@ class  ProcessGLookUp(BaseZRP):
                                   self.county,
                                   self.house_number
                                  ]).intersection(set(data_cols)))
-        data = data.apply(lambda x: x.str.upper())
+        data = data.apply(lambda x: x.astype(str).str.upper() if x.dtype==str else x)
         data = reduce_whitespace(data)
 
         # Remove/replace special characters

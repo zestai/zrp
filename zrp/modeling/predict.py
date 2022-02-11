@@ -97,12 +97,13 @@ class BISGWrapper(BaseZRP):
     
     def transform(self, data):
         df = data.copy()
-        df = df[df.index.duplicated(keep='last')]
+        df = df[~df.index.duplicated(keep='first')]
+
         df = df.filter([self.last_name, self.zip_code, self.census_tract])
-        bisg = surgeo.SurgeoModel()
-        bisg_results = bisg.get_probabilities(names  = df[self.last_name] ,  geo_df = df[self.zip_code].astype(int))
         
-        combo = df.merge(bisg_results, 
+        bisg = surgeo.SurgeoModel()
+        bisg_results = bisg.get_probabilities(names  = df[self.last_name].reset_index(drop=True) ,  geo_df = df[self.zip_code].astype(int))
+        combo = df.reset_index().merge(bisg_results, 
                            how="left", 
                            left_on=[self.last_name, self.zip_code], 
                            right_on=["name", "zcta5"]
@@ -117,7 +118,7 @@ class BISGWrapper(BaseZRP):
             'multiple': 'OTHER',
             'hispanic': 'HISPANIC'
         }, inplace=True) 
-        
+        combo = combo.set_index(self.key)
         # Generate proxy at threshold
         subset = combo[['WHITE', 'BLACK', 'AAPI', 'AIAN', 'OTHER', 'HISPANIC'
                        ]]
@@ -127,8 +128,9 @@ class BISGWrapper(BaseZRP):
         if self.proxy =='labels':
             proxies = combo[[self.race, "source_bisg"]]
         if self.proxy =='probs':
-            proxies = combo[['WHITE', 'BLACK', 'AAPI', 'AIAN', 'OTHER', 'HISPANIC', "source_bisg"]]
+            proxies = combo[['WHITE', 'BLACK', 'AAPI', 'AIAN', 'OTHER', 'HISPANIC', self.race, "source_bisg"]]            
         return(proxies)
+
 
 
 class ZRP_Predict_ZipCode(BaseZRP):
