@@ -1,5 +1,7 @@
 import pandas as pd
 import os
+
+
 class BaseZRP():
     """
     Prepares data to generate race & ethnicity proxies
@@ -36,7 +38,6 @@ class BaseZRP():
         Name of census tract column
     support_files_path:
         File path with support data
-
     street_address_2: str, optional
         Name of additional address column
     name_prefix: str, optional
@@ -56,13 +57,16 @@ class BaseZRP():
     n_jobs: int (default 1)
         Number of jobs in parallel
     """
-    
-   
-    
-    def __init__(self, support_files_path="data/processed", key="ZEST_KEY", first_name="first_name", middle_name="middle_name", last_name="last_name", house_number="house_number", street_address="street_address", city="city", state="state", zip_code="zip_code", race='race', proxy="probs", census_tract= None, street_address_2=None, name_prefix=None, name_suffix=None, na_values = None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=49, year="2019", span ="5", runname="test"):
+
+    def __init__(self, support_files_path="data/processed", key="ZEST_KEY", first_name="first_name",
+                 middle_name="middle_name", last_name="last_name", house_number="house_number",
+                 street_address="street_address", city="city", state="state", zip_code="zip_code", race='race',
+                 proxy="probs", census_tract=None, street_address_2=None, name_prefix=None, name_suffix=None,
+                 na_values=None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=49, year="2019",
+                 span="5", runname="test"):
         self.key = key
         self.first_name = first_name
-        self.middle_name =  middle_name
+        self.middle_name = middle_name
         self.last_name = last_name
         self.name_suffix = name_suffix
         self.house_number = house_number
@@ -77,11 +81,11 @@ class BaseZRP():
         self.na_values = na_values
         self.geocode = geocode
         self.readout = readout
-        self.bisg=bisg
+        self.bisg = bisg
         self.proxy = proxy
-        self.race= race
+        self.race = race
         self.n_jobs = n_jobs
-        self.year= year
+        self.year = year
         self.span = span
         self.runname = runname
         if file_path:
@@ -90,7 +94,9 @@ class BaseZRP():
             self.out_path = "artifacts"
 
         super().__init__()
-    def fit():
+
+    def fit(self):
         pass
-    def transform():
+
+    def transform(self):
         pass

@@ -21,9 +21,6 @@ class ZRP_Prepare(BaseZRP):
     
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-
     state_mapping: dictionary
         dictionary mapping state names & abbreviations
     key: str 

@@ -17,7 +17,7 @@ import re
 
 
 class ZRP(BaseZRP):
-    """Zest Race Predictor, predicts race & ethnicity using name & geograhpic data
+    """Zest Race Predictor, predicts race & ethnicity using name & geograhpic data.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -27,6 +27,8 @@ class ZRP(BaseZRP):
     
     def transform(self, input_data):
         """
+        Processes input data and generates ZRP predictions. Generates BISG predictions additionally if specified.
+
         Parameters
         -----------
         input_data: pd.Dataframe

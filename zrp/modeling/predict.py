@@ -30,23 +30,14 @@ from zrp.modeling.src.set_key import SetKey
 class PredictPass(BaseZRP):
     """
     Generates proxies
-    
-    
+
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-    key: str 
-        Key to set as index. If not provided, a key will be generated.
-    race: str
-        Name of race column 
-    proxy_data: str, pd.Series, or pd.DataFrame
-        File path to proxy data
-    ground_truth: str, pd.Series, or pd.DataFrame
-        File path to ground truth data
+    pipe_path: str
+        Folder path to directory containing pipeline
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, pipe_path, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pipe_path = pipe_path
         
@@ -54,7 +45,14 @@ class PredictPass(BaseZRP):
         return self
     
     def transform(self, input_data):
-        
+        """
+        Processes input data and generates BISG predictions.
+
+        Parameters
+        -----------
+        data: pd.Dataframe
+            Dataframe to be transformed
+        """
         # Load Data
         try:
             data = input_data.copy()
@@ -83,12 +81,24 @@ def validate_drop(data):
 
 
 class BISGWrapper(BaseZRP):
-    """Wrapper function for bisg"""
+    """
+    Wrapper class for BISG.
+
+    Generates proxies using BISG algorithm.
+
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
         
     def fit(self, data):
+        """
+
+        Parameters
+        -----------
+        data: pd.Dataframe
+            Dataframe to be transformed
+        """
         if self.last_name not in data.columns:
             raise ValueError('Last name needs to be provided when initializing this class. Please provide last name data in a column named "last_name" or set the custom name of the last name column in the data')
         if self.zip_code not in data.columns:
@@ -96,6 +106,14 @@ class BISGWrapper(BaseZRP):
         return self
     
     def transform(self, data):
+        """
+        Processes input data and generates BISG predictions.
+
+        Parameters
+        -----------
+        data: pd.Dataframe
+            Dataframe to be transformed
+        """
         df = data.copy()
         df = df[df.index.duplicated(keep='last')]
         df = df.filter([self.last_name, self.zip_code, self.census_tract])
@@ -133,21 +151,13 @@ class BISGWrapper(BaseZRP):
 
 class ZRP_Predict_ZipCode(BaseZRP):
     """
-    Generates proxies
+    Generates proxies using model trained on zip code features.
     
     
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-    key: str 
-        Key to set as index. If not provided, a key will be generated.
-    race: str
-        Name of race column 
-    proxy_data: str, pd.Series, or pd.DataFrame
-        File path to proxy data
-    ground_truth: str, pd.Series, or pd.DataFrame
-        File path to ground truth data
+    pipe_path: str
+        Folder path to directory containing pipeline
     """
 
     def __init__(self, pipe_path, *args, **kwargs):
@@ -158,6 +168,14 @@ class ZRP_Predict_ZipCode(BaseZRP):
         return self
     
     def transform(self, input_data):
+        """
+        Processes input data and generates ZRP proxy predictions.
+
+        Parameters
+        -----------
+        data: pd.Dataframe
+            Dataframe to be transformed
+        """
         src_path = os.path.join(self.pipe_path, "zip_code")
         sys.path.append(src_path)        
         # Load Data
@@ -189,21 +207,13 @@ class ZRP_Predict_ZipCode(BaseZRP):
 
 class ZRP_Predict_BlockGroup(BaseZRP):
     """
-    Generates proxies
+    Generates proxies using model trained on block group features.
     
     
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-    key: str 
-        Key to set as index. If not provided, a key will be generated.
-    race: str
-        Name of race column 
-    proxy_data: str, pd.Series, or pd.DataFrame
-        File path to proxy data
-    ground_truth: str, pd.Series, or pd.DataFrame
-        File path to ground truth data
+    pipe_path: str
+        Folder path to directory containing pipeline
     """
 
     def __init__(self, pipe_path, *args, **kwargs):
@@ -214,6 +224,14 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         return self
     
     def transform(self, input_data):
+        """
+        Processes input data and generates ZRP proxy predictions.
+
+        Parameters
+        -----------
+        data: pd.Dataframe
+            Dataframe to be transformed
+        """
         src_path = os.path.join(self.pipe_path,"block_group")
         sys.path.append(src_path)
         
@@ -247,21 +265,13 @@ class ZRP_Predict_BlockGroup(BaseZRP):
 
 class ZRP_Predict_CensusTract(BaseZRP):
     """
-    Generates proxies
+    Generates proxies using model trained on census tract features.
     
     
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-    key: str 
-        Key to set as index. If not provided, a key will be generated.
-    race: str
-        Name of race column 
-    proxy_data: str, pd.Series, or pd.DataFrame
-        File path to proxy data
-    ground_truth: str, pd.Series, or pd.DataFrame
-        File path to ground truth data
+    pipe_path: str
+        Folder path to directory containing pipeline
     """
 
     def __init__(self, pipe_path, *args, **kwargs):
@@ -272,6 +282,14 @@ class ZRP_Predict_CensusTract(BaseZRP):
         return self
     
     def transform(self, input_data):
+        """
+        Processes input data and generates ZRP proxy predictions.
+
+        Parameters
+        -----------
+        data: pd.Dataframe
+            Dataframe to be transformed
+        """
         src_path = os.path.join(self.pipe_path,"census_tract")
         sys.path.append(src_path)
         
@@ -305,13 +323,14 @@ class ZRP_Predict_CensusTract(BaseZRP):
 
 class ZRP_Predict(BaseZRP):
     """
-    Generates proxies
+    Generates race proxies.
+
+    Attempts to predict on census tract, then block group, then zip code based on which level ACS data is found for. If
+    Geo level data is unattainable, the BISG proxy is computed. No prediction returned if BISG cannot be computed either.
     
     
     Parameters
     ----------
-    data: dataframe
-        dataframe with processed user data
     pipe_path: str
         Folder path to directory containing pipeline
     """
@@ -325,6 +344,14 @@ class ZRP_Predict(BaseZRP):
         return self
     
     def transform(self, input_data, save_table=True):
+        """
+        Processes input data and generates ZRP proxy predictions.
+
+        Parameters
+        -----------
+        data: pd.Dataframe
+            Dataframe to be transformed
+        """
         # Load Data
         try:
             data = input_data.copy()
@@ -401,7 +428,7 @@ class FEtoPredict(BaseZRP):
         dataframe with processed user data
     pipe_path: str
         Folder path to directory containing pipeline
-    pip_type: str, (default='census_tract')
+    pipe_type: str, (default='census_tract')
         Type of pipeline that generated the engineered data.
         Options: 'block_group', 'census_tract', or 'zip_code'
     """
@@ -416,14 +443,21 @@ class FEtoPredict(BaseZRP):
         return self
     
     def transform(self, input_data, save_table=True):
+        """
+        Processes input data and generates ZRP proxy predictions.
 
+        Parameters
+        -----------
+        data: pd.Dataframe
+            Dataframe to be transformed
+        """
         # Load Data
         try:
             fe_data = input_data.copy()
         except AttributeError:
             fe_data = load_file(self.proxy_data)
             
-        model = pd.read_pickle(os.path.join(self.pipe_path, f"{pipe_type}/model.pkl") )
+        model = pd.read_pickle(os.path.join(self.pipe_path, f"{self.pipe_type}/model.pkl") )
          
         if self.proxy =='labels':
             proxies = pd.DataFrame({'race' : model.predict(fe_data)}, index=fe_data.index)

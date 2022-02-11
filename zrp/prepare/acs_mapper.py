@@ -1,13 +1,9 @@
-from os.path import dirname, join, expanduser
 from .preprocessing import *
 from .base import BaseZRP
 from .utils import *
 import pandas as pd
-import numpy as np
-import json
 import os
-import re
-import sys
+
 
 def acs_search(year, span):
     """
@@ -27,26 +23,25 @@ def acs_search(year, span):
     data_path = join(curpath, f'../data/processed/acs/{year}/{span}yr')
     for root, dirs, files in os.walk(os.path.join(data_path)):
         for file in files:
-            if (f"_zip" in file) & ("processed" in file) :
-                file_list_z.append(os.path.join(root,file))
-            if (f"tract" in file) & ("processed" in file) :
-                file_list_c.append(os.path.join(root,file))
-            if (f"blockgroup" in file) & ("processed" in file) :
-                file_list_b.append(os.path.join(root,file))
-    return(file_list_z, file_list_c, file_list_b)    
+            if (f"_zip" in file) & ("processed" in file):
+                file_list_z.append(os.path.join(root, file))
+            if (f"tract" in file) & ("processed" in file):
+                file_list_c.append(os.path.join(root, file))
+            if (f"blockgroup" in file) & ("processed" in file):
+                file_list_b.append(os.path.join(root, file))
+    return (file_list_z, file_list_c, file_list_b)
 
 
 class ACSModelPrep(BaseZRP):
     """
     Prepares ACS data & processed user input for modeling
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        
+
     def fit(self):
         pass
-    
 
     def acs_combine(self, data, acs_bg, acs_ct, acs_zip):
         """
@@ -67,7 +62,7 @@ class ACSModelPrep(BaseZRP):
         # Block Group
         mbggk_list = list(set(data.GEOID_BG.unique()).intersection(set(acs_bg.GEOID.unique())))
         print(data.index.name)
-        
+
         print(" ...Copy dataframes")
         ## Merge by current
         mbggk = data.copy()
@@ -76,51 +71,50 @@ class ACSModelPrep(BaseZRP):
         nm = data.copy()
 
         print(" ...Block group")
-        mbggk = mbggk[(mbggk.GEOID_BG.isin(mbggk_list))].reset_index(drop= False)
+        mbggk = mbggk[(mbggk.GEOID_BG.isin(mbggk_list))].reset_index(drop=False)
         mbggk_zkeys = list(mbggk.index)
         mbggk = mbggk.merge(acs_bg,
-                            left_on = "GEOID_BG",
-                            right_on = "GEOID").set_index(self.key)
-        mbggk["acs_source"] = "BG"    
+                            left_on="GEOID_BG",
+                            right_on="GEOID").set_index(self.key)
+        mbggk["acs_source"] = "BG"
 
         # Census Tract
         mctgk_list = list(set(data.GEOID_CT.unique()).intersection(set(acs_ct.GEOID.unique())))
         prev_zkeys = mbggk_zkeys
-        mctgk = mctgk[~(mctgk.index.isin(prev_zkeys)) &\
-                      (mctgk["GEOID_CT"].isin(mctgk_list))].reset_index(drop= False)
+        mctgk = mctgk[~(mctgk.index.isin(prev_zkeys)) & \
+                      (mctgk["GEOID_CT"].isin(mctgk_list))].reset_index(drop=False)
         mctgk_zkeys = list(mctgk.index)
         print(" ...Census tract")
         mctgk = mctgk.merge(acs_ct,
-                            left_on = "GEOID_CT",
-                            right_on = "GEOID").set_index(self.key)
-        mctgk["acs_source"] = "CT" 
+                            left_on="GEOID_CT",
+                            right_on="GEOID").set_index(self.key)
+        mctgk["acs_source"] = "CT"
 
         # Merge by Zip
         mbz_list = list(set(data["GEOID_ZIP"].unique()).intersection(set(acs_zip.GEOID.unique())))
         prev_zkeys_0 = mbggk_zkeys + mctgk_zkeys
         print(" ...Zip code")
-        mbz = mbz[~(mbz.index.isin(prev_zkeys_0)) &\
-                  (mbz["GEOID_ZIP"].isin(mbz_list))].reset_index(drop= False)
+        mbz = mbz[~(mbz.index.isin(prev_zkeys_0)) & \
+                  (mbz["GEOID_ZIP"].isin(mbz_list))].reset_index(drop=False)
         mbz_zkeys = list(mbz.index)
         mbz = mbz.merge(acs_zip,
-                        right_on ="GEOID",
+                        right_on="GEOID",
                         left_on="GEOID_ZIP").set_index(self.key)
         mbz["acs_source"] = "ZIP"
 
         # No Merge
         print(" ...No match")
-        prev_zkeys_1 = mbggk_zkeys + mctgk_zkeys + mbz_zkeys 
+        prev_zkeys_1 = mbggk_zkeys + mctgk_zkeys + mbz_zkeys
         nm = nm[~(nm.index.isin(prev_zkeys_1))]
         nm["acs_source"] = None
 
         print(" ...Merge")
-        data_out = pd.concat([mbggk, mctgk, mbz], sort = True)
-        data_out = pd.concat([data_out, nm], sort = True)
+        data_out = pd.concat([mbggk, mctgk, mbz], sort=True)
+        data_out = pd.concat([data_out, nm], sort=True)
         print(" ...Merging complete")
-        return(data_out)
+        return (data_out)
 
-    
-    def transform(self, input_data, save_table = False):
+    def transform(self, input_data, save_table=False):
         """
         Parameters
         ----------
@@ -133,32 +127,31 @@ class ACSModelPrep(BaseZRP):
         try:
             data = input_data.copy()
         except AttributeError:
-            data = load_file(input_data) 
+            data = load_file(input_data)
             print("Input data file is loaded")
-            
-        if "GEOID_ZIP" not in  data.columns:
+
+        if "GEOID_ZIP" not in data.columns:
             print("Generating Geo IDs")
             data["GEOID_ZIP"] = data["ZEST_ZIP"]
-            data["GEOID_CT"] = data["STATEFP"] + data["COUNTYFP"] + data["TRACTCE"] 
+            data["GEOID_CT"] = data["STATEFP"] + data["COUNTYFP"] + data["TRACTCE"]
             data["GEOID_BG"] = data["GEOID_CT"] + data["BLKGRPCE"]
-            
+
         file_list_z, file_list_c, file_list_b = acs_search(self.year,
                                                            self.span)
-        
+
         print("   ...loading ACS lookup tables")
         acs_bg = load_file(file_list_b[0])
         acs_ct = load_file(file_list_c[0])
         acs_zip = load_file(file_list_z[0])
-        
+
         print("   ... combining ACS & user input data")
         data_out = self.acs_combine(data,
                                     acs_bg,
                                     acs_ct,
                                     acs_zip)
-        
+
         if save_table:
             make_directory()
-            file_name = f"Zest_processed_data_.parquet" 
-            save_dataframe(data_out, self.out_path, file_name)          
-        return(data_out)
-      
+            file_name = f"Zest_processed_data_.parquet"
+            save_dataframe(data_out, self.out_path, file_name)
+        return (data_out)

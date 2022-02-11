@@ -20,51 +20,56 @@ import pickle
 import joblib
 import surgeo
 
+
 class BISGWrapper(BaseZRP):
     """Wrapper function for bisg"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        
+
     def fit(self):
         return self
-    
+
     def transform(self, data):
+        """
+        Returns proxies using the BISG algorithm
+        :param data: A pd.DataFrame of input data.
+        :return: A pd.DataFrame
+        """
         df = data.copy()
         df = df.reset_index().drop_duplicates(self.key)
         df = df.filter([self.last_name, self.zip_code, self.census_tract])
         bisg = surgeo.SurgeoModel()
-        bisg_results = bisg.get_probabilities(names  = df[self.last_name] ,  geo_df = df[self.zip_code].astype(int))
-        
-        combo = df.merge(bisg_results, 
-                           how="left", 
-                           left_on=[self.last_name, self.zip_code], 
-                           right_on=["name", "zcta5"]
-                          )
-        combo.drop(columns = ['zcta5', 'name'], inplace=True)
-        
-        combo.rename(columns = {
+        bisg_results = bisg.get_probabilities(names=df[self.last_name], geo_df=df[self.zip_code].astype(int))
+
+        combo = df.merge(bisg_results,
+                         how="left",
+                         left_on=[self.last_name, self.zip_code],
+                         right_on=["name", "zcta5"]
+                         )
+        combo.drop(columns=['zcta5', 'name'], inplace=True)
+
+        combo.rename(columns={
             'white': 'BISG_WHITE',
             'black': 'BISG_BLACK',
             'api': 'BISG_AAPI',
             'native': 'BISG_AIAN',
             'multiple': 'BISG_OTHER',
             'hispanic': 'BISG_HISPANIC'
-        }, inplace=True) 
-        
+        }, inplace=True)
+
         # Generate proxy at threshold
         subset = combo[['BISG_WHITE', 'BISG_BLACK', 'BISG_AAPI', 'BISG_AIAN', 'BISG_OTHER', 'BISG_HISPANIC'
-                       ]]
+                        ]]
         identifiedRaces = subset.idxmax(axis=1)
         identifiedRaces = identifiedRaces.astype(str).str.replace(
             "BISG_", "", 1)
         combo[self.race] = identifiedRaces
         combo['source_bisg'] = 1
-        if self.proxy =='labels':
+        if self.proxy == 'labels':
             proxies = combo[[self.race, "source_bisg"]]
-        if self.proxy =='labels':
-            proxies = combo[['BISG_WHITE', 'BISG_BLACK', 'BISG_AAPI', 'BISG_AIAN', 'BISG_OTHER', 'BISG_HISPANIC', "source_bisg"]]
+        if self.proxy == 'labels':
+            proxies = combo[
+                ['BISG_WHITE', 'BISG_BLACK', 'BISG_AAPI', 'BISG_AIAN', 'BISG_OTHER', 'BISG_HISPANIC', "source_bisg"]]
         proxies_out = proxies.copy()
-        return(proxies_out)
-
-
+        return (proxies_out)
