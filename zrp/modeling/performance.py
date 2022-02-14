@@ -4,7 +4,7 @@ from zrp.prepare.utils import load_file
 from zrp.prepare.preprocessing import set_id
 import pandas as pd
 import numpy as np
-import pycm
+from pycm import *
 import os
 import re
 

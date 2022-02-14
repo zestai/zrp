@@ -1,5 +1,4 @@
 from os.path import dirname, join, expanduser
-from .generate_bisg import *
 from .preprocessing import *
 from .geo_geocoder import *
 from .acs_mapper import *

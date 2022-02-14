@@ -47,7 +47,7 @@ class ZRP(BaseZRP):
                
         if self.bisg:
             bisg_data = prepared_data.copy()
-            bisg_data = bisg_data[~bisg_data.index.duplicated(keep='last')]
+            bisg_data = bisg_data[~bisg_data.index.duplicated(keep='first')]
             
             bisgw = BISGWrapper()
             full_bisg_proxies = bisgw.transform(bisg_data)
