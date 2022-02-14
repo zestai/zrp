@@ -48,6 +48,7 @@ def norm_na(data, na_values):
                    "^\\s*$"] 
 
     if na_values:
+        word_border = "\\b"
         na_values = [word_border + s + word_border for s in na_values]
         na_values = na_values + base_na_list
     else:
