@@ -63,7 +63,7 @@ ___________
 
 To get started using the ZRP, first ensure the download is complete (as described above) and xgboost == 1.0.2 
 
-Next, check out the guide in the examples folder. Clone the repo in order to obtain the example notebooks and data; this is not provided in the pip installable package.
+Next, check out the guides in the `examples <./examples>`_ folder. Clone the repo in order to obtain the example notebooks and data; this is not provided in the pip installable package. If you're experiencing issues, first consult our `common issues guide <./common_issues.rst>`_.
 
 
 Validation
