@@ -1,23 +1,17 @@
 import pandas as pd
 import os
+
+
 class BaseZRP():
     """
     Prepares data to generate race & ethnicity proxies
     
-    
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-
-    state_mapping: dictionary
-        dictionary mapping state names & abbreviations
     key: str 
         Key to set as index. If not provided, a key will be generated.
-        
     first_name: str
         Name of first name column
-        
     middle_name: str
         Name of middle name column
     last_name: str
@@ -36,7 +30,6 @@ class BaseZRP():
         Name of census tract column
     support_files_path:
         File path with support data
-
     street_address_2: str, optional
         Name of additional address column
     name_prefix: str, optional
@@ -49,7 +42,11 @@ class BaseZRP():
         Input data file path
     geocode: bool
         Whether to geocode
-    bisg=True
+    race: str
+        Name of race column
+    proxy: str
+        Type of proxy to return, default is race probabilities
+    bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
         Whether to return a readout
@@ -57,9 +54,7 @@ class BaseZRP():
         Number of jobs in parallel
     """
     
-   
-    
-    def __init__(self, support_files_path="data/processed", key="ZEST_KEY", first_name="first_name", middle_name="middle_name", last_name="last_name", house_number="house_number", street_address="street_address", city="city", state="state", zip_code="zip_code", race='race', proxy="probs", census_tract= None, street_address_2=None, name_prefix=None, name_suffix=None, na_values = None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=49, year="2019", span ="5", runname="test"):
+    def __init__(self, support_files_path = "data/processed", key = "ZEST_KEY", first_name = "first_name", middle_name = "middle_name", last_name = "last_name", house_number = "house_number", street_address = "street_address", city = "city", state = "state", zip_code = "zip_code", race = 'race', proxy = "probs", census_tract =  None, block_group = None, street_address_2 = None, name_prefix = None, name_suffix = None, na_values = None, file_path = None, geocode = True, bisg = True, readout = True, n_jobs = -1, year = "2019", span  = "5", runname = "test"):
         self.key = key
         self.first_name = first_name
         self.middle_name =  middle_name
@@ -72,16 +67,17 @@ class BaseZRP():
         self.state = state
         self.zip_code = zip_code
         self.census_tract = census_tract
+        self.block_group = block_group
         self.file_path = file_path
         self.support_files_path = support_files_path
         self.na_values = na_values
         self.geocode = geocode
         self.readout = readout
-        self.bisg=bisg
+        self.bisg = bisg
         self.proxy = proxy
-        self.race= race
+        self.race = race
         self.n_jobs = n_jobs
-        self.year= year
+        self.year = year
         self.span = span
         self.runname = runname
         if file_path:
@@ -90,7 +86,9 @@ class BaseZRP():
             self.out_path = "artifacts"
 
         super().__init__()
+        
     def fit():
         pass
+    
     def transform():
         pass

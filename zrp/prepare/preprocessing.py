@@ -10,6 +10,8 @@ import json
 import sys
 import os
 import re
+from zrp.validate import *
+
 
 def norm_na(data, na_values):
     """
@@ -17,7 +19,7 @@ def norm_na(data, na_values):
     
     Parameters
     ----------
-    data: dataframe
+    data: pd.DataFrame
         DataFrame to make changes to 
     na_values: list
         List of missing values to replace
@@ -48,6 +50,7 @@ def norm_na(data, na_values):
                    "^\\s*$"] 
 
     if na_values:
+        word_border = "\\b"
         na_values = [word_border + s + word_border for s in na_values]
         na_values = na_values + base_na_list
     else:
@@ -67,7 +70,7 @@ def set_id(data, key):
     
     Parameters
     ----------
-    data: dataframe
+    data: pd.DataFrame
         DataFrame to make changes to 
     key: str
         Key to set as index
@@ -98,7 +101,7 @@ def reduce_whitespace(data):
     
     Parameters
     ----------
-    data: dataframe
+    data: pd.DataFrame
         DataFrame to make changes to 
     """
     return data.apply(lambda x: x.str.strip().str.replace(" +", " ", regex=True))
@@ -110,7 +113,7 @@ def replicate_address(data, i, street_suffix_mapping, unit_mapping):
     
     Parameters
     ----------
-    data: dataframe
+    data: pd.DataFrame
        ACS dataFrame to make changes to 
     street_address: str
        Name of street address column 
@@ -151,7 +154,16 @@ def replicate_address(data, i, street_suffix_mapping, unit_mapping):
 
 
 def address_mining(data, i):
-    """address mining"""
+    """
+    Cleans street addresses
+
+    Parameters
+    ----------
+    data: pd.DataFrame
+        DataFrame to make changes to 
+    i: int
+        Iteration variable
+    """
     data[i]  = re.sub("[^A-Za-z0-9\\s]",
                                    "",
                                    re.sub("[^A-Za-z0-9']",
@@ -175,7 +187,7 @@ class HandleTracts():
         """
         Parameters
         ----------
-        data: dataframe
+        data: pd.DataFrame
            ACS dataFrame to make changes to 
         """
         if not isinstance(data, pd.DataFrame):
@@ -192,24 +204,17 @@ class HandleTracts():
         return(acs_ct, acs_zip)
 
     
-class  LongProcesStrings():
+class LongProcesStrings():
     """
     ProcesStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
     
     
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-        
-    state_mapping: dictionary
-        dictionary mapping state names & abbreviations
     key: str 
         Key to set as index. If not provided, a key will be generated.
-        
     first_name: str
         Name of first name column
-        
     middle_name: str
         Name of middle name column
     last_name: str
@@ -228,8 +233,6 @@ class  LongProcesStrings():
         Name of census tract column
     support_files_path:
         File path with support data
-    step:
-        Indicator of step
     street_address_2: str, optional
         Name of additional address column
     name_prefix: str, optional
@@ -242,7 +245,11 @@ class  LongProcesStrings():
         Input data file path
     geocode: bool
         Whether to geocode
-    bisg=True
+    race: str
+        Name of race column
+    proxy: str
+        Type of proxy to return, default is race probabilities
+    bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
         Whether to return a readout
@@ -337,7 +344,7 @@ class  LongProcesStrings():
                                      (data[self.zip_code].str.contains("None")),
                                       None,
                                       data[self.zip_code].apply(lambda x: x.zfill(5)))
-            
+            data[self.zip_code] = data[self.zip_code].astype(str).str[:5]       
             street_addr_dict = dict(zip(data.index, data[self.street_address])) 
             
             rep_addr_results = Parallel(n_jobs = self.n_jobs, prefer="threads", verbose=1)(delayed(replicate_address)(street_addr_dict, i, street_suffix_mapping, unit_mapping) for i in tqdm(list(data.index)))
@@ -367,7 +374,6 @@ class  LongProcesStrings():
             
         print("   Formatting P2")
         data = norm_na(data, self.na_values)
-        data = data.astype(str)
         data = reduce_whitespace(data)
         return data
 
@@ -378,8 +384,8 @@ def replicate_address_2(data, street_address, street_suffix_mapping, unit_mappin
     
     Parameters
     ----------
-    data: dataframe
-       ACS dataFrame to make changes to 
+    data: pd.DataFrame
+        DataFrame to make changes to 
     street_address: str
        Name of street address column 
     street_suffix_mapping: dict
@@ -407,7 +413,7 @@ def replicate_address_2(data, street_address, street_suffix_mapping, unit_mappin
                            data
                           ], axis=0)
     dataout = dataout.drop_duplicates()
-    print(f"     Address dataframe expansion is complete! (n={len(dataout)})")
+    print(f"         Address dataframe expansion is complete! (n={len(dataout)})")
     return(dataout)
 
 
@@ -417,16 +423,15 @@ def replicate_house_number(data, house_number):
     
     Parameters
     ----------
-    data: dataframe
-       ACS dataFrame to make changes to 
+    data: pd.DataFrame
+        DataFrame to make changes to 
     house_number: str
        Name of street address column 
     """
     # base
-    data = data.reset_index(drop=False)
+    data = data.reset_index(drop=True)
     print("         ...Base")
     df_base =  data.copy()     # base is complete, containing the original record (1)
-#     data[house_number] = np.where(data[house_number]=='nan', None, data[house_number])
     print("         ...Number processing...")
     data[house_number].apply(lambda x: re.sub("[^0-9]",\
                                                      "",\
@@ -435,27 +440,20 @@ def replicate_house_number(data, house_number):
                            data
                           ], axis=0)
     dataout = dataout.drop_duplicates()
-    print(f"     Address dataframe expansion is complete! (n={len(dataout)})")
+    print(f"         House number dataframe expansion is complete! (n={len(dataout)})")
     return(dataout)
 
        
-class  ProcessStrings(BaseZRP):
+class ProcessStrings(BaseZRP):
     """
     ProcessStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
     
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-        
-    state_mapping: dictionary
-        dictionary mapping state names & abbreviations
     key: str 
         Key to set as index. If not provided, a key will be generated.
-        
     first_name: str
         Name of first name column
-        
     middle_name: str
         Name of middle name column
     last_name: str
@@ -486,7 +484,11 @@ class  ProcessStrings(BaseZRP):
         Input data file path
     geocode: bool
         Whether to geocode
-    bisg=True
+    race: str
+        Name of race column
+    proxy: str
+        Type of proxy to return, default is race probabilities
+    bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
         Whether to return a readout
@@ -498,22 +500,46 @@ class  ProcessStrings(BaseZRP):
         super().__init__(*args, **kwargs)
         
             
-    def fit(self):
-        pass
-    
-    
-    def reduce_set(self, data):
-        remove_cols = list(set(data.columns) - set([self.key,  self.first_name, self.middle_name, self.last_name, self.house_number, self.street_address, self.street_address_2, self.city, self.state, self.zip_code, self.census_tract]))
-        return( data.drop(remove_cols, axis = 1))
-    
+    def fit(self, data):
+        data_cols = list(data.columns)
+        print("   [Start] Validating input data")  
+        if self.census_tract in data_cols:
+            self.required_cols = [self.first_name, self.middle_name, self.last_name, self.census_tract]
+        elif (self.census_tract in data_cols) & (self.block_group in data_cols):
+            self.required_cols = [self.first_name, self.middle_name, self.last_name, self.census_tract, self.block_group]
+        elif (self.zip_code in data_cols) & (self.geocode==True):
+            self.required_cols = [self.first_name, self.middle_name, self.last_name, self.zip_code, self.house_number, self.street_address, self.city, self.state]
+        elif (self.zip_code in data_cols) & (self.geocode==False):
+            self.required_cols = [self.first_name, self.middle_name, self.last_name, self.zip_code]
+        val_na = is_missing(data, self.required_cols)
+        if val_na:
+            assert True, f"     Missing required data {val_na}"
+        validate = ValidateInput()
+        validate.fit()
+        validators_in = validate.transform(data)
+        save_json(validators_in, self.out_path, "input_validator.json")  
+        print("   [Completed] Validating input data")  
+        return self
+
     
     def transform(self, data_in, replicate=False):
+        """
+        Processes general data
+
+        Parameters
+        ----------
+        data_in: pd.DataFrame
+            DataFrame to make changes to 
+        replicate: bool
+            Indicator to process address components
+        """
+        
         # Load Data
         try:
             data = data_in.copy()
         except AttributeError:
             data = load_file(self.file_path)
-            
+        
         data_cols =  data.columns
         data = set_id(data, self.key)
         
@@ -528,9 +554,10 @@ class  ProcessStrings(BaseZRP):
         data = data.apply(lambda x: x.str.upper())
         
         data = reduce_whitespace(data)
-        
-        na_dict =  {"^\\s*$": None} # new added
-        data = data.replace(na_dict, regex=True) # new added
+        na_dict =  {"^\\s*$": None,
+                    "^NAN$": None,
+                    "^NONE$": None}
+        data = data.replace(na_dict, regex=True)          
         
         # Remove/replace special characters
         for col in numeric_cols:
@@ -555,44 +582,51 @@ class  ProcessStrings(BaseZRP):
         
 class  ProcessACS(BaseZRP):
     """
-    ProcessStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
-    """
+    All user data is processed with additional processing operations for geo-specific and American Community Survey data.
+
+    Parameters
+    ----------
+    out_path: str
+        Path to store output artifacts
+    """    
     def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
         
             
-    def fit(self):
-        pass
+    def fit(self, data):
+        data_cols = list(data.columns)
+        validate = ValidateGeocoded()
+        validate.fit()
+        acs_validator = validate.transform(data)
+        save_json(acs_validator, self.out_path, "input_acs_validator.json")
+        return self
 
 
     def transform(self, data):
         """
+        Processes ACS data 
+
+        Parameters
+        ----------
+        data_in: pd.DataFrame
+            DataFrame to make changes to 
         """
         data = reduce_whitespace(data)
         data = data.replace({'\\bN\\b': None}, regex=True) # Note: 800+ columns
         data = data.reset_index(drop=False)
-        data = data.astype(str)
         return(data)
     
     
 class  ProcessGeo(BaseZRP):
     """
-    ProcessStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
-    
-    
+    All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
+
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-        
-    state_mapping: dictionary
-        dictionary mapping state names & abbreviations
     key: str 
         Key to set as index. If not provided, a key will be generated.
-        
     first_name: str
         Name of first name column
-        
     middle_name: str
         Name of middle name column
     last_name: str
@@ -623,7 +657,11 @@ class  ProcessGeo(BaseZRP):
         Input data file path
     geocode: bool
         Whether to geocode
-    bisg=True
+    race: str
+        Name of race column
+    proxy: str
+        Type of proxy to return, default is race probabilities
+    bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
         Whether to return a readout
@@ -634,13 +672,43 @@ class  ProcessGeo(BaseZRP):
         super().__init__(*args, **kwargs)
         
             
-    def fit(self):
-        pass
+    def fit(self, data):
+        data_cols = list(data.columns)
+        print("   [Start] Validating input geo data")  
+        if self.census_tract in data_cols:
+            self.required_cols = [self.census_tract]
+        elif (self.census_tract in data_cols) & (self.block_group in data_cols):
+            self.required_cols = [self.census_tract, self.block_group]
+        elif (self.zip_code in data_cols) & (self.geocode==True):
+            self.required_cols = [self.zip_code, self.house_number, self.street_address, self.city, self.state]
+        val_na = is_missing(data, self.required_cols)
+        val_na = is_missing(data, self.required_cols)
+        if val_na:
+            assert True, f"Missing required data {val_na}"
+        geo_validate = ValidateGeo()
+        geo_validate.fit()
+        geo_validators_in = geo_validate.transform(data)
+        save_json(geo_validators_in, self.out_path, "input_geo_validator.json") 
+        print("   [Completed] Validating input geo data")  
+        
+        return self
 
 
     def transform(self, data, processed, replicate=False):
+        """
+        Processes geo data 
+
+        Parameters
+        ----------
+        data: pd.DataFrame
+            DataFrame to make changes to 
+        processed: bool
+            Indicator is the data was previously cleaned & processed 
+        replicate: bool
+            Indicator to process compenents of the address
+        """        
         curpath = dirname(__file__)
-        print("   [Start] Processing geo data")       
+        print("   [Start] Processing geo data")  
         # Load Data
         if not processed:
             data_cols =  data.columns
@@ -657,12 +725,15 @@ class  ProcessGeo(BaseZRP):
             data = data.apply(lambda x: x.str.upper())
             
             data = reduce_whitespace(data)
+            print("")
+            print(data.state.unique())
             
             na_dict =  {"^\\s*$": None,
                        "^NAN$": None,
-                       "^None$": None} # new added
-            data = data.replace(na_dict, regex=True) # new added   
-            
+                       "^NONE$": None}
+            data = data.replace(na_dict, regex=True)   
+            print("")
+            print(data.state.unique())
             # Remove/replace special characters
             for col in numeric_cols:
                 data[col] = data[col].apply(lambda x: re.sub("[^0-9]",\
@@ -678,6 +749,7 @@ class  ProcessGeo(BaseZRP):
                                                                   re.sub("[^A-Za-z']",
                                                                          " ",
                                                                          str(x))))
+        
         data_path = join(curpath, f'../data/processed')
         state_mapping, street_suffix_mapping, directionals_mapping, unit_mapping = load_mappings(data_path)
         
@@ -701,6 +773,8 @@ class  ProcessGeo(BaseZRP):
                                  (data[self.zip_code].str.contains("None")),
                                   None,
                                   data[self.zip_code].apply(lambda x: x.zfill(5)))
+        data[self.zip_code] = data[self.zip_code].astype(str).str[:5]        
+        
         if replicate:
             print("      ...replicating address")
             data = replicate_address_2(data, self.street_address, street_suffix_mapping, unit_mapping)  
@@ -708,8 +782,8 @@ class  ProcessGeo(BaseZRP):
         
         print("      ...formatting")
         addr_cols = list(set(list(data.columns)).intersection(set([self.zip_code, self.census_tract, self.house_number, self.city, self.state, self.street_address])))
-        spec_cols =  addr_cols
-        data = data.astype(str)
+
+
         data = reduce_whitespace(data)
         print("   [Completed] Processing geo data")
         return(data)
@@ -717,22 +791,13 @@ class  ProcessGeo(BaseZRP):
     
 class  ProcessGLookUp(BaseZRP):
     """
-    ProcessStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
-    
-    
+    All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-        
-    state_mapping: dictionary
-        dictionary mapping state names & abbreviations
     key: str 
         Key to set as index. If not provided, a key will be generated.
-        
     first_name: str
         Name of first name column
-        
     middle_name: str
         Name of middle name column
     last_name: str
@@ -749,6 +814,8 @@ class  ProcessGLookUp(BaseZRP):
         Name of zip or postal code column
     census_tract: str
         Name of census tract column
+    support_files_path:
+        File path with support data
     street_address_2: str, optional
         Name of additional address column
     name_prefix: str, optional
@@ -761,7 +828,11 @@ class  ProcessGLookUp(BaseZRP):
         Input data file path
     geocode: bool
         Whether to geocode
-    bisg=True
+    race: str
+        Name of race column
+    proxy: str
+        Type of proxy to return, default is race probabilities
+    bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
         Whether to return a readout
@@ -779,10 +850,20 @@ class  ProcessGLookUp(BaseZRP):
         
             
     def fit(self):
-        pass
+        return self
 
 
     def transform(self, data, state_mapping):
+        """
+        Processes geo lookup table data 
+
+        Parameters
+        ----------
+        data: pd.DataFrame
+            DataFrame to make changes to 
+        state_mapping: dict
+            Mapping of state codes and names to standard abbreviations 
+        """               
         print("   [Start] Processing lookup data")
         # Load Data
         data_cols =  data.columns
@@ -790,23 +871,23 @@ class  ProcessGLookUp(BaseZRP):
                                   self.census_tract,
                                   self.block_group,
                                   self.county,
-                                  self.house_number
                                  ]).intersection(set(data_cols)))
-        data = data.apply(lambda x: x.astype(str).str.upper() if x.dtype==str else x)
+        data = data.astype(str)
+        data = data.apply(lambda x: x.str.upper())
+        
         data = reduce_whitespace(data)
-
+        na_dict =  {"^\\s*$": None,
+                    "^NAN$": None,
+                    "^NONE$": None} 
+        data = data.replace(na_dict, regex=True)
+        
         # Remove/replace special characters
         for col in numeric_cols:
             data[col] = data[col].apply(lambda x: re.sub("[^0-9]",\
                                                      "",\
                                                     str(x))) 
 
-        # State
-        data[self.state] = data[self.state].replace(state_mapping)
-        data[self.zip_code] = np.where((data[self.zip_code].isna()) |\
-                                 (data[self.zip_code].str.contains("None")),
-                                  None,
-                                  data[self.zip_code].apply(lambda x: x.zfill(5)))
+      
         data[self.census_tract] = np.where((data[self.census_tract].isna()) |\
                                  (data[self.census_tract].str.contains("None")),
                                   None,
@@ -825,5 +906,10 @@ class  ProcessGLookUp(BaseZRP):
         data[spec_cols] = norm_na(data[spec_cols], self.na_values)
         data = reduce_whitespace(data)
         print("   [Completed] Processing lookup data")
+        
+        data_cols = list(data.columns)
+        validate = ValidateInput()
+        validate.fit()
+        validator_in = validate.transform(data) 
+        print(validator_in)
         return(data)
-    

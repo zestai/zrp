@@ -4,6 +4,7 @@ from zrp.prepare.geo_geocoder import *
 from zrp.prepare.acs_mapper import *
 from zrp.prepare.base import BaseZRP
 from zrp.prepare.utils import *
+from zrp.validate import *
 import pandas as pd
 import numpy as np
 import warnings
@@ -13,10 +14,10 @@ import tqdm
 import sys
 import os
 import re
-import pycm
 import pickle
 import joblib
 import surgeo
+import xgboost
 
 
 
@@ -24,26 +25,16 @@ from zrp.modeling import src
 from zrp.modeling.src.app_preprocessor import HandleCompoundNames
 from zrp.modeling.src.acs_scaler import CustomRatios
 from zrp.modeling.src.app_fe import AppFeatureEngineering, NameAggregation
-from zrp.modeling.src.set_key import SetKey
 
 
 class PredictPass(BaseZRP):
     """
     Generates proxies
-    
-    
+
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-    key: str 
-        Key to set as index. If not provided, a key will be generated.
-    race: str
-        Name of race column 
-    proxy_data: str, pd.Series, or pd.DataFrame
-        File path to proxy data
-    ground_truth: str, pd.Series, or pd.DataFrame
-        File path to ground truth data
+    pipe_path: str
+        Folder path to directory containing pipeline
     """
 
     def __init__(self, *args, **kwargs):
@@ -54,16 +45,23 @@ class PredictPass(BaseZRP):
         return self
     
     def transform(self, input_data):
-        
+        """
+        Processes input data and generates BISG predictions.
+
+        Parameters
+        -----------
+        input_data: pd.DataFrame
+            Dataframe to be transformed
+        """
         # Load Data
         try:
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.proxy_data)
             
-        if self.proxy =='labels':
+        if self.proxy == 'labels':
             proxies = pd.DataFrame({'race' : None}, index = fe_data.index)
-        if self.proxy =='probs':
+        if self.proxy == 'probs':
             proxies = pd.DataFrame({"AAPI":None, "AIAN":None, "BLACK":None,
                                     "HISPANIC": None, "WHITE": None}, index = fe_data.index)
         return(proxies) 
@@ -83,23 +81,43 @@ def validate_drop(data):
 
 
 class BISGWrapper(BaseZRP):
-    """Wrapper function for bisg"""
+    """
+    Wrapper function for bisg
+
+    Generates proxies using BISG algorithm.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
         
     def fit(self, data):
-        if self.last_name not in data.columns:
+        """
+
+        Parameters
+        -----------
+        input_data: pd.DataFrame
+            Dataframe to be transformed
+        """        
+        if (self.last_name not in data.columns):
             raise ValueError('Last name needs to be provided when initializing this class. Please provide last name data in a column named "last_name" or set the custom name of the last name column in the data')
         if self.zip_code not in data.columns:
             raise ValueError('Zip or postal code name needs to be provided when initializing this class. Please provide zip code data in a column named "zip_ode" or set the custom name of the zip code column in the data')
         return self
     
     def transform(self, data):
+        """
+        Processes input data and generates BISG predictions.
+
+        Parameters
+        -----------
+        input_data: pd.DataFrame
+            Dataframe to be transformed
+        """        
         df = data.copy()
         df = df[~df.index.duplicated(keep='first')]
 
         df = df.filter([self.last_name, self.zip_code, self.census_tract])
+        df[self.zip_code] = np.where((df[self.zip_code] == "") | (df[self.zip_code] == " ") | (df[self.zip_code] == None) | (df[self.zip_code].str.len()<5), "99999", df[self.zip_code])
         
         bisg = surgeo.SurgeoModel()
         bisg_results = bisg.get_probabilities(names  = df[self.last_name].reset_index(drop=True) ,  geo_df = df[self.zip_code].astype(int))
@@ -120,36 +138,27 @@ class BISGWrapper(BaseZRP):
         }, inplace=True) 
         combo = combo.set_index(self.key)
         # Generate proxy at threshold
-        subset = combo[['WHITE', 'BLACK', 'AAPI', 'AIAN', 'OTHER', 'HISPANIC'
+        subset = combo[['WHITE', 'BLACK', 'AAPI', 'AIAN', 'HISPANIC'
                        ]]
         identifiedRaces = subset.idxmax(axis=1)
         combo[self.race] = identifiedRaces
         combo['source_bisg'] = 1
-        if self.proxy =='labels':
+        if self.proxy == 'labels':
             proxies = combo[[self.race, "source_bisg"]]
-        if self.proxy =='probs':
-            proxies = combo[['WHITE', 'BLACK', 'AAPI', 'AIAN', 'OTHER', 'HISPANIC', self.race, "source_bisg"]]            
+        if self.proxy == 'probs':
+            proxies = combo[['WHITE', 'BLACK', 'AAPI', 'AIAN', 'HISPANIC', "source_bisg"]]            
         return(proxies)
 
 
 
 class ZRP_Predict_ZipCode(BaseZRP):
     """
-    Generates proxies
-    
-    
+    Generates proxies using model trained on zip code features.
+
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-    key: str 
-        Key to set as index. If not provided, a key will be generated.
-    race: str
-        Name of race column 
-    proxy_data: str, pd.Series, or pd.DataFrame
-        File path to proxy data
-    ground_truth: str, pd.Series, or pd.DataFrame
-        File path to ground truth data
+    pipe_path: str
+        Folder path to directory containing pipeline
     """
 
     def __init__(self, pipe_path, *args, **kwargs):
@@ -160,6 +169,15 @@ class ZRP_Predict_ZipCode(BaseZRP):
         return self
     
     def transform(self, input_data):
+        """
+        Processes input data and generates ZRP proxy predictions.
+
+        Parameters
+        -----------
+        input_data: pd.DataFrame
+            Dataframe to be transformed
+        """
+        
         src_path = os.path.join(self.pipe_path, "zip_code")
         sys.path.append(src_path)        
         # Load Data
@@ -174,14 +192,15 @@ class ZRP_Predict_ZipCode(BaseZRP):
         model = pd.read_pickle(os.path.join(src_path,"model.pkl") )
         pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl") )
         
+        
         data = validate_case(data, self.key, self.last_name)
         fe_data = pipe.transform(data)
         fe_data = validate_drop(fe_data)
         
-        if self.proxy =='labels':
+        if self.proxy == 'labels':
             proxies = pd.DataFrame({'race' : model.predict(fe_data)}, index = fe_data.index)
        
-        if self.proxy =='probs':
+        if self.proxy == 'probs':
             proxies = pd.DataFrame(model.predict_proba(fe_data), index = fe_data.index)
             proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
         proxies['source_zip_code'] = 1
@@ -191,21 +210,12 @@ class ZRP_Predict_ZipCode(BaseZRP):
 
 class ZRP_Predict_BlockGroup(BaseZRP):
     """
-    Generates proxies
-    
-    
+    Generates proxies using model trained on block group features.
+
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-    key: str 
-        Key to set as index. If not provided, a key will be generated.
-    race: str
-        Name of race column 
-    proxy_data: str, pd.Series, or pd.DataFrame
-        File path to proxy data
-    ground_truth: str, pd.Series, or pd.DataFrame
-        File path to ground truth data
+    pipe_path: str
+        Folder path to directory containing pipeline
     """
 
     def __init__(self, pipe_path, *args, **kwargs):
@@ -216,6 +226,15 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         return self
     
     def transform(self, input_data):
+        """
+        Processes input data and generates ZRP proxy predictions.
+
+        Parameters
+        -----------
+        input_data: pd.DataFrame
+            Dataframe to be transformed
+        """        
+        
         src_path = os.path.join(self.pipe_path,"block_group")
         sys.path.append(src_path)
         
@@ -226,7 +245,7 @@ class ZRP_Predict_BlockGroup(BaseZRP):
             data = load_file(self.proxy_data)
             
         numeric_cols = list(data.filter(regex='^B|^C16').columns)
-        data[numeric_cols] = data[numeric_cols].apply(pd.to_numeric, errors='coerce') 
+        data[numeric_cols] = data[numeric_cols].apply(pd.to_numeric, errors='coerce')
         
         model = pd.read_pickle(os.path.join(src_path,"model.pkl") )
         pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl") )
@@ -235,10 +254,10 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         fe_data = pipe.transform(data)
         fe_data = validate_drop(fe_data)
         
-        if self.proxy =='labels':
+        if self.proxy == 'labels':
             proxies = pd.DataFrame({'race' : model.predict(fe_data)}, index = fe_data.index)
        
-        if self.proxy =='probs':
+        if self.proxy == 'probs':
             proxies = pd.DataFrame(model.predict_proba(fe_data), index = fe_data.index)
             proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
         proxies['source_block_group'] = 1
@@ -249,21 +268,12 @@ class ZRP_Predict_BlockGroup(BaseZRP):
 
 class ZRP_Predict_CensusTract(BaseZRP):
     """
-    Generates proxies
-    
-    
+    Generates proxies using model trained on census tract features.
+
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
-    key: str 
-        Key to set as index. If not provided, a key will be generated.
-    race: str
-        Name of race column 
-    proxy_data: str, pd.Series, or pd.DataFrame
-        File path to proxy data
-    ground_truth: str, pd.Series, or pd.DataFrame
-        File path to ground truth data
+    pipe_path: str
+        Folder path to directory containing pipeline
     """
 
     def __init__(self, pipe_path, *args, **kwargs):
@@ -274,6 +284,14 @@ class ZRP_Predict_CensusTract(BaseZRP):
         return self
     
     def transform(self, input_data):
+        """
+        Processes input data and generates ZRP proxy predictions.
+
+        Parameters
+        -----------
+        input_data: pd.DataFrame
+            Dataframe to be transformed
+        """        
         src_path = os.path.join(self.pipe_path,"census_tract")
         sys.path.append(src_path)
         
@@ -293,40 +311,61 @@ class ZRP_Predict_CensusTract(BaseZRP):
         fe_data = pipe.transform(data)
         fe_data = validate_drop(fe_data)
         
-        if self.proxy =='labels':
+        if self.proxy == 'labels':
             proxies = pd.DataFrame({'race' : model.predict(fe_data)}, index = fe_data.index)
-        if self.proxy =='probs':
+        if self.proxy == 'probs':
             proxies = pd.DataFrame(model.predict_proba(fe_data), index = fe_data.index)
             proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
         proxies['source_census_tract'] = 1
         return(proxies)
     
-    
-
 
 
 class ZRP_Predict(BaseZRP):
     """
-    Generates proxies
-    
-    
+    Generates race proxies.
+    Attempts to predict on census tract, then block group, then zip code based on which level ACS data is found for. If
+    Geo level data is unattainable, the BISG proxy is computed. No prediction returned if BISG cannot be computed either.
+
     Parameters
     ----------
-    data: dataframe
-        dataframe with processed user data
     pipe_path: str
         Folder path to directory containing pipeline
+    proxy: str
+        Type of proxy to return, default is race probabilities          
     """
 
     def __init__(self, pipe_path, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pipe_path = pipe_path
+        self.census_tract = 'GEOID_CT'
+        self.block_group = 'GEOID_BG'
+        self.zip_code = 'GEOID_ZIP'
         
         
-    def fit(self):
+    def fit(self, data):
+        assert xgboost.__version__ == "1.0.2", "XGBoost version does not match requirements, required version is 1.0.2"  
+        data_cols =  list(data.columns)
+        self.required_cols = [self.first_name, self.middle_name, self.last_name, "GEOID", "B01003_001"]
+        val_na = is_missing(data, self.required_cols)
+        if val_na:
+            assert True, f"Missing required data {val_na}"        
+
+        validator = ValidateInput()
+        validator.fit()
+        validator_in = validator.transform(data)
+        save_json(validator_in, self.out_path, "input_predict_validator.json")
         return self
     
     def transform(self, input_data, save_table=True):
+        """
+        Processes input data and generates ZRP proxy predictions.
+
+        Parameters
+        -----------
+        input_data: pd.DataFrame
+            Dataframe to be transformed
+        """        
         # Load Data
         try:
             data = input_data.copy()
@@ -337,7 +376,6 @@ class ZRP_Predict(BaseZRP):
         flb = load_json(f'{cur_path}/feature_list_bg.json')
         flc = load_json(f'{cur_path}/feature_list_ct.json')
         flz = load_json(f'{cur_path}/feature_list_zp.json')
-
 
         if 'acs_source' in data.columns:    
             df_0 = data[data['acs_source'] == 'BG']
@@ -350,9 +388,6 @@ class ZRP_Predict(BaseZRP):
             keys_2 = keys_1 + list(df_2.index.values)
             df_3 = data[~(data.index.isin(keys_2))
                                 & (data['acs_source'].isna())]
-            keys_3 = keys_2 + list(df_3.index.values)
-            df_4 = data[~(data.index.isin(keys_3)) 
-                            & (data['acs_source'].isna())]
         else:
             raise KeyError("Processed data is required for ZRP_Predict. Please use EnginetoPredict if supplying feature engineered data to generate predictions" )
             
@@ -373,13 +408,15 @@ class ZRP_Predict(BaseZRP):
             bisgw = BISGWrapper()
             bisgw.fit(df_3)
             out_3 = bisgw.transform(df_3)
-            out_list.append(out_3)    
-        if not df_4.empty:
-            pass_o = PredictPass()
-            out_4 = pass_o.transform(df_4)
-            out_list.append(out_4)    
-        
+            out_list.append(out_3)  
+            
         proxies_out = pd.concat(out_list)
+        source_cols = list(set(proxies_out.columns).intersection(set([
+            'source_block_group', 'source_census_tract',
+            'source_zip_code', 'source_bisg'])))
+        proxies_out[source_cols] = proxies_out[source_cols].fillna(0)
+        proxies_out = proxies_out.sort_values(['source_block_group', 'source_census_tract',
+            'source_zip_code', 'source_bisg'])
         
         if save_table:
             make_directory()
@@ -394,18 +431,17 @@ class ZRP_Predict(BaseZRP):
     
 class FEtoPredict(BaseZRP):
     """
-    Generates proxies
-    
-    
+    Generates proxies from feature engineered data.
+
     Parameters
     ----------
-    data: dataframe
-        dataframe with processed user data
     pipe_path: str
         Folder path to directory containing pipeline
     pip_type: str, (default='census_tract')
         Type of pipeline that generated the engineered data.
         Options: 'block_group', 'census_tract', or 'zip_code'
+    proxy: str
+        Type of proxy to return, default is race probabilities    
     """
 
     def __init__(self, pipe_path, pipe_type='census_tract', *args, **kwargs):
@@ -418,21 +454,25 @@ class FEtoPredict(BaseZRP):
         return self
     
     def transform(self, input_data, save_table=True):
+        """
+        Processes input data and generates ZRP proxy predictions.
 
-        # Load Data
-        try:
-            fe_data = input_data.copy()
-        except AttributeError:
-            fe_data = load_file(self.proxy_data)
-            
+        Parameters
+        -----------
+        input_data: pd.DataFrame
+            Dataframe to be transformed
+        """         
         model = pd.read_pickle(os.path.join(self.pipe_path, f"{pipe_type}/model.pkl") )
-         
-        if self.proxy =='labels':
+        # Load Data
+        assert not input_data.empty, "Feature engineered data is empty or missing. Please provide the feature engineered dataas `input_data` to generate predictions."
+        fe_data = input_data.copy()
+            
+        if self.proxy == 'labels':
             proxies = pd.DataFrame({'race' : model.predict(fe_data)}, index=fe_data.index)
-        if self.proxy =='probs':
+        if self.proxy == 'probs':
             proxies = pd.DataFrame(model.predict_proba(fe_data), index=fe_data.index)
             proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
-        proxies['source_census_tract'] = 1        
+        proxies[f'source_{pipe_type}'] = 1        
         
         proxies_out = proxies.copy()
         

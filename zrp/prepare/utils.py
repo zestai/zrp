@@ -8,26 +8,78 @@ import json
 import fiona
     
 def load_json(path):
+    """
+    Load json files
+    
+    Parameters
+    ----------
+    path: str
+        Filepath of json file
+    """
     with open(path, "r") as infile:
         data = json.load(infile)
     return data
 
 def save_json(data, path, file_name):
+    """
+    Save json files
+    
+    Parameters
+    ----------
+    data: list or dict
+        Data to save to json
+    path: str
+        Filepath of where to store json
+    file_name: str
+        Name of file
+    """    
     with open(os.path.join(path, file_name), "w") as outfile:
         json.dump(data, outfile)
         
 def save_dataframe(data, path, file_name):
+    """
+    Save dataframe as parquet
+    
+    Parameters
+    ----------
+    data: pd.DataFrame
+        Dataframe to save
+    path: str
+        Filepath of where to store json
+    file_name: str
+        Name of file
+    """      
     data.to_parquet(os.path.join(path, file_name))
     return(print("Output saved"))
 
 def save_feather(data, path, file_name):
+    """
+    Save dataframe as feather file
+    
+    Parameters
+    ----------
+    data: pd.DataFrame
+        Dataframe to save
+    path: str
+        Filepath of where to store json
+    file_name: str
+        Name of file
+    """          
     data.reset_index(drop = False).to_feather(os.path.join(path,
                                                          file_name))
     return(print("Output saved"))
         
 def make_directory(output_directory = None):
+    """
+    Creates a directory
+    
+    Parameters
+    ----------
+    output_directory: str
+        Filepath or name of directory to create
+    """      
     try:
-        if output_directory ==None:
+        if output_directory == None:
             os.makedirs("artifacts")
         else: 
             os.makedirs(os.path.join(output_directory))
@@ -35,8 +87,15 @@ def make_directory(output_directory = None):
         print("Directory already exists")
         pass
 
-def load_file(file_path):
-    """ Load file """
+def load_file(file_path):    
+    """
+    Load files. Compatible with csv, text, feather, xlsx, and parquet
+    
+    Parameters
+    ----------
+    file_path: str
+        File path of file to load
+    """
     na_values = ["None",
                  "NAN",
                  "NONE",
@@ -86,6 +145,14 @@ def load_file(file_path):
     return(data)
     
 def load_mappings(support_files_path):
+    """
+    Loads support mapping files
+    
+    Parameters
+    ----------
+    support_files_path: str
+        Filepath or name of directory where files are stored
+    """        
     mapping_file_path = os.path.expanduser(support_files_path)
     print(mapping_file_path)
     # add zip to county mapping
@@ -103,6 +170,16 @@ def load_mappings(support_files_path):
            unit_mapping)
 
 def gdbToDf_short(file, indx):
+    """
+    Loads shapefiles
+    
+    Parameters
+    ----------
+    file: str
+        Filepath or name of file to load
+    indx: str
+        Indicates type of shapefile to load in
+    """      
     dictList = []
     if indx == "address":
         with fiona.open(file) as src:
@@ -122,11 +199,29 @@ def gdbToDf_short(file, indx):
 
     
 def acs_rename(data):
+    """
+    Rename ACS index column
+    
+    Parameters
+    -----------
+    data: pd.DataFrame
+        Dataframe to make changes to
+    """
     data_cols = list(data.columns[1:])
     data.columns = ["result"] + data_cols
     return data
 
 def acs_trt_split(data, feature):
+    """
+    Extract keys from ACS identifier column for census tract level data
+    
+    Parameters
+    ----------
+    data: pd.DataFrame
+        Dataframe to make changes to
+    feature: str
+        Name of identifier column to extract information from
+    """
     data = data[data[feature].notna()]
     state = [
         re.split(f".*state:", re.split(r">", data[feature].iloc[i])[0])[1]
@@ -150,10 +245,20 @@ def acs_trt_split(data, feature):
     if "TRACTCE10" in data.columns:
         data["GEO_KEY_10"] = data["STATEFP"] + data["COUNTYFP"] + data["TRACTCE10"]
         data = data.drop("TRACTCE10", axis = 1)
-    data = data.drop([feature, "STATEFP", "COUNTYFP", "TRACTCE"], axis=1)
+    data = data.drop([feature, "STATEFP", "COUNTYFP", "TRACTCE"], axis = 1)
     return data
 
 def acs_zip_split(dataframe, feature):
+    """
+    Extract keys from ACS identifier column for zip code level data
+    
+    Parameters
+    ----------
+    data: pd.DataFrame
+        Dataframe to make changes to
+    feature: str
+        Name of identifier column to extract information from
+    """    
     state = [
         re.split(f".*state:", re.split(r">", dataframe[feature].iloc[i])[0])[1]
         for i in range(len(dataframe))
@@ -170,4 +275,12 @@ def acs_zip_split(dataframe, feature):
     )
 
 def most_common(lizt):
+    """
+    Returns the most common element of a list or series
+    
+    Parameters
+    ----------
+    lizt: list
+        List to extract most common element from
+    """
     return max(set(lizt), key = lizt.count)
