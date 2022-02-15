@@ -58,8 +58,6 @@ class ZRP(BaseZRP):
         Whether to geocode
     race: str
         Name of race column
-    proxy: str
-        Type of proxy to return, default is race probabilities
     bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
@@ -92,9 +90,7 @@ class ZRP(BaseZRP):
         z_prepare = ZRP_Prepare()
         z_prepare.fit(data)
         prepared_data = z_prepare.transform(data)
-               
-        print("POST ACS", prepared_data.index.values)
-            
+
         curpath = dirname(__file__)
         pipe_path = join(curpath, "modeling/models")
         
@@ -108,7 +104,7 @@ class ZRP(BaseZRP):
             
             bisgw = BISGWrapper()
             full_bisg_proxies = bisgw.transform(bisg_data)
-            save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_{self.proxy}.feather")
+            save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_output.feather")
             
         try:
             predict_out = input_data.merge(predict_out.reset_index(drop = False), on = self.key)

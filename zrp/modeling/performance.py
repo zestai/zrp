@@ -56,7 +56,7 @@ ground_truth_path = None, key = "ZEST_KEY", race = "race"):
 
         proxies = set_id(proxies, self.key)
         ground_truth = set_id(ground_truth, self.key)
-        proxies = proxies[self.race]
+        proxies = proxies[f"{self.race}_proxy"]
         ground_truth = ground_truth[self.race]
 
         cm = ConfusionMatrix(

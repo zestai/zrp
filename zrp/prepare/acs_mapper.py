@@ -66,7 +66,6 @@ class ACSModelPrep(BaseZRP):
         """
         # Block Group
         mbggk_list = list(set(data.GEOID_BG.unique()).intersection(set(acs_bg.GEOID.unique())))
-        print(data.index.name)
         
         print(" ...Copy dataframes")
         ## Merge by current
@@ -76,7 +75,7 @@ class ACSModelPrep(BaseZRP):
         nm = data.copy()
 
         print(" ...Block group")
-        mbggk = mbggk[(mbggk.GEOID_BG.isin(mbggk_list))].reset_index(drop= False)
+        mbggk = mbggk[(mbggk.GEOID_BG.isin(mbggk_list))].reset_index(drop = False)
         mbggk_zkeys = list(mbggk.index)
         mbggk = mbggk.merge(acs_bg,
                             left_on = "GEOID_BG",
@@ -87,7 +86,7 @@ class ACSModelPrep(BaseZRP):
         mctgk_list = list(set(data.GEOID_CT.unique()).intersection(set(acs_ct.GEOID.unique())))
         prev_zkeys = mbggk_zkeys
         mctgk = mctgk[~(mctgk.index.isin(prev_zkeys)) &\
-                      (mctgk["GEOID_CT"].isin(mctgk_list))].reset_index(drop= False)
+                      (mctgk["GEOID_CT"].isin(mctgk_list))].reset_index(drop = False)
         mctgk_zkeys = list(mctgk.index)
         print(" ...Census tract")
         mctgk = mctgk.merge(acs_ct,
@@ -100,11 +99,11 @@ class ACSModelPrep(BaseZRP):
         prev_zkeys_0 = mbggk_zkeys + mctgk_zkeys
         print(" ...Zip code")
         mbz = mbz[~(mbz.index.isin(prev_zkeys_0)) &\
-                  (mbz["GEOID_ZIP"].isin(mbz_list))].reset_index(drop= False)
+                  (mbz["GEOID_ZIP"].isin(mbz_list))].reset_index(drop = False)
         mbz_zkeys = list(mbz.index)
         mbz = mbz.merge(acs_zip,
-                        right_on ="GEOID",
-                        left_on="GEOID_ZIP").set_index(self.key)
+                        right_on = "GEOID",
+                        left_on = "GEOID_ZIP").set_index(self.key)
         mbz["acs_source"] = "ZIP"
 
         # No Merge

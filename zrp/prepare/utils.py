@@ -6,6 +6,8 @@ import sys
 from os.path import join, expanduser
 import json
 import fiona
+import warnings
+warnings.filterwarnings("ignore")
     
 def load_json(path):
     """

@@ -44,8 +44,6 @@ class BaseZRP():
         Whether to geocode
     race: str
         Name of race column
-    proxy: str
-        Type of proxy to return, default is race probabilities
     bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
@@ -54,7 +52,7 @@ class BaseZRP():
         Number of jobs in parallel
     """
     
-    def __init__(self, support_files_path = "data/processed", key = "ZEST_KEY", first_name = "first_name", middle_name = "middle_name", last_name = "last_name", house_number = "house_number", street_address = "street_address", city = "city", state = "state", zip_code = "zip_code", race = 'race', proxy = "probs", census_tract =  None, block_group = None, street_address_2 = None, name_prefix = None, name_suffix = None, na_values = None, file_path = None, geocode = True, bisg = True, readout = True, n_jobs = -1, year = "2019", span  = "5", runname = "test"):
+    def __init__(self, support_files_path = "data/processed", key = "ZEST_KEY", first_name = "first_name", middle_name = "middle_name", last_name = "last_name", house_number = "house_number", street_address = "street_address", city = "city", state = "state", zip_code = "zip_code", race = 'race', census_tract =  None, block_group = None, street_address_2 = None, name_prefix = None, name_suffix = None, na_values = None, file_path = None, geocode = True, bisg = True, readout = True, n_jobs = -1, year = "2019", span  = "5", runname = "test"):
         self.key = key
         self.first_name = first_name
         self.middle_name =  middle_name
@@ -74,7 +72,6 @@ class BaseZRP():
         self.geocode = geocode
         self.readout = readout
         self.bisg = bisg
-        self.proxy = proxy
         self.race = race
         self.n_jobs = n_jobs
         self.year = year

@@ -57,8 +57,6 @@ class ZRP_Prepare(BaseZRP):
         Whether to geocode
     race: str
         Name of race column
-    proxy: str
-        Type of proxy to return, default is race probabilities
     bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
@@ -108,11 +106,10 @@ class ZRP_Prepare(BaseZRP):
 
         print("[Start] Preparing geo data")
         data_path = join(curpath, f'../data/processed')
-        assert len(os.listdir(data_path)) > 0, "Missing required support files please see the README for how to download the support files: [html]<https://github.com/zestai/zrp/blob/main/README.rst#install>"        
+        assert len(os.listdir(data_path)) > 0, "Missing required support files please see the README for how to download the support files: https://github.com/zestai/zrp/blob/main/README.rst#install "        
         
         inv_state_map = load_json(join(data_path, "inv_state_mapping.json"))
         data['zest_in_state_fips'] = data[self.state].replace(inv_state_map)
-#         print("GEO", data.index.values)
         print("")
 
         if self.census_tract:
@@ -178,9 +175,7 @@ class ZRP_Prepare(BaseZRP):
         data = data[~data.index.isin(geo_coded_keys)]
         geo_coded = pd.concat([geo_coded, data])
         
-#         print("ZEST_KEY_COL" in geo_coded.columns)
-#         print("ZEST_KEY" in geo_coded.columns)
-#         print("GEO", geo_coded.index.values)
+
         print("")
         
         print("[Completed] Preparing geo data")
@@ -188,18 +183,17 @@ class ZRP_Prepare(BaseZRP):
         print("[Start] Preparing ACS data")
         
         print("   [Start] Validating ACS input data")
-        print(geo_coded.columns)
         validate = ValidateGeocoded()
         validate.fit()
         acs_validator = validate.transform(geo_coded)
         save_json(acs_validator, self.out_path, "input_acs_validator.json")
         print("   [Completed] Validating ACS input data")
+        print("")
 
         amp = ACSModelPrep()
         amp.fit()
         data_out = amp.transform(geo_coded, False)
         print("[Complete] Preparing ACS data")
-        print("ACS", data_out.index.values)
         print("")
         
         return(data_out)

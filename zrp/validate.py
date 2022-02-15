@@ -90,22 +90,25 @@ class BaseValidate():
         """
         return(len(data))
         
-    def check_missing_pct(self, data):
+    def check_missing_pct(self, data, is_input = True):
         """Calculates percentage of missing values
         
         Parameter
         ---------
         data: pd.dataframe
             dataframe to make changes to or use for validation
+        is_input: bool
+            Indicator if vlaidating raw input data
         """
         na_dict = {}
         for col in data.columns:
             na_dict[col] = None
             na_dict[col] = data[(data[col].astype(str).str.upper() == "NONE")
+                                | (data[col].astype(str).str.upper() == " ")
                                 | (data[col].isna())].shape[0]/data.shape[0]
-            if na_dict[col] > 0.10:
-                print(f"     (Warning!!) {col} is {na_dict[col]*100}% missing, this may impact the ability to return race approximations")
-            
+            if is_input:
+                if na_dict[col] > 0.10:
+                    print(f"       (Warning!!) {col} is {na_dict[col]*100}% missing, this may impact the ability to return race approximations")         
         return(na_dict)
     
     def is_geocoded(self, data):
@@ -416,6 +419,21 @@ class ValidateGeocoded(BaseValidate):
         print("     Number of observations:", validator["n_obs"])
         validator["is_unique_key"] = self.is_unique_key(data)
         print("     Is key unique:", validator["is_unique_key"]) 
+                
+        validator["pct_na"] = self.check_missing_pct(data, is_input=False)
+        print()
+        try:
+            for i in [self.last_name, self.first_name]:
+                tmp = round(validator["pct_na"][i]*100, 2)
+                assert tmp < 10, f"Too many missing values in required name feature, {i}. {tmp}% of the values are missing. Please review data and reduce missing. Required features include first name and last name." 
+        except (KeyError, ValueError) as e:
+            pass
+        if (not self.census_tract) & (not self.block_group):
+            try:
+                tmp = round(validator["pct_na"][self.house_number]*100, 2)
+                assert tmp < 10, f"Too many missing values in required house number column, {self.house_number}.{tmp}% of the values are missing. Please review data and reduce missing. House number is required to convert addresses to Census geo-identifiers" 
+            except (KeyError, ValueError) as e:
+                pass
         validator["is_geocoded"] = self.is_geocoded(data)
         return(validator)        
     

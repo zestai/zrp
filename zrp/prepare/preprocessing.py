@@ -178,7 +178,7 @@ class HandleTracts():
     It will also create a GEO_KEY for merging with geocoded user data.
     """
     def __init__(self):
-        super().__init__()   
+        super().__init__()
     
     def fit(self, data):
         pass
@@ -204,180 +204,6 @@ class HandleTracts():
         return(acs_ct, acs_zip)
 
     
-class LongProcesStrings():
-    """
-    ProcesStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
-    
-    
-    Parameters
-    ----------
-    key: str 
-        Key to set as index. If not provided, a key will be generated.
-    first_name: str
-        Name of first name column
-    middle_name: str
-        Name of middle name column
-    last_name: str
-        Name of last name/surname column
-    house_number: str
-        Name of house number column. Also known as primary address number this is the unique number assigned to a building to delineate it from others on a street. This is usually the first component of a delivery address line.
-    street_address: str
-        Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
-    city: str
-        Name of city column
-    state: str
-        Name of state column
-    zip_code: str
-        Name of zip or postal code column
-    census_tract: str
-        Name of census tract column
-    support_files_path:
-        File path with support data
-    street_address_2: str, optional
-        Name of additional address column
-    name_prefix: str, optional
-        Name of column containing full name preix (ie Dr, Sr, and Esq )
-    name_suffix: str, optional
-        Name of column containing full name suffix (ie jr, iii, and phd)
-    na_values: list
-        List of missing values to replace 
-    file_path: str
-        Input data file path
-    geocode: bool
-        Whether to geocode
-    race: str
-        Name of race column
-    proxy: str
-        Type of proxy to return, default is race probabilities
-    bisg: bool, default True
-        Whether to return BISG proxies
-    readout: bool
-        Whether to return a readout
-    n_jobs: int (default 1)
-        Number of jobs in parallel
-    """
-    def __init__(self, key, first_name, middle_name, last_name, house_number, street_address, city, state, zip_code, support_files_path,  step, census_tract= None, street_address_2=None, name_prefix=None, name_suffix=None, na_values = None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=1):
-        self.key = key
-        self.first_name = first_name
-        self.middle_name =  middle_name
-        self.last_name = last_name
-        self.name_suffix = name_suffix
-        self.house_number = house_number
-        self.street_address = street_address
-        self.street_address_2 = street_address_2
-        self.city = city
-        self.state = state
-        self.zip_code = zip_code
-        self.census_tract = census_tract
-        self.file_path = file_path
-        self.support_files_path = support_files_path
-        self.na_values = na_values
-        self.geocode = geocode
-        self.readout = readout
-        self.step = step
-        self.n_jobs = n_jobs
-        super().__init__()
-        
-            
-    def fit(self):
-        pass
-    
-    
-    def reduce_set(self, data):
-        remove_cols = list(set(data.columns) - set([self.key,  self.first_name, self.middle_name, self.last_name, self.house_number, self.street_address, self.street_address_2, self.city, self.state, self.zip_code, self.census_tract]))
-        return( data.drop(remove_cols, axis = 1))
-
-    def transform(self, data_in):
-        curpath = dirname(__file__)
-        # Load Data
-        try:
-            data = data_in.copy()
-            print("Data is loaded")
-        except AttributeError:
-            data = load_file(self.file_path)
-            print("Data file is loaded")
-            
-        data_cols =  data.columns
-        data = set_id(data, self.key)
-        numeric_cols =  list(set([self.zip_code,
-                                  self.census_tract,
-                                  self.house_number
-                                 ]).intersection(set(data_cols)))
-
-        # Convert to uppercase & trim whitespace
-        print("   Formatting P1")
-        data = data.astype(str)
-        data = data.apply(lambda x: x.str.upper())
-            
-        data = reduce_whitespace(data)
-        # Remove/replace special characters
-        for col in numeric_cols:
-            data[col] = data[col].apply(lambda x: re.sub("[^0-9]",\
-                                                     "",\
-                                                    str(x))) 
-        if self.last_name:
-            name_cols = list(set([self.first_name,
-                                  self.middle_name,
-                                  self.last_name]).intersection(set(data_cols))) 
-            for col in name_cols:
-                    data[col] =  data[col].apply(lambda x: re.sub("[^A-Za-z\\s]",
-                                                              "",
-                                                              re.sub("[^A-Za-z']",
-                                                                     " ",
-                                                                     str(x))))
-        if self.step=="geocoding":  #self.geocode:
-            data_path = join(curpath, f'../data/processed')
-            state_mapping, street_suffix_mapping, directionals_mapping, unit_mapping = load_mappings(data_path)
-            print("   Geo Processing")
-            street_addr_dict = dict(zip(data.index, data[self.street_address])) 
-            street_addr_results = Parallel(n_jobs = self.n_jobs, prefer="threads", verbose=1)(delayed((address_mining))(street_addr_dict, i) for i in tqdm(list(data.index)))
-
-            data[self.street_address] = street_addr_results
-
-            data[self.city]  = data[self.city].str.replace("[^\\w\\s]", "", regex=True)
-
-            # State
-            data[self.state]  = data[self.state].str.replace("[^\\w\\s]", "", regex=True)
-            data[self.state] = data[self.state].replace(state_mapping)
-            # Zip code 
-            data[self.zip_code] = np.where((data[self.zip_code].isna()) |\
-                                     (data[self.zip_code].str.contains("None")),
-                                      None,
-                                      data[self.zip_code].apply(lambda x: x.zfill(5)))
-            data[self.zip_code] = data[self.zip_code].astype(str).str[:5]       
-            street_addr_dict = dict(zip(data.index, data[self.street_address])) 
-            
-            rep_addr_results = Parallel(n_jobs = self.n_jobs, prefer="threads", verbose=1)(delayed(replicate_address)(street_addr_dict, i, street_suffix_mapping, unit_mapping) for i in tqdm(list(data.index)))
-            data[self.street_address] = rep_addr_results 
-            
-        if self.step=="glookup":
-            print("   Lookup Processing")
-            # State
-            data["ZEST_STATE"] = data[self.state].replace(state_mapping)
-
-            # Zip code 
-            data["ZEST_ZIP"] = np.where((data["ZEST_ZIP"].isna()) |\
-                                     (data["ZEST_ZIP"].str.contains("None")),
-                                      None,
-                                      data["ZEST_ZIP"].apply(lambda x: x.zfill(5)))
-                    
-        if self.step=="modeling":
-            ht =  HandleTracts()
-            data = ht.transform(data)
-            data = data.replace({"\\bN\\b": None}, regex=True)
-            if "ZEST_ZIP" in data.columns:
-                data["ZEST_ZIP"] = np.where((data["ZEST_ZIP"].isna()) |\
-                                         (data["ZEST_ZIP"].str.contains("None")),
-                                          None,
-                                          data["ZEST_ZIP"].apply(lambda x: x.zfill(5)))
-            data = data.astype(str)
-            
-        print("   Formatting P2")
-        data = norm_na(data, self.na_values)
-        data = reduce_whitespace(data)
-        return data
-
-    
 def replicate_address_2(data, street_address, street_suffix_mapping, unit_mapping):
     """
     Replicate street addresses 
@@ -396,7 +222,7 @@ def replicate_address_2(data, street_address, street_suffix_mapping, unit_mappin
     # base
     data = data.reset_index(drop=False)
     print("         ...Base")
-    df_base =  data.copy()     # base is complete, containing the original record (1)
+    df_base =  data.copy()# base is complete, containing the original record (1)
     print("         ...Map street suffixes...")
     data[street_address] = data[street_address].replace(street_suffix_mapping, regex=True) # this mapping takes the longest but is ok for 10K records
     data[street_address] = np.where(data[street_address]=='nan', None, data[street_address])
@@ -431,7 +257,7 @@ def replicate_house_number(data, house_number):
     # base
     data = data.reset_index(drop=True)
     print("         ...Base")
-    df_base =  data.copy()     # base is complete, containing the original record (1)
+    df_base =  data.copy()# base is complete, containing the original record (1)
     print("         ...Number processing...")
     data[house_number].apply(lambda x: re.sub("[^0-9]",\
                                                      "",\
@@ -486,8 +312,6 @@ class ProcessStrings(BaseZRP):
         Whether to geocode
     race: str
         Name of race column
-    proxy: str
-        Type of proxy to return, default is race probabilities
     bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
@@ -502,7 +326,7 @@ class ProcessStrings(BaseZRP):
             
     def fit(self, data):
         data_cols = list(data.columns)
-        print("   [Start] Validating input data")  
+        print("   [Start] Validating input data")
         if self.census_tract in data_cols:
             self.required_cols = [self.first_name, self.middle_name, self.last_name, self.census_tract]
         elif (self.census_tract in data_cols) & (self.block_group in data_cols):
@@ -517,8 +341,9 @@ class ProcessStrings(BaseZRP):
         validate = ValidateInput()
         validate.fit()
         validators_in = validate.transform(data)
-        save_json(validators_in, self.out_path, "input_validator.json")  
-        print("   [Completed] Validating input data")  
+        save_json(validators_in, self.out_path, "input_validator.json")
+        print("   [Completed] Validating input data")
+        print("")
         return self
 
     
@@ -557,7 +382,7 @@ class ProcessStrings(BaseZRP):
         na_dict =  {"^\\s*$": None,
                     "^NAN$": None,
                     "^NONE$": None}
-        data = data.replace(na_dict, regex=True)          
+        data = data.replace(na_dict, regex=True)     
         
         # Remove/replace special characters
         for col in numeric_cols:
@@ -575,7 +400,7 @@ class ProcessStrings(BaseZRP):
                                                                      " ",
                                                                      str(x))))
         print("   Formatting P2")
-        print("reduce whitespace")
+        print("   reduce whitespace")
         data = reduce_whitespace(data)
         return(data)
     
@@ -595,10 +420,14 @@ class  ProcessACS(BaseZRP):
             
     def fit(self, data):
         data_cols = list(data.columns)
+        print("   [Start] Validating input ACS data")
         validate = ValidateGeocoded()
         validate.fit()
         acs_validator = validate.transform(data)
         save_json(acs_validator, self.out_path, "input_acs_validator.json")
+        print("   [Completed] Validating input ACS data")
+        print("")
+        
         return self
 
 
@@ -659,8 +488,6 @@ class  ProcessGeo(BaseZRP):
         Whether to geocode
     race: str
         Name of race column
-    proxy: str
-        Type of proxy to return, default is race probabilities
     bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
@@ -674,7 +501,7 @@ class  ProcessGeo(BaseZRP):
             
     def fit(self, data):
         data_cols = list(data.columns)
-        print("   [Start] Validating input geo data")  
+        print("   [Start] Validating input geo data")
         if self.census_tract in data_cols:
             self.required_cols = [self.census_tract]
         elif (self.census_tract in data_cols) & (self.block_group in data_cols):
@@ -689,7 +516,7 @@ class  ProcessGeo(BaseZRP):
         geo_validate.fit()
         geo_validators_in = geo_validate.transform(data)
         save_json(geo_validators_in, self.out_path, "input_geo_validator.json") 
-        print("   [Completed] Validating input geo data")  
+        print("   [Completed] Validating input geo data")
         
         return self
 
@@ -708,7 +535,7 @@ class  ProcessGeo(BaseZRP):
             Indicator to process compenents of the address
         """        
         curpath = dirname(__file__)
-        print("   [Start] Processing geo data")  
+        print("   [Start] Processing geo data")
         # Load Data
         if not processed:
             data_cols =  data.columns
@@ -731,7 +558,7 @@ class  ProcessGeo(BaseZRP):
             na_dict =  {"^\\s*$": None,
                        "^NAN$": None,
                        "^NONE$": None}
-            data = data.replace(na_dict, regex=True)   
+            data = data.replace(na_dict, regex=True)
             print("")
             print(data.state.unique())
             # Remove/replace special characters
@@ -777,7 +604,7 @@ class  ProcessGeo(BaseZRP):
         
         if replicate:
             print("      ...replicating address")
-            data = replicate_address_2(data, self.street_address, street_suffix_mapping, unit_mapping)  
+            data = replicate_address_2(data, self.street_address, street_suffix_mapping, unit_mapping)
             data = replicate_house_number(data, self.house_number)
         
         print("      ...formatting")
@@ -830,8 +657,6 @@ class  ProcessGLookUp(BaseZRP):
         Whether to geocode
     race: str
         Name of race column
-    proxy: str
-        Type of proxy to return, default is race probabilities
     bisg: bool, default True
         Whether to return BISG proxies
     readout: bool
@@ -891,7 +716,7 @@ class  ProcessGLookUp(BaseZRP):
         data[self.census_tract] = np.where((data[self.census_tract].isna()) |\
                                  (data[self.census_tract].str.contains("None")),
                                   None,
-                                  data[self.census_tract].apply(lambda x: x.zfill(6)))  
+                                  data[self.census_tract].apply(lambda x: x.zfill(6)))
         data[self.block_group] = np.where((data[self.block_group].isna()) |\
                                  (data[self.block_group].str.contains("None")),
                                   None,
