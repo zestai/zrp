@@ -327,7 +327,7 @@ class ZRP_Predict(BaseZRP):
     """
     Generates race proxies.
 
-    Attempts to predict on census tract, then block group, then zip code based on which level ACS data is found for. If
+    Attempts to predict on block group, then census tract, then zip code based on which level ACS data is found for. If
     Geo level data is unattainable, the BISG proxy is computed. No prediction returned if BISG cannot be computed either.
     
     
