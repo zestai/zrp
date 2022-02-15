@@ -51,19 +51,146 @@ The US Census Bureau details that, "the American Community Survey (ACS) is an on
 ACS data is available in 1 or 5 year spans. The 5yr ACS data is the most comprehensive & is available at more granular levels than 1yr data. It is thus used in this work.
 
 
-The Models and API
-__________
-
-The ZRP can be broken down into four main segments: preprocessing, geocoding, American Community Survey(ACS) integration, and modeling/predictions.
-
-
-
 Usage and Examples
 ___________
 
 To get started using the ZRP, first ensure the download is complete (as described above) and xgboost == 1.0.2 
 
-Next, check out the guides in the `examples <./examples>`_ folder. Clone the repo in order to obtain the example notebooks and data; this is not provided in the pip installable package. If you're experiencing issues, first consult our `common issues guide <./common_issues.rst>`_.
+Check out the guides in the `examples <./examples>`_ folder. Clone the repo in order to obtain the example notebooks and data; this is not provided in the pip installable package. If you're experiencing issues, first consult our `common issues guide <./common_issues.rst>`_.
+
+Next, we present the primary ways you'll use ZRP. 
+
+ZRP Predict
+=============
+
+**Summary of commands:**
+::
+
+  >>> from zrp import ZRP
+  >>> zest_race_predictor = ZRP()
+  >>> zest_race_predictor.fit()
+  >>> zrp_output = zest_race_predictor.transform(input_dataframe)
+
+**Breaking down key commands**
+::
+
+  >>> zest_race_predictor = ZRP()
+  
+- **ZRP(pipe_path=None, support_files_path="data/processed", key="ZEST_KEY", first_name="first_name", middle_name="middle_name", last_name="last_name", house_number="house_number", street_address="street_address", city="city", state="state", zip_code="zip_code", race='race', proxy="probs", census_tract=None, street_address_2=None, name_prefix=None, name_suffix=None, na_values=None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=49, year="2019", span="5", runname="test")**
+
+  -  What it does:
+
+     - Prepares data to generate race & ethnicity proxies
+
+  You can find parameter descriptions in the `ZRP class <./zrp/zrp.py>`_ and it's `parent class <./zrp/prepare/base.py>`_.
+
+::
+
+  >>> zrp_output = zest_race_predictor.transform(input_dataframe)
+  
+- **zest_race_predictor.transform(df)**
+
+  -  What it does:
+
+     - Processes input data and generates ZRP proxy predictions.
+     - Attempts to predict on block group, then census tract, then zip code based on which level ACS data is found for. If Geo level data is unattainable, the BISG proxy is computed. No prediction returned if BISG cannot be computed either.
+
+
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ | Parameters |                                                                                                                          |
+ +============+==========================================================================================================================+
+ |            | **df** : *{DataFrame}* Pandas dataframe containing input data (see below for necessary columns)                          |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+
+Input data, **df**, into the prediction/modeling pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, and zest key. Consult our `common issues guide <./common_issues.rst>`_ to ensure you're input data is the correct format.
+
+-  Output: A dataframe with the following columns: AAPI	AIAN	BLACK	HISPANIC	WHITE	source_block_group	source_zip_code	source_bisg 
+   ::
+
+      >>> zrp_output
+      
+     =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
+                  AAPI        AIAN        BLACK       HISPANIC    WHITE       source_block_group    source_census_tract    source_zip_code    OTHER   
+     =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
+      ZEST_KEY                                                                                                                                        
+      10          0.021916    0.021960    0.004889    0.012153    0.939082    1.0                   NaN                    NaN                NaN     
+      100         0.009462    0.013033    0.003875    0.008469    0.965162    1.0                   NaN                    NaN                NaN     
+      103         0.107332    0.000674    0.000584    0.021980    0.869429    1.0                   NaN                    NaN                NaN     
+      106         0.177411    0.015208    0.003767    0.041668    0.761946    1.0                   NaN                    NaN                NaN     
+      109         0.000541    0.000416    0.000376    0.000932    0.997736    1.0                   NaN                    NaN                NaN     
+      ...         ...         ...         ...         ...         ...         ...                   ...                    ...                ...     
+      556         NaN         NaN         NaN         NaN         NaN         NaN                   NaN                    NaN                NaN     
+      557         NaN         NaN         NaN         NaN         NaN         NaN                   NaN                    NaN                NaN     
+     =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
+
+
+ZRP Build
+=============
+
+**Summary of commands**
+::
+
+  >>> from zrp.modeling import ZRP_Build
+  >>> zest_race_predictor_builder = ZRP_Build('/path/to/desired/output/directory')
+  >>> zest_race_predictor_builder.fit()
+  >>> zrp_build_output = zest_race_predictor_builder.transform(input_training_data)
+
+**Breaking down key commands**
+::
+
+  >>> zest_race_predictor_builder = ZRP_Build('/path/to/desired/output/directory')
+
+- **ZRP_Build(file_path, zrp_model_name = 'zrp_0', zrp_model_source ='ct')**
+
+  -  What it does:
+
+     - Prepares the class that builds the new custom ZRP model.
+
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ | Parameters |                                                                                                                          |
+ +============+==========================================================================================================================+
+ |            | **file_path** : *{str}* The path where pipeline, model, and supporting data are saved.                                   |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ |            | **zrp_model_name** : *{str}* Name of zrp_model.                                                                          |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ |            | **zrp_model_source** : *{str}* Indicates the source of zrp_modeling data to use.                                         |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ 
+ You can find more detailed parameter descriptions in the `ZRP_Build class <./zrp/modeling/pipeline_builder.py>`_. ZRP_Build() also inherits initlizing parameters from its `parent class <./zrp/prepare/base.py>`_.
+     
+::
+
+  >>> zrp_build_output = zest_race_predictor_builder.transform(input_training_data)
+
+- **zest_race_predictor_builder.transform(df)**
+
+  -  What it does:
+
+     - Builds a new custom ZRP model trained off of user input data when supplied with standard ZRP requirements including name, address, and race 
+     - Produces a custom model-pipeline. The pipeline, model, and supporting data are saved automatically to "~/data/experiments/model_source/data/" in the support files path defined.
+     - The class assumes data is not broken into train and test sets, performs this split itself, and outputs predictions on the test set. 
+
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ | Parameters |                                                                                                                          |
+ +============+==========================================================================================================================+
+ |            | **df** : *{DataFrame}* Pandas dataframe containing input data (see below for necessary columns)                          |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+
+Input data, **df**, into this pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, zest key, and race. Consult our `common issues guide <./common_issues.rst>`_ to ensure you're input data is the correct format.
+
+-  Output: A dictionary of race & ethnicity probablities and labels.
+
+
+Addition Runs of Your Custom Model
+==================================
+After having run ZRP_Build() you can re-use your custome model just like you run ours. All you must do is specify the path to the generated model and pipelines (this path is the same path as '/path/to/desired/output/directory' that you defined previously when running ZRP_Build() in the example above; we call this 'pipe_path'). Thus, you would run:
+::
+
+  >>> from zrp import ZRP
+  >>> zest_race_predictor = ZRP('pipe_path')
+  >>> zest_race_predictor.fit()
+  >>> zrp_output = zest_race_predictor.transform(input_dataframe)
+
 
 
 Validation
