@@ -19,8 +19,10 @@ import re
 class ZRP(BaseZRP):
     """Zest Race Predictor, predicts race & ethnicity using name & geograhpic data.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, pipe_path=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.pipe_path = pipe_path
+
         
     def fit(self):
         return self
@@ -54,9 +56,10 @@ class ZRP(BaseZRP):
             save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_{self.proxy}.feather")
             
         curpath = dirname(__file__)
-        pipe_path = join(curpath, "modeling/models")
+        if self.pipe_path is None:
+            self.pipe_path = join(curpath, "modeling/models")
         
-        z_predict = ZRP_Predict(pipe_path = pipe_path)
+        z_predict = ZRP_Predict(pipe_path = self.pipe_path)
         z_predict.fit()
         predict_out = z_predict.transform(prepared_data)
         
