@@ -3,7 +3,7 @@ from .preprocessing import *
 from .base import BaseZRP
 from .utils import *
 import pandas as pd
-import numpy as np 
+import numpy as np
 import statistics
 import json
 import sys
@@ -13,30 +13,29 @@ import re
 import warnings
 warnings.filterwarnings(action='ignore')
 
-
 def get_reduced(tmp_data):
-    keep_cols = ['ZEST_KEY', 'first_name', 'middle_name', 'last_name', 
+    keep_cols = ['ZEST_KEY', 'first_name', 'middle_name', 'last_name',
                  'house_number', 'street_address', 'city', 'state', 'zip_code',
-                 'BLKGRPCE','BLKGRPCE10','COUNTYFP', 'COUNTYFP10','FROMHN', 'TOHN',
-                 'LFROMADD',  'LTOADD',  'PUMACE','PUMACE10',  'RFROMADD','RTOADD', 'SIDE', 
-                 'STATEFP','STATEFP10', 'TBLKGPCE',  'TRACTCE','TRACTCE10', 'TTRACTCE',
-                 'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME','ZEST_KEY_COL', 'ZEST_STATE',
-                 'ZEST_ZIP','GEOID_ZIP', 'GEOID_CT', 'GEOID_BG','age', 'original_ethnicity',
-                 'original_race', 'original_sex',  'ethnicity', 'race', 'sex', 'source']
-    na_match_cols =['BLKGRPCE', 'BLKGRPCE10','COUNTYFP', 'COUNTYFP10', 'FROMHN', 'TOHN',
-                'LFROMADD',  'LTOADD',  'PUMACE','PUMACE10',  'RFROMADD','RTOADD', 'SIDE',
-                'STATEFP','STATEFP10', 'TBLKGPCE',  'TRACTCE','TRACTCE10', 'TTRACTCE', 
-                'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME','ZEST_STATE', 'ZEST_ZIP']
-    red_bit =keep_cols + ['HN_Match', 'ZIP_Match', 'RAW_ZEST_STATEFP']
+                 'BLKGRPCE', 'BLKGRPCE10', 'COUNTYFP', 'COUNTYFP10', 'FROMHN', 'TOHN',
+                 'LFROMADD', 'LTOADD', 'PUMACE', 'PUMACE10', 'RFROMADD', 'RTOADD', 'SIDE',
+                 'STATEFP', 'STATEFP10', 'TBLKGPCE', 'TRACTCE', 'TRACTCE10', 'TTRACTCE',
+                 'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_KEY_COL', 'ZEST_STATE',
+                 'ZEST_ZIP', 'GEOID_ZIP', 'GEOID_CT', 'GEOID_BG', 'age', 'original_ethnicity',
+                 'original_race', 'original_sex', 'ethnicity', 'race', 'sex', 'source']
+    na_match_cols = ['BLKGRPCE', 'BLKGRPCE10', 'COUNTYFP', 'COUNTYFP10', 'FROMHN', 'TOHN',
+                     'LFROMADD', 'LTOADD', 'PUMACE', 'PUMACE10', 'RFROMADD', 'RTOADD', 'SIDE',
+                     'STATEFP', 'STATEFP10', 'TBLKGPCE', 'TRACTCE', 'TRACTCE10', 'TTRACTCE',
+                     'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_STATE', 'ZEST_ZIP']
+    red_bit = keep_cols + ['HN_Match', 'ZIP_Match', 'RAW_ZEST_STATEFP']
 
     tmp_data = tmp_data.filter(red_bit)
 
     geocd = tmp_data.copy()
     nomatch = tmp_data.copy()
-    
-    geocd = geocd[(geocd.HN_Match.astype(float) == 1)  & (geocd.ZIP_Match.astype(float) == 1)]
+
+    geocd = geocd[(geocd.HN_Match.astype(float) == 1) & (geocd.ZIP_Match.astype(float) == 1)]
     geokeys = list(geocd['ZEST_KEY'].unique())
-    
+
     nomatch = nomatch[~nomatch['ZEST_KEY'].isin(geokeys)]
     nomatch = nomatch.drop_duplicates('ZEST_KEY')
 
@@ -50,14 +49,14 @@ def get_reduced(tmp_data):
     geocd["GEOID_BG"] = geocd[["GEOID_CT", "BLKGRPCE"]].apply(lambda x: "".join(x.dropna()), axis=1)
     geocd = geocd.set_index('ZEST_KEY')
 
-    if len(nomatch)>1:
+    if len(nomatch) > 1:
         nomatch[na_match_cols] = None
         nomatch = nomatch.set_index('ZEST_KEY')
         data_out = pd.concat([geocd, nomatch])
         data_out["GEOID_ZIP"] = np.where(data_out["ZCTA5CE"].isna(), data_out.zip_code, data_out["ZCTA5CE"])
         
         data_out = data_out.filter(keep_cols)
-    else: 
+    else:
         data_out = geocd.filter(keep_cols)
         data_out["GEOID_ZIP"] = np.where(data_out["ZCTA5CE"].isna(), data_out.zip_code, data_out["ZCTA5CE"])
     
@@ -70,6 +69,7 @@ def get_reduced(tmp_data):
 def geo_search(geo_files_path, year, st_cty_code):
     """
     Returns a list of files associated with the state county code
+
     Parameters
     ----------
     geo_files_path:
@@ -84,13 +84,14 @@ def geo_search(geo_files_path, year, st_cty_code):
         for file in files:
             if (st_cty_code in file):
                 if year in file:
-                    file_list.append(os.path.join(root,file))
-    return(file_list)
-        
-    
+                    file_list.append(os.path.join(root, file))
+    return (file_list)
+
+
 def geo_read(file_list):
     """
     Returns a dataframe from files associated with the state county code
+
     Parameters
     ----------
     file_list:
@@ -98,10 +99,11 @@ def geo_read(file_list):
     """
     aef = pd.DataFrame()
     for file in file_list:
-        tmp = load_file(file_path)
+        tmp = load_file(file)
         aef = pd.concat([aef, tmp], axis=0)
-    return(aef)    
-    
+    return (aef)
+
+
 def geo_zoom(geo_df):
     """
     Matches census tract
@@ -113,8 +115,9 @@ def geo_zoom(geo_df):
     """
     geo_df = geo_df[(geo_df.HN_Match == 1) &
                     (geo_df.ZIP_Match == 1)]
-    return(geo_df)
-    
+    return (geo_df)
+
+
 def geo_range(geo_df):
     """
     Define house number range indicators
@@ -128,28 +131,34 @@ def geo_range(geo_df):
         (geo_df.FROMHN > geo_df.TOHN) & (geo_df.FROMHN.str.len() >= geo_df.TOHN.str.len()),
         geo_df.TOHN,
         geo_df.FROMHN)
-    
+
     geo_df["big"] = np.where(
         (geo_df.FROMHN > geo_df.TOHN) & (geo_df.FROMHN.str.len() >= geo_df.TOHN.str.len()),
         geo_df.FROMHN,
         geo_df.TOHN)
     return(geo_df)    
 
+
 class ZGeo(BaseZRP):
     """
     This class geocodes addresses.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.key ='ZEST_KEY'      
-            
+        self.key = 'ZEST_KEY'
+
     def fit(self):
         return self
-    
-    
+
     def geo_match(self, geo_df):
         """
-        Returns match indicators 
+        Returns match indicators
+
+        Parameters
+        ----------
+        geo_df: pd.DataFrame
+            Dataframe with geo data
         """
         geo_df["HN_Match"] = np.where(
             (geo_df[self.house_number] <= geo_df.big) &
@@ -168,16 +177,17 @@ class ZGeo(BaseZRP):
     def transform(self, input_data, geo, processed, replicate, save_table=True):
         """
         Returns a DataFrame of geocoded addresses.
+
         :param input_data: A pd.DataFrame.
         :param geo: A String
         :param processed: A boolean.
         :param replicate: A boolean.
         :param save_table: A boolean. Tables are saved if True. Default is True.
         :return: A DataFrame
-        """        
+
         curpath = dirname(__file__)
         out_geo_path = os.path.join(curpath, '../data/processed/geo/2019')
-        
+
         print("")
         # Load Data
         try:
@@ -196,9 +206,9 @@ class ZGeo(BaseZRP):
         if len(geo)>2:
             file_list = geo_search(out_geo_path, self.year, geo)
             aef = geo_read(file_list)
-        if len(geo)<=2:
+        if len(geo) <= 2:
             aef = load_file(os.path.join(out_geo_path, f"Zest_Geo_Lookup_{self.year}_State_{geo}.parquet"))
-        
+
         data["ZEST_FULLNAME"] = data[self.street_address]
         print("      ...merge user input & lookup table")
         geo_df = aef.merge(data, on="ZEST_FULLNAME", how="right")
@@ -216,19 +226,17 @@ class ZGeo(BaseZRP):
         geocoded_keys = list(geo_df[self.key].unique())
         add_na_keys = list(set(all_keys) - set(geocoded_keys))
         odf = odf[odf[self.key].isin(add_na_keys)]
-        
+
         geo_df = pd.concat([geo_df, odf])
-        
+
         geo_df = get_reduced(geo_df)
-        
-        
+
         if save_table:
             make_directory()
             if self.runname is not None:
                 file_name = f"Zest_Geocoded_{self.runname}_{self.year}__{geo}.parquet"
             else:
                 file_name = f"Zest_Geocoded__{self.year}__{geo}.parquet"
-            save_dataframe(geo_df, self.out_path, file_name)        
+            save_dataframe(geo_df, self.out_path, file_name)
         print("   [Completed] Mapping geo data")
-        return(geo_df)
-
+        return (geo_df)

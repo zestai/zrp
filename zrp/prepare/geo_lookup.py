@@ -99,6 +99,8 @@ class GeoLookUpBuilder():
 
     def transform(self, st_cty_code, save_table=True):
         """
+        Returns DataFrame of geo lookup tables
+
         Parameters
         ----------
         st_cty_code: str
