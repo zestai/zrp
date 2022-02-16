@@ -18,51 +18,7 @@ import re
 class ZRP_Prepare(BaseZRP):
     """
     Prepares data to generate race & ethnicity proxies
-    
-    Parameters
-    ----------
-    key: str 
-        Key to set as index. If not provided, a key will be generated.
-    first_name: str
-        Name of first name column
-    middle_name: str
-        Name of middle name column
-    last_name: str
-        Name of last name/surname column
-    house_number: str
-        Name of house number column. Also known as primary address number this is the unique number assigned to a building to delineate it from others on a street. This is usually the first component of a delivery address line.
-    street_address: str
-        Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
-    city: str
-        Name of city column
-    state: str
-        Name of state column
-    zip_code: str
-        Name of zip or postal code column
-    census_tract: str
-        Name of census tract column
-    support_files_path:
-        File path with support data
-    street_address_2: str, optional
-        Name of additional address column
-    name_prefix: str, optional
-        Name of column containing full name preix (ie Dr, Sr, and Esq )
-    name_suffix: str, optional
-        Name of column containing full name suffix (ie jr, iii, and phd)
-    na_values: list
-        List of missing values to replace 
-    file_path: str
-        Input data file path
-    geocode: bool
-        Whether to geocode
-    race: str
-        Name of race column
-    bisg: bool, default True
-        Whether to return BISG proxies
-    readout: bool
-        Whether to return a readout
-    n_jobs: int (default 1)
-        Number of jobs in parallel
+
     """
     
     def __init__(self, *args, **kwargs):

@@ -37,7 +37,7 @@ class PredictPass(BaseZRP):
         Folder path to directory containing pipeline
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, pipe_path, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pipe_path = pipe_path
         
@@ -59,7 +59,7 @@ class PredictPass(BaseZRP):
         except AttributeError:
             data = load_file(self.proxy_data)
         proxies = pd.DataFrame({"AAPI": None, "AIAN": None, "BLACK": None,
-                                "HISPANIC": None, "WHITE": None, f"{self.race}_proxy": None}, index = fe_data.index)
+                                "HISPANIC": None, "WHITE": None, f"{self.race}_proxy": None}, index = data.index)
         return(proxies) 
 
 def validate_case(data, key, last_name):
@@ -86,7 +86,7 @@ class BISGWrapper(BaseZRP):
         super().__init__(*args, **kwargs)
         
         
-    def fit(self, data):
+    def fit(self, input_data):
         """
 
         Parameters
@@ -94,22 +94,22 @@ class BISGWrapper(BaseZRP):
         input_data: pd.DataFrame
             Dataframe to be transformed
         """        
-        if (self.last_name not in data.columns):
+        if (self.last_name not in input_data.columns):
             raise ValueError('Last name needs to be provided when initializing this class. Please provide last name data in a column named "last_name" or set the custom name of the last name column in the data')
-        if self.zip_code not in data.columns:
+        if self.zip_code not in input_data.columns:
             raise ValueError('Zip or postal code name needs to be provided when initializing this class. Please provide zip code data in a column named "zip_ode" or set the custom name of the zip code column in the data')
         return self
     
-    def transform(self, data):
+    def transform(self, input_data):
         """
         Processes input data and generates BISG predictions.
 
         Parameters
         -----------
-        input_data: pd.DataFrame
+        data: pd.Dataframe
             Dataframe to be transformed
-        """        
-        df = data.copy()
+        """
+        df = input_data.copy()
         df = df[~df.index.duplicated(keep='first')]
 
         df = df.filter([self.last_name, self.zip_code, self.census_tract])
@@ -172,7 +172,7 @@ class ZRP_Predict_ZipCode(BaseZRP):
         input_data: pd.DataFrame
             Dataframe to be transformed
         """
-        
+
         src_path = os.path.join(self.pipe_path, "zip_code")
         sys.path.append(src_path)        
         # Load Data
@@ -229,7 +229,7 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         input_data: pd.DataFrame
             Dataframe to be transformed
         """        
-        
+
         src_path = os.path.join(self.pipe_path,"block_group")
         sys.path.append(src_path)
         
@@ -287,6 +287,7 @@ class ZRP_Predict_CensusTract(BaseZRP):
         input_data: pd.DataFrame
             Dataframe to be transformed
         """        
+
         src_path = os.path.join(self.pipe_path,"census_tract")
         sys.path.append(src_path)
         
@@ -363,6 +364,7 @@ class ZRP_Predict(BaseZRP):
         input_data: pd.DataFrame
             Dataframe to be transformed
         """        
+
         # Load Data
         try:
             data = input_data.copy()
@@ -434,7 +436,7 @@ class FEtoPredict(BaseZRP):
     ----------
     pipe_path: str
         Folder path to directory containing pipeline
-    pip_type: str, (default='census_tract')
+    pipe_type: str, (default='census_tract')
         Type of pipeline that generated the engineered data.
         Options: 'block_group', 'census_tract', or 'zip_code'
     """
@@ -461,7 +463,7 @@ class FEtoPredict(BaseZRP):
         model.load_model(os.path.join(src_path,"model.txt"))
 #         model = pd.read_pickle(os.path.join(self.pipe_path, f"{pipe_type}/model.pkl") )
         # Load Data
-        assert not input_data.empty, "Feature engineered data is empty or missing. Please provide the feature engineered dataas `input_data` to generate predictions."
+        assert not input_data.empty, "Feature engineered data is empty or missing. Please provide the feature engineered data as `input_data` to generate predictions."
         fe_data = input_data.copy()
         fe_matrix = xgboost.DMatrix(fe_data)
 
@@ -469,6 +471,7 @@ class FEtoPredict(BaseZRP):
         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         proxies[f'source_{pipe_type}'] = 1        
+
         
         if save_table:
             make_directory()

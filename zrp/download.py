@@ -43,7 +43,8 @@ def download_progress(url, fname):
     return fname
 
 
-def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tables_output_zip_fname, geo_yr="2019"):
+def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tables_output_zip_fname, geo_yr="2019",
+                                     acs_yr="2019", acs_range="5yr"):
     """
     Downloads look up tables and file them within the module.
     This downloads the zip file from the repository, extracts it, renames it, then moves the
@@ -78,12 +79,18 @@ def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tab
     # Clear old look up table directories
     data_dir = os.path.join(cwd, 'data')
     geo_data_dir = os.path.join(data_dir, f'processed/geo/{geo_yr}')
+    acs_data_dir = os.path.join(data_dir, f'processed/acs/{acs_yr}/{acs_range}')
+
     if os.path.isdir(geo_data_dir):
         shutil.rmtree(geo_data_dir)
+    if os.path.isdir(acs_data_dir):
+        shutil.rmtree(acs_data_dir)
+
     print("Old geo lookup table data cleared out.")
 
     # Migrate lookup tables
     dl_geo_dir = os.path.join(cwd, lookup_tables_output_fname, f'geo/{geo_yr}')
+    dl_acs_dir = os.path.join(cwd, lookup_tables_output_fname, f'acs/{acs_yr}/{acs_range}')
 
     if os.path.isdir(dl_geo_dir):
         shutil.move(dl_geo_dir, geo_data_dir)
@@ -91,6 +98,11 @@ def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tab
     else:
         warnings.warn(f"The geo lookup data was not found in {dl_geo_dir}. Ensure you're requesting a valid year. "
                       "Consult the lookup_tables release to troubleshoot.")
+    if os.path.isdir(dl_acs_dir):
+        shutil.move(dl_acs_dir, acs_data_dir)
+    else:
+        warnings.warn(f"The acs lookup data was not found in {dl_acs_dir}. Ensure you're requesting a valid year and"
+                      "year range. Consult the lookup_tables release to troubleshoot.")
 
     # Remove rest of lookup table folder
     shutil.rmtree(path_to_lookup_tables)

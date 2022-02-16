@@ -1,12 +1,15 @@
 Zest Race Predictor
 ____________________
 
-This tool allows users to predict race by only providing an individual's name and address as inputs. The nuance that this tool exploits, however, that gives it far superior accuracy to the Bayesian Improved Surname Geocoding (BISG) tool used by fair lending institutions today, is use of American Community Survey (ACS) data. By cross referencing with our ACS data lookup tables, we've trained models with data as low fedelity as an individuals census block group. Additionally, using ACS data, we've bolstered our training input feature vectors with additional insights such as percentages of a racial group in a census tract, or average houshold income of a census tract. 
+Zest Race Predictor (ZRP) allows its users to estimate race and ethnicty based on an individual's name and home address. ZRP improves upon the Bayesian Improved Surname Geocoding (BISG) method developed by RAND Corporation that is used in fair lending analysis at institutions today.  Our intent is to improve the accuracy of fair lending analysis by using more data and better math, and thereby improve our understanding of disparate impact and disparate treatment of protected-status borrowers.  Armed with a better understanding of the disparities that exist in our financial system, we can highlight inequities create a roadmap to improve equity in access to finance.
+
+ZRP leverages modern predictive algorithms (in particular gradient boosting) in combination with block group and tract-level American Community Survey (ACS) data. By locating each address within a block group or census tract, and referencing demographic attributes associated with that granular geolocation, we can provide trained models with data as high fidelity as Census block group.  The predictive features used in the model include such demographic attributes as percentage of residences identifying as a particular race/ethnicity and average houshold income.  Example usage and model training procedures are provided. 
+
 
 Notes
 _____
 
-This is the preliminary version and implementation of the ZRP tool. We're dedicated to continue improving both the algorithm and documentation. 
+This is the preliminary version and implementation of the ZRP tool. We're dedicated to continue improving both the algorithm and documentation and hope that government agencies, lenders, citizen data scientists and other interested parties will help us improve the model.
 
 
 Install
@@ -48,19 +51,213 @@ The US Census Bureau details that, "the American Community Survey (ACS) is an on
 ACS data is available in 1 or 5 year spans. The 5yr ACS data is the most comprehensive & is available at more granular levels than 1yr data. It is thus used in this work.
 
 
-The Models and API
-__________
-
-The ZRP can be broken down into four main segments: preprocessing, geocoding, American Community Survey(ACS) integration, and modeling/predictions.
-
-
-
 Usage and Examples
 ___________
 
 To get started using the ZRP, first ensure the download is complete (as described above) and xgboost == 1.0.2 
 
-Next, check out the guide in the examples folder.
+Check out the guides in the `examples <./examples>`_ folder. Clone the repo in order to obtain the example notebooks and data; this is not provided in the pip installable package. If you're experiencing issues, first consult our `common issues guide <./common_issues.rst>`_.
+
+Next, we present the primary ways you'll use ZRP. 
+
+ZRP Predict
+=============
+
+**Summary of commands:**
+::
+
+  >>> from zrp import ZRP
+  >>> zest_race_predictor = ZRP()
+  >>> zest_race_predictor.fit()
+  >>> zrp_output = zest_race_predictor.transform(input_dataframe)
+
+**Breaking down key commands**
+::
+
+  >>> zest_race_predictor = ZRP()
+  
+- **ZRP(pipe_path=None, support_files_path="data/processed", key="ZEST_KEY", first_name="first_name", middle_name="middle_name", last_name="last_name", house_number="house_number", street_address="street_address", city="city", state="state", zip_code="zip_code", race='race', proxy="probs", census_tract=None, street_address_2=None, name_prefix=None, name_suffix=None, na_values=None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=49, year="2019", span="5", runname="test")**
+
+  -  What it does:
+
+     - Prepares data to generate race & ethnicity proxies
+
+  You can find parameter descriptions in the `ZRP class <./zrp/zrp.py>`_ and it's `parent class <./zrp/prepare/base.py>`_.
+
+::
+
+  >>> zrp_output = zest_race_predictor.transform(input_dataframe)
+  
+- **zest_race_predictor.transform(df)**
+
+  -  What it does:
+
+     - Processes input data and generates ZRP proxy predictions.
+     - Attempts to predict on block group, then census tract, then zip code based on which level ACS data is found for. If Geo level data is unattainable, the BISG proxy is computed. No prediction returned if BISG cannot be computed either.
+
+
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ | Parameters |                                                                                                                          |
+ +============+==========================================================================================================================+
+ |            | **df** : *{DataFrame}* Pandas dataframe containing input data (see below for necessary columns)                          |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+
+Input data, **df**, into the prediction/modeling pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, and zest key. Consult our `common issues guide <./common_issues.rst>`_ to ensure you're input data is the correct format.
+
+-  Output: A dataframe with the following columns: AAPI	AIAN	BLACK	HISPANIC	WHITE	source_block_group	source_zip_code	source_bisg 
+   ::
+
+      >>> zrp_output
+      
+     =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
+                  AAPI        AIAN        BLACK       HISPANIC    WHITE       source_block_group    source_census_tract    source_zip_code    OTHER   
+     =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
+      ZEST_KEY                                                                                                                                        
+      10          0.021916    0.021960    0.004889    0.012153    0.939082    1.0                   NaN                    NaN                NaN     
+      100         0.009462    0.013033    0.003875    0.008469    0.965162    1.0                   NaN                    NaN                NaN     
+      103         0.107332    0.000674    0.000584    0.021980    0.869429    1.0                   NaN                    NaN                NaN     
+      106         0.177411    0.015208    0.003767    0.041668    0.761946    1.0                   NaN                    NaN                NaN     
+      109         0.000541    0.000416    0.000376    0.000932    0.997736    1.0                   NaN                    NaN                NaN     
+      ...         ...         ...         ...         ...         ...         ...                   ...                    ...                ...     
+      556         NaN         NaN         NaN         NaN         NaN         NaN                   NaN                    NaN                NaN     
+      557         NaN         NaN         NaN         NaN         NaN         NaN                   NaN                    NaN                NaN     
+     =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
+
+
+ZRP Build
+=============
+
+**Summary of commands**
+::
+
+  >>> from zrp.modeling import ZRP_Build
+  >>> zest_race_predictor_builder = ZRP_Build('/path/to/desired/output/directory')
+  >>> zest_race_predictor_builder.fit()
+  >>> zrp_build_output = zest_race_predictor_builder.transform(input_training_data)
+
+**Breaking down key commands**
+::
+
+  >>> zest_race_predictor_builder = ZRP_Build('/path/to/desired/output/directory')
+
+- **ZRP_Build(file_path, zrp_model_name = 'zrp_0', zrp_model_source ='ct')**
+
+  -  What it does:
+
+     - Prepares the class that builds the new custom ZRP model.
+
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ | Parameters |                                                                                                                          |
+ +============+==========================================================================================================================+
+ |            | **file_path** : *{str}* The path where pipeline, model, and supporting data are saved.                                   |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ |            | **zrp_model_name** : *{str}* Name of zrp_model.                                                                          |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ |            | **zrp_model_source** : *{str}* Indicates the source of zrp_modeling data to use.                                         |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ 
+ You can find more detailed parameter descriptions in the `ZRP_Build class <./zrp/modeling/pipeline_builder.py>`_. ZRP_Build() also inherits initlizing parameters from its `parent class <./zrp/prepare/base.py>`_.
+     
+::
+
+  >>> zrp_build_output = zest_race_predictor_builder.transform(input_training_data)
+
+- **zest_race_predictor_builder.transform(df)**
+
+  -  What it does:
+
+     - Builds a new custom ZRP model trained off of user input data when supplied with standard ZRP requirements including name, address, and race 
+     - Produces a custom model-pipeline. The pipeline, model, and supporting data are saved automatically to "~/data/experiments/model_source/data/" in the support files path defined.
+     - The class assumes data is not broken into train and test sets, performs this split itself, and outputs predictions on the test set. 
+
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ | Parameters |                                                                                                                          |
+ +============+==========================================================================================================================+
+ |            | **df** : *{DataFrame}* Pandas dataframe containing input data (see below for necessary columns)                          |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+
+Input data, **df**, into this pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, zest key, and race. Consult our `common issues guide <./common_issues.rst>`_ to ensure you're input data is the correct format.
+
+-  Output: A dictionary of race & ethnicity probablities and labels.
+
+
+Addition Runs of Your Custom Model
+==================================
+After having run ZRP_Build() you can re-use your custome model just like you run ours. All you must do is specify the path to the generated model and pipelines (this path is the same path as '/path/to/desired/output/directory' that you defined previously when running ZRP_Build() in the example above; we call this 'pipe_path'). Thus, you would run:
+::
+
+  >>> from zrp import ZRP
+  >>> zest_race_predictor = ZRP('pipe_path')
+  >>> zest_race_predictor.fit()
+  >>> zrp_output = zest_race_predictor.transform(input_dataframe)
+
+
+
+Validation
+__________
+
+
+The models included in this package were trained on publicly-available voter registration data and validated multiple times: on hold out sets of voter registration data and on a national sample of PPP loan forgiveness data.  The results were consistent across tests:  20-30% more African Americans correctily identified as African American, and 60% fewer whites identified as people of color as compared with the status quo BISG method.  
+
+Performance on the national PPP loan forgiveness dataset was as follows (comparing ZRP softmax with the BISG-80 method):
+
+*African American*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.571       0.700       +23% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.954       0.961       +01% (F)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.046       0.039       -15% (F)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.429       0.300       -30% (F)
+====================== =========== =========== ===========
+
+
+*Asian American and Pacific Islander*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.683       0.777       +14% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.982       0.977       -01% (U)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.018       0.023       -28% (F)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.317       0.223       -30% (F)
+====================== =========== =========== ===========
+
+
+*Non-White Hispanic*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.599       0.711       +19% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.979       0.973       -01% (U)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.021       0.027       -29% (F)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.401       0.289       -28% (F)
+====================== =========== =========== ===========
+
+*White, Non-Hispanic*
+
+====================== =========== =========== ===========
+Statistic              BISG        ZRP         Pct. Diff
+---------------------- ----------- ----------- ----------- 
+True Positive Rate     0.758       0.906       +19% (F)
+---------------------- ----------- ----------- ----------- 
+True Negative Rate     0.758       0.741       -02% (U)
+---------------------- ----------- ----------- ----------- 
+False Positive Rate    0.242       0.259       +07% (U)
+---------------------- ----------- ----------- ----------- 
+False Negative Rate    0.241       0.094       -61% (F)
+====================== =========== =========== ===========
 
 
 Authors
@@ -77,11 +274,9 @@ _____________
 
 Contributions are encouraged! For small bug fixes and minor improvements, feel free to just open a PR. For larger changes, please open an issue first so that other contributors can discuss your plan, avoid duplicated work, and ensure it aligns with the goals of the project. Be sure to also follow the `Code of Conduct <./CODE_OF_CONDUCT.md>`_. Thanks!
 
-
-Releases
-________
-
-Follow the steps in the `releasing doc <./releasing.rst>`_ to push new releases to Pypi and Github releases. With respect to Github releases, we provide new releases to ensure relevant data and look up tables requisite for package download and use are consistently up to date. With each release, the __version__ field in the about.py file must be updated correspondingly (instructions in the resleasing doc). 
+Maintainers
+===========
+Maintainers should additionally consult our documentation on `releasing <./releasing.rst>`_. Follow the steps there to push new releases to Pypi and Github releases. With respect to Github releases, we provide new releases to ensure relevant pipelines and look up tables requisite for package download and use are consistently up to date. 
 
 Wishlist
 __________

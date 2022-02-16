@@ -1,3 +1,5 @@
+from pycm import ConfusionMatrix
+
 from zrp.prepare.utils import load_file
 from zrp.prepare.preprocessing import set_id
 from pycm import ConfusionMatrix
@@ -23,8 +25,8 @@ class ZRP_Performance():
         File path to ground truth data
     """
 
-    def __init__(self, proxy_data_path = None,
-ground_truth_path = None, key = "ZEST_KEY", race = "race"):
+    def __init__(self, proxy_data_path=None,
+                 ground_truth_path=None, key="ZEST_KEY", race="race"):
         self.key = key
         self.proxy_data_path = proxy_data_path
         self.ground_truth_path = ground_truth_path
@@ -48,7 +50,7 @@ ground_truth_path = None, key = "ZEST_KEY", race = "race"):
         try:
             proxies = proxy_data.copy()
         except AttributeError:
-            proxies = load_file(self.proxy_data_path) 
+            proxies = load_file(self.proxy_data_path)
         try:
             ground_truth = ground_truth.copy()
         except AttributeError:
@@ -76,4 +78,3 @@ ground_truth_path = None, key = "ZEST_KEY", race = "race"):
         performance_dict['AUC'] = cm.AUC
 
         return(performance_dict)
-    

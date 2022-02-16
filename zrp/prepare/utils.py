@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy as np 
+import numpy as np
 import os
 import re
 import sys
@@ -9,6 +9,7 @@ import fiona
 import warnings
 warnings.filterwarnings("ignore")
     
+
 def load_json(path):
     """
     Load json files
@@ -21,6 +22,7 @@ def load_json(path):
     with open(path, "r") as infile:
         data = json.load(infile)
     return data
+
 
 def save_json(data, path, file_name):
     """
@@ -37,7 +39,8 @@ def save_json(data, path, file_name):
     """    
     with open(os.path.join(path, file_name), "w") as outfile:
         json.dump(data, outfile)
-        
+
+
 def save_dataframe(data, path, file_name):
     """
     Save dataframe as parquet
@@ -52,7 +55,8 @@ def save_dataframe(data, path, file_name):
         Name of file
     """      
     data.to_parquet(os.path.join(path, file_name))
-    return(print("Output saved"))
+    return (print("Output saved"))
+
 
 def save_feather(data, path, file_name):
     """
@@ -80,10 +84,11 @@ def make_directory(output_directory = None):
     output_directory: str
         Filepath or name of directory to create
     """      
+
     try:
         if output_directory == None:
             os.makedirs("artifacts")
-        else: 
+        else:
             os.makedirs(os.path.join(output_directory))
     except FileExistsError:
         print("Directory already exists")
@@ -98,6 +103,7 @@ def load_file(file_path):
     file_path: str
         File path of file to load
     """
+
     na_values = ["None",
                  "NAN",
                  "NONE",
@@ -109,18 +115,18 @@ def load_file(file_path):
                  "-666666666",
                  "-999999999",
                  "-888888888"
-                ]
+                 ]
     if file_path.endswith(".csv"):
         data = pd.read_csv(file_path,
-                           dtype = str,
-                           na_values = na_values)
+                           dtype=str,
+                           na_values=na_values)
     elif file_path.endswith(".feather"):
         data = pd.read_feather(file_path)
         data = data.astype(str)
     elif file_path.endswith(".xlsx"):
         data = pd.read_excel(file_path,
-                             dtype = str,
-                             na_values = na_values)
+                             dtype=str,
+                             na_values=na_values)
     elif file_path.endswith(".parquet"):
         data = pd.read_parquet(file_path)
         data = data.astype(str)
@@ -129,23 +135,24 @@ def load_file(file_path):
             first_line = f.readline()
             if "|" in first_line:
                 data = pd.read_csv(file_path,
-                                   sep = "|",
-                                   dtype = str,
-                                   na_values = na_values)
+                                   sep="|",
+                                   dtype=str,
+                                   na_values=na_values)
             elif "," in first_line:
                 data = pd.read_csv(file_path,
-                                   sep = ",",
-                                   dtype = str,
-                                   na_values = na_values)
+                                   sep=",",
+                                   dtype=str,
+                                   na_values=na_values)
             else:
                 data = pd.read_csv(file_path,
-                                   sep = "\t",
-                                   dtype = str,
-                                   na_values = na_values)
+                                   sep="\t",
+                                   dtype=str,
+                                   na_values=na_values)
     else:
         raise ValueError("Unrecognizable table format")
-    return(data)
-    
+    return (data)
+
+
 def load_mappings(support_files_path):
     """
     Loads support mapping files
@@ -166,10 +173,11 @@ def load_mappings(support_files_path):
                                                   "directionals_mapping.json"))
     unit_mapping = load_json(os.path.join(mapping_file_path,
                                           "unit_mapping.json"))
-    return(state_mapping,
-           street_suffix_mapping,
-           directionals_mapping,
-           unit_mapping)
+    return (state_mapping,
+            street_suffix_mapping,
+            directionals_mapping,
+            unit_mapping)
+
 
 def gdbToDf_short(file, indx):
     """
@@ -193,13 +201,11 @@ def gdbToDf_short(file, indx):
                 dictList.append(next(src)["properties"])
     df = pd.DataFrame(
         dictList,
-        columns = dictList[0].keys(),
+        columns=dictList[0].keys(),
     )
-    return df    
+    return df
 
 
-
-    
 def acs_rename(data):
     """
     Rename ACS index column
@@ -212,6 +218,7 @@ def acs_rename(data):
     data_cols = list(data.columns[1:])
     data.columns = ["result"] + data_cols
     return data
+
 
 def acs_trt_split(data, feature):
     """
@@ -246,9 +253,11 @@ def acs_trt_split(data, feature):
     data["GEO_KEY"] = data["STATEFP"] + data["COUNTYFP"] + data["TRACTCE"]
     if "TRACTCE10" in data.columns:
         data["GEO_KEY_10"] = data["STATEFP"] + data["COUNTYFP"] + data["TRACTCE10"]
-        data = data.drop("TRACTCE10", axis = 1)
-    data = data.drop([feature, "STATEFP", "COUNTYFP", "TRACTCE"], axis = 1)
+        data = data.drop("TRACTCE10", axis=1)
+    data = data.drop([feature, "STATEFP", "COUNTYFP", "TRACTCE"], axis=1)
+
     return data
+
 
 def acs_zip_split(dataframe, feature):
     """
@@ -266,15 +275,16 @@ def acs_zip_split(dataframe, feature):
         for i in range(len(dataframe))
     ]
     zcta5 = [
-        re.split(f".*zip code tabulation area:", acs_zip["result"].iloc[i])[1]
-        for i in range(len(acs_zip))
+        re.split(f".*zip code tabulation area:", dataframe["result"].iloc[i])[1]
+        for i in range(len(dataframe))
     ]
     dataframe["STATEFP"] = state
     dataframe["ZEST_ZIP"] = zcta5
     dataframe = dataframe.drop(
         ["Unnamed: 0", "result"],
-        axis = 1
+        axis=1
     )
+
 
 def most_common(lizt):
     """
@@ -285,4 +295,4 @@ def most_common(lizt):
     lizt: list
         List to extract most common element from
     """
-    return max(set(lizt), key = lizt.count)
+    return max(set(lizt), key=lizt.count)

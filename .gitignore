@@ -14,6 +14,7 @@ zrp/modeling/models/zip_code/pipeline_builder_basezrp.py
 extras/
 extras/processed.zip
 zrp/data/processed/geo/
+zrp/data/processed/acs
 artifacts/
 
 zrp/modeling/models/block_group/fl_ids.json
