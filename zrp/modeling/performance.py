@@ -2,9 +2,9 @@ from pycm import ConfusionMatrix
 
 from zrp.prepare.utils import load_file
 from zrp.prepare.preprocessing import set_id
+from pycm import ConfusionMatrix
 import pandas as pd
 import numpy as np
-from pycm import *
 import os
 import re
 
@@ -15,8 +15,6 @@ class ZRP_Performance():
     
     Parameters
     ----------
-    data: dataframe
-        dataframe with user data
     key: str 
         Key to set as index. If not provided, a key will be generated.
     race: str
@@ -37,16 +35,17 @@ class ZRP_Performance():
     def fit(self):
         return self
 
-    def transform(self, proxy_data=None, ground_truth=None):
+    def transform(self, proxy_data = None, ground_truth = None):
         """
-        Returns confusion matrix analysis of ZRP performance against fround in the form of a dictionary
+        Returns confusion matrix analysis of ZRP performance against gound truth in the form of a dictionary
 
         Parameters
         ----------
         proxy_data: pd.dataframe
             Dataframe containing proxy race labels
         ground_truth: pd.dataframe
-            Dataframe containing ground truth race labels"""
+            Dataframe containing ground truth race labels
+            """
         # Load Data
         try:
             proxies = proxy_data.copy()
@@ -59,7 +58,7 @@ class ZRP_Performance():
 
         proxies = set_id(proxies, self.key)
         ground_truth = set_id(ground_truth, self.key)
-        proxies = proxies[self.race]
+        proxies = proxies[f"{self.race}_proxy"]
         ground_truth = ground_truth[self.race]
 
         cm = ConfusionMatrix(
@@ -78,4 +77,4 @@ class ZRP_Performance():
         performance_dict['TNR'] = cm.TNR
         performance_dict['AUC'] = cm.AUC
 
-        return (performance_dict)
+        return(performance_dict)

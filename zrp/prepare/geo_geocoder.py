@@ -51,13 +51,17 @@ def get_reduced(tmp_data):
         nomatch[na_match_cols] = None
         nomatch = nomatch.set_index('ZEST_KEY')
         data_out = pd.concat([geocd, nomatch])
-        data_out["GEOID_ZIP"] = data_out["ZCTA5CE"].fillna(data_out.zip_code)
-
+        data_out["GEOID_ZIP"] = np.where(data_out["ZCTA5CE"].isna(), data_out.zip_code, data_out["ZCTA5CE"])
+        
         data_out = data_out.filter(keep_cols)
     else:
         data_out = geocd.filter(keep_cols)
-        data_out["GEOID_ZIP"] = data_out["ZCTA5CE"].fillna(data_out.zip_code)
-    return (data_out)
+        data_out["GEOID_ZIP"] = np.where(data_out["ZCTA5CE"].isna(), data_out.zip_code, data_out["ZCTA5CE"])
+    
+    data_out["GEOID"] = None
+    data_out["GEOID"].fillna(data_out["GEOID_BG"]).fillna(data_out["GEOID_CT"]).fillna(data_out["GEOID_ZIP"])
+    return(data_out)
+
 
 
 def geo_search(geo_files_path, year, st_cty_code):
@@ -130,9 +134,7 @@ def geo_range(geo_df):
         geo_df.FROMHN > geo_df.TOHN,
         geo_df.FROMHN,
         geo_df.TOHN)
-    geo_df["small"] = pd.to_numeric(geo_df["small"], errors="coerce").fillna(0).astype(np.int64)
-    geo_df["big"] = pd.to_numeric(geo_df["big"], errors="coerce").fillna(0).astype(np.int64)
-    return (geo_df)
+    return(geo_df)    
 
 
 class ZGeo(BaseZRP):
@@ -157,16 +159,13 @@ class ZGeo(BaseZRP):
             Dataframe with geo data
         """
         geo_df["HN_Match"] = np.where(
-            (geo_df[self.house_number].astype(float) <= geo_df.big.astype(float)) &
-            (geo_df[self.house_number].astype(float) >= geo_df.small.astype(float)),
+            (geo_df[self.house_number] <= geo_df.big) &
+            (geo_df[self.house_number] >= geo_df.small),
             1,
             0)
         geo_df["ZIP_Match"] = np.where(geo_df.ZEST_ZIP.astype(float) == geo_df[self.zip_code].astype(float), 1, 0)
-        # update use l/rfrom/toadd + side
-        geo_df["Parity_Match"] = np.where(geo_df.small.astype(float) % 2 == geo_df[self.house_number].astype(float) % 2,
-                                          1, 0)
-        return (geo_df)
-
+        return(geo_df)    
+    
     def transform(self, input_data, geo, processed, replicate, save_table=True):
         """
         Returns a DataFrame of geocoded addresses.
@@ -177,7 +176,7 @@ class ZGeo(BaseZRP):
         :param replicate: A boolean.
         :param save_table: A boolean. Tables are saved if True. Default is True.
         :return: A DataFrame
-        """
+
         curpath = dirname(__file__)
         out_geo_path = os.path.join(curpath, '../data/processed/geo/2019')
 
@@ -189,19 +188,14 @@ class ZGeo(BaseZRP):
         except AttributeError:
             data = load_file(self.file_path)
             print("   Data file is loaded")
-
-        if self.key in data.columns:
-            data["ZEST_KEY_COL"] = data[self.key]
-        else:
-            data["ZEST_KEY_COL"] = data.index
-
+            
         prg = ProcessGeo()
         data = prg.transform(data, processed=processed, replicate=replicate)
+        
         print("   [Start] Mapping geo data")
-        data[self.house_number] = pd.to_numeric(data[self.house_number], errors="coerce").fillna(0).astype(np.int64)
         state = most_common(list(data[self.state].unique()))
-
-        if len(geo) > 2:
+        
+        if len(geo)>2:
             file_list = geo_search(out_geo_path, self.year, geo)
             aef = geo_read(file_list)
         if len(geo) <= 2:
@@ -210,12 +204,17 @@ class ZGeo(BaseZRP):
         data["ZEST_FULLNAME"] = data[self.street_address]
         print("      ...merge user input & lookup table")
         geo_df = aef.merge(data, on="ZEST_FULLNAME", how="right")
+        
         geo_df = geo_range(geo_df)
+
         geo_df = self.geo_match(geo_df)
+        
         print("      ...mapping")
         all_keys = list(geo_df[self.key].unique())
         odf = geo_df.copy()
         geo_df = geo_zoom(geo_df)
+        da_zoom = geo_df.copy()
+        
         geocoded_keys = list(geo_df[self.key].unique())
         add_na_keys = list(set(all_keys) - set(geocoded_keys))
         odf = odf[odf[self.key].isin(add_na_keys)]

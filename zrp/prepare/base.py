@@ -6,9 +6,9 @@ class BaseZRP():
     """
     Prepares data to generate race & ethnicity proxies
     
-    
     Parameters
     ----------
+
     support_files_path: "data/processed"
         File path with support data.
     key: str, default 'ZEST_KEY'
@@ -31,8 +31,6 @@ class BaseZRP():
         Name of zip or postal code column.
     race: str, default 'race'
         Name of the race column
-    proxy: str, default 'probs'
-        Specifies whether to return proxy results as 'probs' (the proxy probabilities) or 'labels'.
     census_tract: str
         Name of census tract column
     street_address_2: str, optional
@@ -63,7 +61,7 @@ class BaseZRP():
     def __init__(self, support_files_path="data/processed", key="ZEST_KEY", first_name="first_name",
                  middle_name="middle_name", last_name="last_name", house_number="house_number",
                  street_address="street_address", city="city", state="state", zip_code="zip_code", race='race',
-                 proxy="probs", census_tract=None, street_address_2=None, name_prefix=None, name_suffix=None,
+                 census_tract=None, street_address_2=None, name_prefix=None, name_suffix=None,
                  na_values=None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=49, year="2019",
                  span="5", runname="test"):
         self.key = key
@@ -78,13 +76,13 @@ class BaseZRP():
         self.state = state
         self.zip_code = zip_code
         self.census_tract = census_tract
+        self.block_group = block_group
         self.file_path = file_path
         self.support_files_path = support_files_path
         self.na_values = na_values
         self.geocode = geocode
         self.readout = readout
         self.bisg = bisg
-        self.proxy = proxy
         self.race = race
         self.n_jobs = n_jobs
         self.year = year

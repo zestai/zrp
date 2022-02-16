@@ -34,7 +34,7 @@ class ACS_Parser():
     n_jobs: int
         Number of jobs in parallel        
     """
-
+    
     def __init__(self, support_files_path, state_level, n_jobs=-1, year='2019', span='5'):
         self.support_files_path = support_files_path
         self.year = year
@@ -180,8 +180,6 @@ class ACS_Parser():
             tmp_data_1.columns = new_col_names
             tmp_data_2.columns = new_col_names
 
-            tmp_data = pd.concat([tmp_data_1, tmp_data_2], axis=0)
-
         except pd.errors.EmptyDataError:
             print(f'   Note: {dat_file_1} was empty.')
             tmp_data = pd.read_csv(dat_file_2, sep=",", header=None, dtype=str)
@@ -228,6 +226,7 @@ class ACS_Parser():
         dat_file = os.path.join(self.raw_acs_path,
                                 "All_Geographies",
                                 sequence_dict[str(i)]['file'])
+
         tmp_data = pd.read_csv(dat_file, sep=",", header=None, dtype=str)
         seq_file = os.path.join(self.raw_acs_path,
                                 sequence_dict[str(i)]['sequence'])
@@ -248,6 +247,7 @@ class ACS_Parser():
         if save_table:
             file_name = "".join(["Zest_ACS_", self.state_level, "_seq", str(i),
                                  "_", self.year, '_', self.span, 'yr.parquet'])
+
             save_dataframe(tmp_data, self.out_acs_path, file_name)
         return (sequence_dict[str(i)])
 
@@ -259,6 +259,7 @@ class ACS_Parser():
             Optional save
         """
         if save_table:
+
             make_directory(output_directory=self.raw_acs_path)
             make_directory(output_directory=self.out_acs_path)
             make_directory(output_directory=os.path.join(self.raw_acs_path,
@@ -274,6 +275,7 @@ class ACS_Parser():
                         seq_str = "".join([self.fol_acs_tmp, "seq", sequence, ".xlsx"])
                         sequence_dict[sequence]["sequence"] = seq_str
 
+
             results = Parallel(n_jobs=self.n_jobs, verbose=1)(
                 delayed((self.acs_parse_5yr))(sequence_dict, sni, save_table) for sni in
                 tqdm(list(sequence_dict.keys())))
@@ -288,6 +290,7 @@ class ACS_Parser():
                         sequence = str(int(sequence))
                         seq_str = "".join([self.fol_acs_tmp, "seq", sequence, ".xlsx"])
                         sequence_dict[sequence]["sequence"] = seq_str
+
 
             results = Parallel(n_jobs=self.n_jobs, verbose=1)(
                 delayed((self.acs_parse_1yr))(sequence_dict, sni, save_table) for sni in
@@ -393,6 +396,7 @@ class ACS_LookupBuilder():
         List of ACS table names to select data to include in the Lookup table
     """
 
+
     def __init__(self, support_files_path, geo, year='2019', span='5', n_jobs=-1, required_tables=None):
         self.support_files_path = support_files_path
         self.geo = geo
@@ -436,12 +440,14 @@ class ACS_LookupBuilder():
         geo_pattern: str
             Pattern to identify geo specific data
         """
-        drop_cols = []  # 'FILEID', 'FILETYPE', 'STUSAB', 'CHARITER', 'SEQUENCE', 'LOGRECNO', 'State'
+        drop_cols = []
+
         long_name = 'GEO_NAME'
         long_id = 'EXT_GEOID'
 
         tmp_data = load_file(os.path.join(self.raw_acs_path, file))
         tmp_data = self.acs_select_features(tmp_data)
+
         tmp_data = tmp_data.rename(columns={'GEOID': long_id,
                                             'Geography Name': long_name})
 
@@ -476,6 +482,7 @@ class ACS_LookupBuilder():
 
         if self.geo == 'zip':
             geo_pattern = '^ZCTA5'
+
             parsed_file_list = [file for file in os.listdir(self.raw_acs_path) if 'ACS_us_seq' in file]
 
             output = Parallel(n_jobs=self.n_jobs, verbose=10)(
@@ -483,6 +490,7 @@ class ACS_LookupBuilder():
 
         elif self.geo == 'block group':
             geo_pattern = '^BLOCK GROUP'
+
             parsed_file_list = [file for file in os.listdir(self.raw_acs_path) if 'ACS_us_seq' not in file]
             results = Parallel(n_jobs=self.n_jobs, verbose=1)(
                 delayed(self.parsed_acs_proc)(file, geo_pattern) for file in parsed_file_list)
@@ -510,6 +518,7 @@ class ACS_LookupBuilder():
 
         elif self.geo == 'tract':
             geo_pattern = '^CENSUS TRACT'
+
             parsed_file_list = [file for file in os.listdir(self.raw_acs_path) if 'ACS_us_seq' not in file]
             results = Parallel(n_jobs=self.n_jobs, verbose=10)(
                 delayed(self.parsed_acs_proc)(file, geo_pattern) for file in parsed_file_list)
@@ -539,8 +548,8 @@ class ACS_LookupBuilder():
 
         # optional save 
         if save_table:
-            make_directory(output_directory=self.raw_acs_path)
-            make_directory(output_directory=self.out_acs_path)
+            make_directory(output_directory = self.raw_acs_path)
+            make_directory(output_directory = self.out_acs_path)
             geo_name = "".join(self.geo.split())
             filename = "".join(["Zest_ACS_Lookup_", self.year, self.span, 'yr_', geo_name, '.parquet'])
             print(f"Saving {filename}")
