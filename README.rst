@@ -123,6 +123,7 @@ Input data, **df**, into the prediction/modeling pipeline **MUST** contain the f
       557         NaN         NaN         NaN         NaN         NaN         NaN                   NaN                    NaN                NaN     
      =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
 
+One of the parameters to the `parent class <./zrp/prepare/base.py>`_ that ZRP() inherits from is ``file_path``. This parameter allows you to specify where the ``artifacts/`` folder is outputted during the run of the ZRP. Once the run is complete, the ``artifacts/`` folder will contain the outputted race/ethnicity proxies and additional logs documenting the validity of input data. ``file_path`` **need not** be specified. If it is not defined, the ``artifacts/`` folder will be placed in the same directory of the script running zrp. Subsequent runs will, however, overwrite the files in ``artifacts/``; providing a unique directory path for ``file_path`` will avoid this.
 
 ZRP Build
 =============
@@ -180,6 +181,7 @@ Input data, **df**, into this pipeline **MUST** contain the following columns: f
 
 -  Output: A dictionary of race & ethnicity probablities and labels.
 
+As mentioned in the ZRP Predict section above, once the run is complete, the ``artifacts/`` folder will contain the outputted race/ethnicity proxies and additional logs documenting the validity of input data. Similarly, defining ``file_path`` **need not** be specified, but providing a unique directory path for ``file_path`` will avoid overwriting the `artifacts/` folder. When running ZRP Build, however, ``artifacts/`` also contains the processed test and train data, trained model, and pipeline. 
 
 Addition Runs of Your Custom Model
 ==================================
