@@ -61,7 +61,7 @@ class BaseZRP():
     def __init__(self, support_files_path="data/processed", key="ZEST_KEY", first_name="first_name",
                  middle_name="middle_name", last_name="last_name", house_number="house_number",
                  street_address="street_address", city="city", state="state", zip_code="zip_code", race='race',
-                 census_tract=None, street_address_2=None, name_prefix=None, name_suffix=None,
+                 census_tract=None, block_group=None, street_address_2=None, name_prefix=None, name_suffix=None,
                  na_values=None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=49, year="2019",
                  span="5", runname="test"):
         self.key = key

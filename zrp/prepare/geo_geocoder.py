@@ -176,7 +176,7 @@ class ZGeo(BaseZRP):
         :param replicate: A boolean.
         :param save_table: A boolean. Tables are saved if True. Default is True.
         :return: A DataFrame
-
+        """
         curpath = dirname(__file__)
         out_geo_path = os.path.join(curpath, '../data/processed/geo/2019')
 

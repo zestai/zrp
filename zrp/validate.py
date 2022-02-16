@@ -420,20 +420,20 @@ class ValidateGeocoded(BaseValidate):
         validator["is_unique_key"] = self.is_unique_key(data)
         print("     Is key unique:", validator["is_unique_key"]) 
                 
-        validator["pct_na"] = self.check_missing_pct(data, is_input=False)
-        print()
-        try:
-            for i in [self.last_name, self.first_name]:
-                tmp = round(validator["pct_na"][i]*100, 2)
-                assert tmp < 10, f"Too many missing values in required name feature, {i}. {tmp}% of the values are missing. Please review data and reduce missing. Required features include first name and last name." 
-        except (KeyError, ValueError) as e:
-            pass
-        if (not self.census_tract) & (not self.block_group):
-            try:
-                tmp = round(validator["pct_na"][self.house_number]*100, 2)
-                assert tmp < 10, f"Too many missing values in required house number column, {self.house_number}.{tmp}% of the values are missing. Please review data and reduce missing. House number is required to convert addresses to Census geo-identifiers" 
-            except (KeyError, ValueError) as e:
-                pass
+#         validator["pct_na"] = self.check_missing_pct(data, is_input=False)
+#         print()
+#         try:
+#             for i in [self.last_name, self.first_name]:
+#                 tmp = round(validator["pct_na"][i]*100, 2)
+#                 assert tmp < 10, f"Too many missing values in required name feature, {i}. {tmp}% of the values are missing. Please review data and reduce missing. Required features include first name and last name." 
+#         except (KeyError, ValueError) as e:
+#             pass
+#         if (not self.census_tract) & (not self.block_group):
+#             try:
+#                 tmp = round(validator["pct_na"][self.house_number]*100, 2)
+#                 assert tmp < 10, f"Too many missing values in required house number column, {self.house_number}.{tmp}% of the values are missing. Please review data and reduce missing. House number is required to convert addresses to Census geo-identifiers" 
+#             except (KeyError, ValueError) as e:
+#                 pass
         validator["is_geocoded"] = self.is_geocoded(data)
         return(validator)        
     

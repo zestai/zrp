@@ -410,12 +410,12 @@ class ZRP_Predict(BaseZRP):
             out_list.append(out_3)  
             
         proxies_out = pd.concat(out_list)
+
         source_cols = list(set(proxies_out.columns).intersection(set([
             'source_block_group', 'source_census_tract',
             'source_zip_code', 'source_bisg'])))
         proxies_out[source_cols] = proxies_out[source_cols].fillna(0)
-        proxies_out = proxies_out.sort_values(['source_block_group', 'source_census_tract',
-            'source_zip_code', 'source_bisg'])
+        proxies_out = proxies_out.sort_values(source_cols)
         
         if save_table:
             make_directory()

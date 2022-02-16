@@ -105,7 +105,7 @@ class ZRP(BaseZRP):
             self.pipe_path = join(curpath, "modeling/models")
         
         z_predict = ZRP_Predict(pipe_path = self.pipe_path)
-        z_predict.fit()
+        z_predict.fit(prepared_data)
         predict_out = z_predict.transform(prepared_data)
         
         if self.bisg:
