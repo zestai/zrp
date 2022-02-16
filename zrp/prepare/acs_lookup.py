@@ -323,7 +323,7 @@ def acs_census_data(support_files_path, level):
     states = load_json(join(data_path, 'states.json'))
     
     df = pd.DataFrame(columns = misc_args)
-    if level = = 'zip':
+    if level == 'zip':
         temp = censusdata.download(
                 "acs5",
                 2019,
@@ -339,7 +339,7 @@ def acs_census_data(support_files_path, level):
     for i in range(len(states)):
         print("State:", i, "\n")
         
-        if level = = 'tract':
+        if level == 'tract':
             temp = censusdata.download(
                 "acs5",
                 2019,
@@ -353,7 +353,7 @@ def acs_census_data(support_files_path, level):
             df = df.append(temp)
     
 
-        elif level = = 'block group':
+        elif level == 'block group':
             temp = censusdata.download(
                 "acs5",
                 2019,
@@ -479,14 +479,14 @@ class ACS_LookupBuilder():
         assert self.geo in ['zip', 'tract', 'block group'], "Require `geo` to be specified as 'zip', 'tract' or 'block group'"
         output = []
 
-        if self.geo = = 'zip':
+        if self.geo == 'zip':
             geo_pattern = '^ZCTA5'
             parsed_file_list = [file for file in os.listdir(self.raw_acs_path)  if 'ACS_us_seq' in file]
             
             output = Parallel(n_jobs = self.n_jobs, verbose = 10)(delayed(self.parsed_acs_proc)(file, geo_pattern) for file in parsed_file_list)
 
             
-        elif self.geo = = 'block group':
+        elif self.geo == 'block group':
             geo_pattern = '^BLOCK GROUP'
             parsed_file_list = [file for file in os.listdir(self.raw_acs_path)  if 'ACS_us_seq' not in file]
             results = Parallel(n_jobs = self.n_jobs, verbose = 1)(delayed(self.parsed_acs_proc)(file, geo_pattern) for file in parsed_file_list)
@@ -512,7 +512,7 @@ class ACS_LookupBuilder():
                     pass
             print("")
             
-        elif self.geo = = 'tract':
+        elif self.geo == 'tract':
             geo_pattern = '^CENSUS TRACT'
             parsed_file_list = [file for file in os.listdir(self.raw_acs_path)  if 'ACS_us_seq' not in file]
             results = Parallel(n_jobs = self.n_jobs, verbose = 10)(delayed(self.parsed_acs_proc)(file, geo_pattern) for file in parsed_file_list)       
