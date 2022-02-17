@@ -153,7 +153,7 @@ class ACSModelPrep(BaseZRP):
                                     acs_zip)
 
         if save_table:
-            make_directory()
+            make_directory(self.out_path)
             file_name = f"Zest_processed_data_.parquet"
             save_dataframe(data_out, self.out_path, file_name)
         return (data_out)

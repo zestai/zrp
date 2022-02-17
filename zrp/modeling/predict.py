@@ -420,7 +420,7 @@ class ZRP_Predict(BaseZRP):
         proxies_out = proxies_out.sort_values(source_cols)
         
         if save_table:
-            make_directory()
+            make_directory(self.out_path)
             file_name = f"proxy_output.feather"
             save_feather(proxies_out,
                          self.out_path,
@@ -476,7 +476,7 @@ class FEtoPredict(BaseZRP):
 
         
         if save_table:
-            make_directory()
+            make_directory(self.out_path)
             file_name = f"{self.pipe_type}_proxy_output.feather"
             save_feather(proxies,
                          self.out_path,

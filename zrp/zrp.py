@@ -94,7 +94,7 @@ class ZRP(BaseZRP):
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.file_path)
-        make_directory()
+        make_directory(self.out_path)
 
         z_prepare = ZRP_Prepare(file_path=self.file_path)
         z_prepare.fit(data)

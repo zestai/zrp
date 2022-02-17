@@ -224,7 +224,7 @@ class ZGeo(BaseZRP):
         geo_df = get_reduced(geo_df)
 
         if save_table:
-            make_directory()
+            make_directory(self.out_path)
             if self.runname is not None:
                 file_name = f"Zest_Geocoded_{self.runname}_{self.year}__{geo}.parquet"
             else:
