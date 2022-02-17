@@ -23,6 +23,9 @@ from zrp.prepare.utils import load_json, load_file, save_feather, make_directory
 from zrp.prepare.base import BaseZRP
 from zrp.prepare.prepare import ZRP_Prepare
 
+import warnings
+warnings.filterwarnings(action='ignore')
+
 curpath = dirname(__file__)
 
 
@@ -275,6 +278,19 @@ class ZRP_Build(BaseZRP):
         sample_path = self.outputs_path
 
         # Prepare data
+        data = data.rename(columns = {self.first_name : "first_name", 
+                              self.middle_name : "middle_name", 
+                              self.last_name : "last_name",
+                              self.house_number : "house_number", 
+                              self.street_address : "street_address", 
+                              self.city : "city",
+                              self.zip_code : "zip_code",
+                              self.state : "state", 
+                              self.block_group : "block_group", 
+                              self.census_tract : "census_tract"
+                             }
+                  )
+        data = data.drop_duplicates(subset=['ZEST_KEY'])
         z_prepare = ZRP_Prepare(file_path=self.file_path)
         z_prepare.fit(data)
         prepared_data = z_prepare.transform(data)

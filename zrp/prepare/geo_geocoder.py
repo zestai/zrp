@@ -193,6 +193,19 @@ class ZGeo(BaseZRP):
         except AttributeError:
             data = load_file(self.file_path)
             print("   Data file is loaded")
+        
+        data = data.rename(columns = {self.first_name : "first_name", 
+                                      self.middle_name : "middle_name", 
+                                      self.last_name : "last_name",
+                                      self.house_number : "house_number", 
+                                      self.street_address : "street_address", 
+                                      self.city : "city",
+                                      self.zip_code : "zip_code",
+                                      self.state : "state", 
+                                      self.block_group : "block_group", 
+                                      self.census_tract : "census_tract"
+                             }
+                  )
             
         prg = ProcessGeo()
         data = prg.transform(data, processed=processed, replicate=replicate)

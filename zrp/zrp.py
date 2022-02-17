@@ -94,6 +94,20 @@ class ZRP(BaseZRP):
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.file_path)
+            
+        data = data.rename(columns = {self.first_name : "first_name", 
+                              self.middle_name : "middle_name", 
+                              self.last_name : "last_name",
+                              self.house_number : "house_number", 
+                              self.street_address : "street_address", 
+                              self.city : "city",
+                              self.zip_code : "zip_code",
+                              self.state : "state", 
+                              self.block_group : "block_group", 
+                              self.census_tract : "census_tract"
+                             }
+                  )
+        
         make_directory(self.out_path)
 
         z_prepare = ZRP_Prepare(file_path=self.file_path)
