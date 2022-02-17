@@ -328,10 +328,12 @@ class ZRP_Predict(BaseZRP):
     ----------
     pipe_path: str
         Folder path to directory containing pipeline
+    file_path: str
+        Path indicating where to put artifacts folder its files (pipeline, model, and supporting data), generated during intermediate steps.
     """
 
-    def __init__(self, pipe_path, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, pipe_path, file_path=None, *args, **kwargs):
+        super().__init__(file_path=file_path, *args, **kwargs)
         self.pipe_path = pipe_path
         self.census_tract = 'GEOID_CT'
         self.block_group = 'GEOID_BG'

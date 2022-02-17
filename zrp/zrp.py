@@ -72,14 +72,14 @@ class ZRP(BaseZRP):
         Year span of ACS data to use.
     runname: str, default 'test'
     """
-    def __init__(self, pipe_path=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+
+    def __init__(self, file_path=None, pipe_path=None, *args, **kwargs):
+        super().__init__(file_path=file_path, *args, **kwargs)
         self.pipe_path = pipe_path
 
-        
     def fit(self):
         return self
-    
+
     def transform(self, input_data):
         """
         Processes input data and generates ZRP predictions. Generates BISG predictions additionally if specified.
@@ -95,32 +95,30 @@ class ZRP(BaseZRP):
         except AttributeError:
             data = load_file(self.file_path)
         make_directory()
-            
-        z_prepare = ZRP_Prepare()
+
+        z_prepare = ZRP_Prepare(file_path=self.file_path)
         z_prepare.fit(data)
         prepared_data = z_prepare.transform(data)
 
         curpath = dirname(__file__)
         if self.pipe_path is None:
             self.pipe_path = join(curpath, "modeling/models")
-        
-        z_predict = ZRP_Predict(pipe_path = self.pipe_path)
+
+        z_predict = ZRP_Predict(file_path=self.file_path, pipe_path=self.pipe_path)
         z_predict.fit(prepared_data)
         predict_out = z_predict.transform(prepared_data)
-        
+
         if self.bisg:
             bisg_data = prepared_data.copy()
-            bisg_data = bisg_data[~bisg_data.index.duplicated(keep = 'first')]
-            
+            bisg_data = bisg_data[~bisg_data.index.duplicated(keep='first')]
+
             bisgw = BISGWrapper()
             full_bisg_proxies = bisgw.transform(bisg_data)
             save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_output.feather")
-            
+
         try:
-            predict_out = input_data.merge(predict_out.reset_index(drop = False), on = self.key)
+            predict_out = input_data.merge(predict_out.reset_index(drop=False), on=self.key)
         except KeyError:
             pass
-                    
-        return(predict_out)
-        
 
+        return (predict_out)

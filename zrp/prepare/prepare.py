@@ -19,10 +19,15 @@ class ZRP_Prepare(BaseZRP):
     """
     Prepares data to generate race & ethnicity proxies
 
+    Parameters
+    ------------
+    file_path: str, optional
+        Path where to put artifacts and other files generated during intermediate steps.
     """
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, file_path=None, *args, **kwargs):
+        super().__init__(file_path=file_path, *args, **kwargs)
+
         
     def fit(self, data):
         if self.census_tract:
