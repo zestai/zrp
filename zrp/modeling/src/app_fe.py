@@ -55,6 +55,7 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
         # handle multi-labeled output
         self.mlb = MultiLabelBinarizer(classes = y_unique)
         self.mlb_columns = list(set(possible_race_classes) & set(y_unique))
+        self.mlb_columns = y_unique
         self.mlb.fit(y.values.reshape(-1,1))
         y_ohe = pd.DataFrame(self.mlb.transform(y.values.reshape(-1,1)), columns=self.mlb_columns)
         
@@ -66,9 +67,7 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
     def fit(self, X, y):
         targets = X[[self.key]].merge(y.reset_index(drop=False), on=self.key, how="left")
         y = targets[self.race]
-#         y = targets.set_index(self.key)[self.race]
         X = X.reset_index(drop=True)
-#         y = y.reset_index(drop=True) 
 
         self.data_columns = list(X.columns)
         self.acs_columns = list(set(self.data_columns) - set(self.label_encoded_columns) - set(self.keys))
