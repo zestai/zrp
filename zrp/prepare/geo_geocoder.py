@@ -140,10 +140,15 @@ def geo_range(geo_df):
 class ZGeo(BaseZRP):
     """
     This class geocodes addresses.
+    
+    Parameters
+    ----------
+    file_path: str
+        Path indicating where to put artifacts folder its files (pipeline, model, and supporting data), generated during intermediate steps.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, file_path=None, *args, **kwargs):
+        super().__init__(file_path=file_path, *args, **kwargs)
         self.key = 'ZEST_KEY'
 
     def fit(self):
