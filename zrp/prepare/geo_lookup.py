@@ -19,15 +19,15 @@ def sides_split(addr_edge_df):
     l_addr_edge_df = addr_edge_df.copy()
     r_addr_edge_df = addr_edge_df.copy()
 
-    l_addr_edge_df = l_addr_edge_df.drop(["TFIDR",
-                                          "RFROMHN",
-                                          "RTOHN",
-                                          "ZIPR"],
+    l_addr_edge_df = l_addr_edge_df.drop(['TFIDR', 'ARIDR', 'RFROMHN',
+                                           'RTOHN', 'ZIPR', 'PARITYR',
+                                           'PLUS4R', 'RFROMTYP', 'RTOTYP',
+                                           'OFFSETR', 'RFROMADD', 'RTOADD'],
                                          axis=1)
-    r_addr_edge_df = r_addr_edge_df.drop(["TFIDL",
-                                          "LFROMHN",
-                                          "LTOHN",
-                                          "ZIPL"],
+    r_addr_edge_df = r_addr_edge_df.drop(['TFIDL', 'ARIDL', 'LFROMHN', 
+                                          'LTOHN', 'ZIPL', 'PARITYL',
+                                          'PLUS4L', 'LFROMTYP', 'LTOTYP',
+                                          'OFFSETL', 'LFROMADD', 'LTOADD'],
                                          axis=1)
 
     l_addr_edge_df["SIDE"] = "L"
@@ -35,15 +35,31 @@ def sides_split(addr_edge_df):
 
     l_addr_edge_df = l_addr_edge_df.rename(
         columns={"TFIDL": "TFID",
+                 "ARIDL": "ARID",
                  "LFROMHN": "FROMHN",
                  "LTOHN": "TOHN",
-                 "ZIPL": "ZIP"}
+                 "ZIPL": "ZIP",
+                 "PARITYL": "PARITY",
+                 "PLUS4L": "PLUS4",
+                 "LFROMTYP":"FROMTYP",
+                 "LTOTYP": "TOTYP",
+                 "OFFSETL": "OFFSET",
+                 "LFROMADD": "FROMADD",
+                 "LTOADD": "TOADD" }
     )
     r_addr_edge_df = r_addr_edge_df.rename(
         columns={"TFIDR": "TFID",
+                 "ARIDR": "ARID",
                  "RFROMHN": "FROMHN",
                  "RTOHN": "TOHN",
-                 "ZIPR": "ZIP"}
+                 "ZIPR": "ZIP",
+                 "PARITYR": "PARITY",
+                 "PLUS4R": "PLUS4",
+                 "RFROMTYP":"FROMTYP",
+                 "RTOTYP": "TOTYP",
+                 "OFFSETR": "OFFSET",
+                 "RFROMADD": "FROMADD",
+                 "RTOADD": "TOADD"}
     )
     return (l_addr_edge_df, r_addr_edge_df)
 
@@ -76,7 +92,7 @@ class GeoLookUpBuilder():
         self.support_files_path = support_files_path
         self.year = year
         self.raw_geo_path = os.path.join(self.support_files_path, "raw/geo", self.year)
-        self.out_geo_path = os.path.join(self.support_files_path, "processed/geo", self.year)
+        self.out_geo_path = os.path.join(self.support_files_path, "processed/geo", f"{self.year}_backup") #new change update 
 
     def fit(self):
         return self
@@ -152,6 +168,8 @@ class GeoLookUpBuilder():
             "RTOTYP",
             "OFFSETL",
             "OFFSETR",
+            "PLUS4R",
+            "PLUS4L"
         ]
 
         if "STATEFP20" in fc_df.columns:
@@ -221,26 +239,24 @@ class GeoLookUpBuilder():
                                      "ZIPL", "ZIPR", "FULLNAME",
                                      "OFFSETL", "OFFSETR"],
                                     "inner")
-
+        
         l_addr_edge_df, r_addr_edge_df = sides_split(addr_edge_df)
 
         l_addr_edge_face_df = merge_shapes(l_addr_edge_df,
                                            fc_df,
-                                           ["TFID", "COUNTYFP", "STATEFP"],
+                                           ["TFID", "COUNTYFP", "STATEFP", "OFFSET"],
                                            "inner")
         r_addr_edge_face_df = merge_shapes(r_addr_edge_df,
                                            fc_df,
-                                           ["TFID", "COUNTYFP", "STATEFP"],
+                                           ["TFID", "COUNTYFP", "STATEFP", "OFFSET"],
                                            "inner")
+        
+        l_addr_edge_face_df = l_addr_edge_face_df[l_addr_edge_face_df["ZIP"].notna()] 
+        r_addr_edge_face_df = r_addr_edge_face_df[r_addr_edge_face_df["ZIP"].notna()]         
 
         aef = concat_shapes([l_addr_edge_face_df,
                              r_addr_edge_face_df])
 
-        aef = aef[
-            (aef.FROMHN.notna()) &
-            (aef.TOHN.notna()) &
-            (aef.ZIP.notna())
-            ]
         aef.drop_duplicates(inplace=True)
 
         print(" ... Formatting lookup table")

@@ -14,6 +14,8 @@ import sys
 import os
 import re
 
+import warnings
+warnings.filterwarnings(action='ignore')
 
 class ZRP_Prepare(BaseZRP):
     """
@@ -73,7 +75,7 @@ class ZRP_Prepare(BaseZRP):
         data['zest_in_state_fips'] = data[self.state].replace(inv_state_map)
         print("")
 
-        if self.census_tract:
+        if self.census_tract is not None:
             try:
                 data[self.zip_code] = np.where((data[self.zip_code].isna()) |\
                                         (data[self.zip_code].str.contains("None")),

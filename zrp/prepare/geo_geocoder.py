@@ -10,6 +10,8 @@ import sys
 import os
 import re
 
+import warnings
+warnings.filterwarnings(action='ignore')
 
 def get_reduced(tmp_data):
     keep_cols = ['ZEST_KEY', 'first_name', 'middle_name', 'last_name',
@@ -126,12 +128,12 @@ def geo_range(geo_df):
         Dataframe with geo data
     """
     geo_df["small"] = np.where(
-        geo_df.FROMHN > geo_df.TOHN,
+        (geo_df.FROMHN > geo_df.TOHN) & (geo_df.FROMHN.str.len() >= geo_df.TOHN.str.len()),
         geo_df.TOHN,
         geo_df.FROMHN)
 
     geo_df["big"] = np.where(
-        geo_df.FROMHN > geo_df.TOHN,
+        (geo_df.FROMHN > geo_df.TOHN) & (geo_df.FROMHN.str.len() >= geo_df.TOHN.str.len()),
         geo_df.FROMHN,
         geo_df.TOHN)
     return(geo_df)    
@@ -168,7 +170,13 @@ class ZGeo(BaseZRP):
             (geo_df[self.house_number] >= geo_df.small),
             1,
             0)
-        geo_df["ZIP_Match"] = np.where(geo_df.ZEST_ZIP.astype(float) == geo_df[self.zip_code].astype(float), 1, 0)
+        
+        geo_df["ZIP_Match_1"] = np.where(geo_df.ZEST_ZIP == geo_df[self.zip_code], 1, 0)
+        geo_df["ZIP_Match_2"] = np.where(geo_df.ZCTA5CE10 == geo_df[self.zip_code], 1, 0)   
+        geo_df["NEW_SUPER_ZIP"] = np.where(geo_df.ZIP_Match_1 == 1, geo_df.ZEST_ZIP, geo_df.ZCTA5CE10)
+        geo_df["ZIP_Match"] = np.where(geo_df.NEW_SUPER_ZIP == geo_df[self.zip_code], 1, 0)
+        
+        
         return(geo_df)    
     
     def transform(self, input_data, geo, processed, replicate, save_table=True):
