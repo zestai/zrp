@@ -21,10 +21,15 @@ class ZRP_Prepare(BaseZRP):
     """
     Prepares data to generate race & ethnicity proxies
 
+    Parameters
+    ------------
+    file_path: str, optional
+        Path where to put artifacts and other files generated during intermediate steps.
     """
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, file_path=None, *args, **kwargs):
+        super().__init__(file_path=file_path, *args, **kwargs)
+
         
     def fit(self, data):
         if self.census_tract:
@@ -54,7 +59,7 @@ class ZRP_Prepare(BaseZRP):
             data = load_file(self.file_path)
             print("Data file is loaded")
             
-        gen_process = ProcessStrings()
+        gen_process = ProcessStrings(file_path=self.file_path)
         gen_process.fit(data)
         data = gen_process.transform(data)
         
@@ -88,7 +93,7 @@ class ZRP_Prepare(BaseZRP):
             geo_coded['GEOID_CT'] = geo_coded[self.census_tract]
             
         elif (self.census_tract is not None) & (self.street_address is not None):
-            geocode = ZGeo()
+            geocode = ZGeo(file_path=self.file_path)
             geocode.fit(geo_coded)
             geocode_out = [] 
             geo_grps = data.groupby([self.state])
@@ -109,7 +114,7 @@ class ZRP_Prepare(BaseZRP):
             geo_coded = pd.concat(geocode_out)
             geo_coded = geo_coded.drop_duplicates()
         else:
-            geocode = ZGeo()
+            geocode = ZGeo(file_path=self.file_path)
             geocode_out = [] 
             geo_grps = data.groupby([self.state])
             geo_dict = {}

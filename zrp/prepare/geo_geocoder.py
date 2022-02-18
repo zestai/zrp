@@ -142,10 +142,15 @@ def geo_range(geo_df):
 class ZGeo(BaseZRP):
     """
     This class geocodes addresses.
+    
+    Parameters
+    ----------
+    file_path: str
+        Path indicating where to put artifacts folder its files (pipeline, model, and supporting data), generated during intermediate steps.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, file_path=None, *args, **kwargs):
+        super().__init__(file_path=file_path, *args, **kwargs)
         self.key = 'ZEST_KEY'
 
     def fit(self):
@@ -184,7 +189,7 @@ class ZGeo(BaseZRP):
         :param replicate: A boolean.
         :param save_table: A boolean. Tables are saved if True. Default is True.
         :return: A DataFrame
-
+        """
         curpath = dirname(__file__)
         out_geo_path = os.path.join(curpath, '../data/processed/geo/2019')
 
@@ -196,6 +201,19 @@ class ZGeo(BaseZRP):
         except AttributeError:
             data = load_file(self.file_path)
             print("   Data file is loaded")
+        
+        data = data.rename(columns = {self.first_name : "first_name", 
+                                      self.middle_name : "middle_name", 
+                                      self.last_name : "last_name",
+                                      self.house_number : "house_number", 
+                                      self.street_address : "street_address", 
+                                      self.city : "city",
+                                      self.zip_code : "zip_code",
+                                      self.state : "state", 
+                                      self.block_group : "block_group", 
+                                      self.census_tract : "census_tract"
+                             }
+                  )
             
         prg = ProcessGeo()
         data = prg.transform(data, processed=processed, replicate=replicate)
@@ -232,7 +250,7 @@ class ZGeo(BaseZRP):
         geo_df = get_reduced(geo_df)
 
         if save_table:
-            make_directory()
+            make_directory(self.out_path)
             if self.runname is not None:
                 file_name = f"Zest_Geocoded_{self.runname}_{self.year}__{geo}.parquet"
             else:

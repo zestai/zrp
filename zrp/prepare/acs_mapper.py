@@ -131,6 +131,19 @@ class ACSModelPrep(BaseZRP):
         except AttributeError:
             data = load_file(input_data)
             print("Input data file is loaded")
+        
+        data = data.rename(columns = {self.first_name : "first_name", 
+                                      self.middle_name : "middle_name", 
+                                      self.last_name : "last_name",
+                                      self.house_number : "house_number", 
+                                      self.street_address : "street_address", 
+                                      self.city : "city",
+                                      self.zip_code : "zip_code",
+                                      self.state : "state", 
+                                      self.block_group : "block_group", 
+                                      self.census_tract : "census_tract"
+                             }
+                  )
 
         if "GEOID_ZIP" not in data.columns:
             print("Generating Geo IDs")
@@ -153,7 +166,7 @@ class ACSModelPrep(BaseZRP):
                                     acs_zip)
 
         if save_table:
-            make_directory()
+            make_directory(self.out_path)
             file_name = f"Zest_processed_data_.parquet"
             save_dataframe(data_out, self.out_path, file_name)
         return (data_out)

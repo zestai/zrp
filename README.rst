@@ -1,9 +1,19 @@
 Zest Race Predictor
 ____________________
 
-Zest Race Predictor (ZRP) allows its users to estimate race and ethnicty based on an individual's name and home address. ZRP improves upon the Bayesian Improved Surname Geocoding (BISG) method developed by RAND Corporation that is used in fair lending analysis at institutions today.  Our intent is to improve the accuracy of fair lending analysis by using more data and better math, and thereby improve our understanding of disparate impact and disparate treatment of protected-status borrowers.  Armed with a better understanding of the disparities that exist in our financial system, we can highlight inequities create a roadmap to improve equity in access to finance.
+Zest Race Predictor (ZRP) is an open-source machine learning algorithm that estimates the race/ethnicity of an individual using only their full name and home address as inputs. ZRP improves upon the most widely used racial and ethnic data estimation method, Bayesian Improved Surname Geocoding (BISG), developed by RAND Corporation in 2009. 
 
-ZRP leverages modern predictive algorithms (in particular gradient boosting) in combination with block group and tract-level American Community Survey (ACS) data. By locating each address within a block group or census tract, and referencing demographic attributes associated with that granular geolocation, we can provide trained models with data as high fidelity as Census block group.  The predictive features used in the model include such demographic attributes as percentage of residences identifying as a particular race/ethnicity and average houshold income.  Example usage and model training procedures are provided. 
+ZRP was built using ML techniques such as gradient boosting and trained on voter data from the southeastern U.S. It was then validated on a national sample using adjusted tract-level American Community Survey (ACS) data. (Model training procedures are provided.)
+
+Compared to BISG, ZRP correctly identified:
+  * 25% more African-Americans as African-American
+  * 35% fewer African-Americans as non-African American
+  * 60% fewer Whites as non-White
+
+ZRP can be used to analyze racial equity and outcomes in critical spheres such as health care, financial services, criminal justice, or anywhere there’s a need to impute the race or ethnicity of a population dataset. (Usage examples are included.) The financial services industry, for example, has struggled for years to achieve more equitable outcomes amid charges of discrimination in lending practices. 
+
+Zest AI began developing ZRP in 2020 to improve the accuracy of our clients’ fair lending analyses by using more data and better math. We believe ZRP can greatly improve our understanding of the disparate impact and disparate treatment of protected-status borrowers. Armed with a better understanding of the disparities that exist in our financial system, we can highlight inequities and create a roadmap to improve equity in access to finance.
+
 
 
 Notes
@@ -123,6 +133,7 @@ Input data, **df**, into the prediction/modeling pipeline **MUST** contain the f
       557         NaN         NaN         NaN         NaN         NaN         NaN                   NaN                    NaN                NaN     
      =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
 
+One of the parameters to the `parent class <./zrp/prepare/base.py>`_ that ZRP() inherits from is ``file_path``. This parameter allows you to specify where the ``artifacts/`` folder is outputted during the run of the ZRP. Once the run is complete, the ``artifacts/`` folder will contain the outputted race/ethnicity proxies and additional logs documenting the validity of input data. ``file_path`` **need not** be specified. If it is not defined, the ``artifacts/`` folder will be placed in the same directory of the script running zrp. Subsequent runs will, however, overwrite the files in ``artifacts/``; providing a unique directory path for ``file_path`` will avoid this.
 
 ZRP Build
 =============
@@ -180,6 +191,7 @@ Input data, **df**, into this pipeline **MUST** contain the following columns: f
 
 -  Output: A dictionary of race & ethnicity probablities and labels.
 
+As mentioned in the ZRP Predict section above, once the run is complete, the ``artifacts/`` folder will contain the outputted race/ethnicity proxies and additional logs documenting the validity of input data. Similarly, defining ``file_path`` **need not** be specified, but providing a unique directory path for ``file_path`` will avoid overwriting the `artifacts/` folder. When running ZRP Build, however, ``artifacts/`` also contains the processed test and train data, trained model, and pipeline. 
 
 Addition Runs of Your Custom Model
 ==================================

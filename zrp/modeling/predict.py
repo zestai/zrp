@@ -328,10 +328,12 @@ class ZRP_Predict(BaseZRP):
     ----------
     pipe_path: str
         Folder path to directory containing pipeline
+    file_path: str
+        Path indicating where to put artifacts folder its files (pipeline, model, and supporting data), generated during intermediate steps.
     """
 
-    def __init__(self, pipe_path, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, pipe_path, file_path=None, *args, **kwargs):
+        super().__init__(file_path=file_path, *args, **kwargs)
         self.pipe_path = pipe_path
         self.census_tract = 'GEOID_CT'
         self.block_group = 'GEOID_BG'
@@ -410,15 +412,15 @@ class ZRP_Predict(BaseZRP):
             out_list.append(out_3)  
             
         proxies_out = pd.concat(out_list)
+
         source_cols = list(set(proxies_out.columns).intersection(set([
             'source_block_group', 'source_census_tract',
             'source_zip_code', 'source_bisg'])))
         proxies_out[source_cols] = proxies_out[source_cols].fillna(0)
-        proxies_out = proxies_out.sort_values(['source_block_group', 'source_census_tract',
-            'source_zip_code', 'source_bisg'])
+        proxies_out = proxies_out.sort_values(source_cols)
         
         if save_table:
-            make_directory()
+            make_directory(self.out_path)
             file_name = f"proxy_output.feather"
             save_feather(proxies_out,
                          self.out_path,
@@ -474,7 +476,7 @@ class FEtoPredict(BaseZRP):
 
         
         if save_table:
-            make_directory()
+            make_directory(self.out_path)
             file_name = f"{self.pipe_type}_proxy_output.feather"
             save_feather(proxies,
                          self.out_path,

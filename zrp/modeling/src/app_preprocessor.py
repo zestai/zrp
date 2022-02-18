@@ -43,7 +43,7 @@ class HandleCompoundNames(BaseEstimator, TransformerMixin):
 
     def _handle_compounds(self, X):
         """
-        Simple compund surname handler. An individual with n names will receive a sample weight 1/n (where n = number of names).
+        Simple compound surname handler. An individual with n names will receive a sample weight 1/n (where n = number of names).
         
         Parameters
         ----------
@@ -51,11 +51,15 @@ class HandleCompoundNames(BaseEstimator, TransformerMixin):
         """
         X[self.last_name] = X[self.last_name].str.replace('-', ' ', regex=False) 
         X[self.last_name] = X[self.last_name].str.replace(' +', ' ', regex=True)
-
+        
         compound_name_str_all = X[self.last_name].str.split(' ', expand=True) # split compounds from non_compounds
+        # Return if there're no compound names
+        if compound_name_str_all.shape[1] == 1:
+            print("Pass through")
+            return X
+        
         non_compound = X[compound_name_str_all[1].isna()].copy().reset_index(drop=True)
         compound = X[~compound_name_str_all[1].isna()].copy().reset_index(drop=True)
-
        
         compound_name_str = compound[self.last_name].str.split(' ', expand=True)
         n_compounds = compound_name_str.shape[1] # max number of unique strings

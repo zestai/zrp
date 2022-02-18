@@ -320,8 +320,8 @@ class ProcessStrings(BaseZRP):
         Number of jobs in parallel
     """
         
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, file_path=None, *args, **kwargs):
+        super().__init__(file_path=file_path, *args, **kwargs)
         
             
     def fit(self, data):
