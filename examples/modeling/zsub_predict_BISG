@@ -1,0 +1,708 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# How to Generate BISG Proxies\n",
+    "The purpose of this notebook is to illustrate how to use `BISGWrapper`, a wrapper class for BISG, to generate race & ethnicity predictions"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%load_ext autoreload\n",
+    "%autoreload 2\n",
+    "%config Completer.use_jedi=False"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from os.path import join, expanduser, dirname\n",
+    "import pandas as pd\n",
+    "import sys\n",
+    "import os\n",
+    "import re\n",
+    "import warnings"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "warnings.filterwarnings(action='once')\n",
+    "home = expanduser('~')\n",
+    "\n",
+    "src_path = '{}/zrp'.format(home)\n",
+    "sys.path.append(src_path)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/home/kam/.conda/envs/zrp_q1_22/lib/python3.7/site-packages/statsmodels/compat/pandas.py:35: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.\n",
+      "  version = LooseVersion(pd.__version__)\n",
+      "/home/kam/.conda/envs/zrp_q1_22/lib/python3.7/importlib/_bootstrap.py:219: RuntimeWarning: numpy.ufunc size changed, may indicate binary incompatibility. Expected 192 from C header, got 216 from PyObject\n",
+      "  return f(*args, **kwds)\n"
+     ]
+    }
+   ],
+   "source": [
+    "from zrp.modeling.predict import BISGWrapper\n",
+    "from zrp.prepare import ProcessStrings\n",
+    "from zrp.prepare.utils import load_file"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Load sample data for prediction\n",
+    "Load processed list of New Jersey Mayors downloaded from https://www.nj.gov/dca/home/2022mayors.csv "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(462, 9)"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "nj_mayors = load_file(\"../2022-nj-mayors-sample.csv\")\n",
+    "nj_mayors.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>first_name</th>\n",
+       "      <th>middle_name</th>\n",
+       "      <th>last_name</th>\n",
+       "      <th>house_number</th>\n",
+       "      <th>street_address</th>\n",
+       "      <th>city</th>\n",
+       "      <th>state</th>\n",
+       "      <th>zip_code</th>\n",
+       "      <th>ZEST_KEY</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Gabe</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Plumer</td>\n",
+       "      <td>782</td>\n",
+       "      <td>Frenchtown Road</td>\n",
+       "      <td>Milford</td>\n",
+       "      <td>NJ</td>\n",
+       "      <td>08848</td>\n",
+       "      <td>2</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Ari</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Bernstein</td>\n",
+       "      <td>500</td>\n",
+       "      <td>West Crescent Avenue</td>\n",
+       "      <td>Allendale</td>\n",
+       "      <td>NJ</td>\n",
+       "      <td>07401</td>\n",
+       "      <td>4</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>David</td>\n",
+       "      <td>J.</td>\n",
+       "      <td>Mclaughlin</td>\n",
+       "      <td>125</td>\n",
+       "      <td>Corlies Avenue</td>\n",
+       "      <td>Allenhurst</td>\n",
+       "      <td>NJ</td>\n",
+       "      <td>07711-1049</td>\n",
+       "      <td>5</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Thomas</td>\n",
+       "      <td>C.</td>\n",
+       "      <td>Fritts</td>\n",
+       "      <td>8</td>\n",
+       "      <td>North Main Street</td>\n",
+       "      <td>Allentown</td>\n",
+       "      <td>NJ</td>\n",
+       "      <td>08501-1607</td>\n",
+       "      <td>6</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>P.</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>McCkelvey</td>\n",
+       "      <td>49</td>\n",
+       "      <td>South Greenwich Street</td>\n",
+       "      <td>Alloway</td>\n",
+       "      <td>NJ</td>\n",
+       "      <td>08001-0425</td>\n",
+       "      <td>7</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>457</th>\n",
+       "      <td>William</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Degroff</td>\n",
+       "      <td>3943</td>\n",
+       "      <td>Route</td>\n",
+       "      <td>Chatsworth</td>\n",
+       "      <td>NJ</td>\n",
+       "      <td>08019</td>\n",
+       "      <td>558</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>458</th>\n",
+       "      <td>Joseph</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Chukwueke</td>\n",
+       "      <td>200</td>\n",
+       "      <td>Cooper Avenue</td>\n",
+       "      <td>Woodlynne</td>\n",
+       "      <td>NJ</td>\n",
+       "      <td>08107-2108</td>\n",
+       "      <td>559</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>459</th>\n",
+       "      <td>Paul</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Sarlo</td>\n",
+       "      <td>85</td>\n",
+       "      <td>Humboldt Street</td>\n",
+       "      <td>Wood-Ridge</td>\n",
+       "      <td>NJ</td>\n",
+       "      <td>07075-2344</td>\n",
+       "      <td>560</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>460</th>\n",
+       "      <td>Craig</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Frederick</td>\n",
+       "      <td>120</td>\n",
+       "      <td>Village Green Drive</td>\n",
+       "      <td>Woolwich Township</td>\n",
+       "      <td>NJ</td>\n",
+       "      <td>08085-3180</td>\n",
+       "      <td>562</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>461</th>\n",
+       "      <td>Donald</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Cottrell</td>\n",
+       "      <td>21</td>\n",
+       "      <td>Saylors Pond Road</td>\n",
+       "      <td>Wrightstown</td>\n",
+       "      <td>NJ</td>\n",
+       "      <td>08562</td>\n",
+       "      <td>563</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>462 rows × 9 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "    first_name middle_name   last_name house_number           street_address  \\\n",
+       "0         Gabe         NaN      Plumer          782          Frenchtown Road   \n",
+       "1          Ari         NaN   Bernstein          500     West Crescent Avenue   \n",
+       "2        David          J.  Mclaughlin          125           Corlies Avenue   \n",
+       "3       Thomas          C.      Fritts            8        North Main Street   \n",
+       "4           P.         NaN   McCkelvey           49   South Greenwich Street   \n",
+       "..         ...         ...         ...          ...                      ...   \n",
+       "457    William         NaN     Degroff         3943                   Route    \n",
+       "458     Joseph         NaN   Chukwueke          200            Cooper Avenue   \n",
+       "459       Paul         NaN       Sarlo           85          Humboldt Street   \n",
+       "460      Craig         NaN   Frederick          120      Village Green Drive   \n",
+       "461     Donald         NaN    Cottrell           21        Saylors Pond Road   \n",
+       "\n",
+       "                  city state    zip_code ZEST_KEY  \n",
+       "0              Milford    NJ       08848        2  \n",
+       "1            Allendale    NJ       07401        4  \n",
+       "2           Allenhurst    NJ  07711-1049        5  \n",
+       "3            Allentown    NJ  08501-1607        6  \n",
+       "4              Alloway    NJ  08001-0425        7  \n",
+       "..                 ...   ...         ...      ...  \n",
+       "457         Chatsworth    NJ       08019      558  \n",
+       "458          Woodlynne    NJ  08107-2108      559  \n",
+       "459         Wood-Ridge    NJ  07075-2344      560  \n",
+       "460  Woolwich Township    NJ  08085-3180      562  \n",
+       "461        Wrightstown    NJ       08562      563  \n",
+       "\n",
+       "[462 rows x 9 columns]"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "nj_mayors"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Data Processing (optional)  \n",
+    "When generating BISG proxies, we use data output from ZRP_Prepare. Since it is not a requirement for the BISGWrapper we will use our most basic processing module to clean up the data in preparation for BISG predictions. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Directory already exists\n",
+      "   [Start] Validating input data\n",
+      "     Number of observations: 462\n",
+      "     Is key unique: True\n",
+      "       (Warning!!) middle_name is 68.3982683982684% missing, this may impact the ability to return race approximations\n",
+      "   [Completed] Validating input data\n",
+      "\n",
+      "   Formatting P1\n",
+      "   Formatting P2\n",
+      "   reduce whitespace\n",
+      "CPU times: user 79.1 ms, sys: 114 µs, total: 79.2 ms\n",
+      "Wall time: 78.7 ms\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "process = ProcessStrings()\n",
+    "process.fit(nj_mayors)\n",
+    "prepared = process.transform(nj_mayors)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "*The warning message above can be ignored since middle name is commonly missing. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Invoke the BISGWrapper on the sample data\n",
+    "To generate BISG proxies, you are required to have `last_name` and `zip_code` in your dataframe otherwise. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "bisg = BISGWrapper()\n",
+    "bisg.fit(prepared)\n",
+    "bisg_output = bisg.transform(prepared)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Inspect the output\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>AAPI</th>\n",
+       "      <th>AIAN</th>\n",
+       "      <th>BLACK</th>\n",
+       "      <th>HISPANIC</th>\n",
+       "      <th>WHITE</th>\n",
+       "      <th>race_proxy</th>\n",
+       "      <th>source_bisg</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>ZEST_KEY</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>0.000478</td>\n",
+       "      <td>0.000463</td>\n",
+       "      <td>0.006154</td>\n",
+       "      <td>0.001932</td>\n",
+       "      <td>0.990258</td>\n",
+       "      <td>WHITE</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0.011623</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000197</td>\n",
+       "      <td>0.004692</td>\n",
+       "      <td>0.977975</td>\n",
+       "      <td>WHITE</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>558</th>\n",
+       "      <td>0.000386</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.003039</td>\n",
+       "      <td>0.004521</td>\n",
+       "      <td>0.989895</td>\n",
+       "      <td>WHITE</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>559</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>560</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>562</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>563</th>\n",
+       "      <td>0.002268</td>\n",
+       "      <td>0.001829</td>\n",
+       "      <td>0.061932</td>\n",
+       "      <td>0.011712</td>\n",
+       "      <td>0.901213</td>\n",
+       "      <td>WHITE</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>462 rows × 7 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "              AAPI      AIAN     BLACK  HISPANIC     WHITE race_proxy  \\\n",
+       "ZEST_KEY                                                                \n",
+       "2         0.000478  0.000463  0.006154  0.001932  0.990258      WHITE   \n",
+       "4         0.011623  0.000000  0.000197  0.004692  0.977975      WHITE   \n",
+       "5              NaN       NaN       NaN       NaN       NaN        NaN   \n",
+       "6              NaN       NaN       NaN       NaN       NaN        NaN   \n",
+       "7              NaN       NaN       NaN       NaN       NaN        NaN   \n",
+       "...            ...       ...       ...       ...       ...        ...   \n",
+       "558       0.000386  0.000000  0.003039  0.004521  0.989895      WHITE   \n",
+       "559            NaN       NaN       NaN       NaN       NaN        NaN   \n",
+       "560            NaN       NaN       NaN       NaN       NaN        NaN   \n",
+       "562            NaN       NaN       NaN       NaN       NaN        NaN   \n",
+       "563       0.002268  0.001829  0.061932  0.011712  0.901213      WHITE   \n",
+       "\n",
+       "          source_bisg  \n",
+       "ZEST_KEY               \n",
+       "2                   1  \n",
+       "4                   1  \n",
+       "5                   1  \n",
+       "6                   1  \n",
+       "7                   1  \n",
+       "...               ...  \n",
+       "558                 1  \n",
+       "559                 1  \n",
+       "560                 1  \n",
+       "562                 1  \n",
+       "563                 1  \n",
+       "\n",
+       "[462 rows x 7 columns]"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "bisg_output"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Check Coverage\n",
+    "A quick glance at the BISG output we can see high missing proxy rates. BISG has some limitations that contribute to missing values:\n",
+    "- last names are required to be in the Census Surname List (ref: [https://www.census.gov/topics/population/genealogy/data/2010_surnames.html](https://www.census.gov/topics/population/genealogy/data/2010_surnames.html))\n",
+    "    - est. 162K out of 6.3MM last names from the 2010 Census are on the list\n",
+    "- zip codes being BISG invalid "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "AAPI           0.58658\n",
+       "AIAN           0.58658\n",
+       "BLACK          0.58658\n",
+       "HISPANIC       0.58658\n",
+       "WHITE          0.58658\n",
+       "race_proxy     0.58658\n",
+       "source_bisg    0.00000\n",
+       "dtype: float64"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "bisg_output.isna().mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Checking the distribution of predicted race & ethnicity "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "NaN         0.586580\n",
+       "WHITE       0.376623\n",
+       "BLACK       0.017316\n",
+       "HISPANIC    0.012987\n",
+       "AAPI        0.006494\n",
+       "Name: race_proxy, dtype: float64"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "bisg_output.race_proxy.value_counts(normalize=True, dropna=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "ZRP (Q1 2022)",
+   "language": "python",
+   "name": "zrp_q1_22"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
