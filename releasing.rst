@@ -27,7 +27,7 @@ The pipelines will be stored with the following paths:
 Preparing the release
 =====================
 
-Observe the following steps in order to safely and correctly prepare and push new Pypi, and Github releases for the zrp packages.
+Observe the following steps in order to safely and correctly prepare and push new Pypi, and Github releases for the zrp packages. Note that in order to ensure continuity between all releases, every new push to the main branch should be accompanied by a new pypi and Github release with appropriate versioning (idential across the various release locations).
 
 If you contribute to the ZRP tool via patches, feature upgrades, or code overhauls that **DO NOT** affect the lookup tables or pipelines in use:
 
@@ -63,10 +63,10 @@ Pypi
     $ bumpversion --current-version ?.?.? [major/minor/patch] [<file_names>]
 
 
-    For example, to increment the MINOR version of zrp, you would do something like this:
+    For example, to increment the MINOR version of zrp, you would do something like this (this increases the version in both setup.py and about.py):
     ::
 
-    $ bumpversion --current-version 0.1.0 minor setup.py
+    $ bumpversion --current-version 0.1.0 minor setup.py zrp/about.py
 
 #. Update local packages for distribution
     ::
