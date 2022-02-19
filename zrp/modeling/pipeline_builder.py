@@ -8,6 +8,7 @@ import json
 import joblib
 import pickle
 
+import xgboost
 from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
@@ -150,7 +151,10 @@ class ZRP_Build_Model(BaseZRP):
         make_directory(self.outputs_path)
         # Save zrp_model
         pickle.dump(self.zrp_model, open(os.path.join(self.outputs_path, "zrp_model.pkl"), "wb"))
-        self.zrp_model.save_model(os.path.join(self.outputs_path, "model.txt"))
+        try:
+            self.zrp_model.save_model(os.path.join(self.outputs_path, "model.txt"))
+        except:
+            pass
 
         ##### Return Race Probabilities
         print('\n---\nGenerate & save race predictions (labels)')
