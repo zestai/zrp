@@ -11,7 +11,8 @@ import sys
 import os
 import re
 from zrp.validate import *
-
+import warnings
+warnings.filterwarnings(action='ignore')
 
 def norm_na(data, na_values):
     """
@@ -322,7 +323,6 @@ class ProcessStrings(BaseZRP):
         
     def __init__(self, file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
-        
             
     def fit(self, data):
         data_cols = list(data.columns)
@@ -341,6 +341,7 @@ class ProcessStrings(BaseZRP):
         validate = ValidateInput()
         validate.fit()
         validators_in = validate.transform(data)
+        make_directory(self.out_path)
         save_json(validators_in, self.out_path, "input_validator.json")
         print("   [Completed] Validating input data")
         print("")
@@ -552,15 +553,10 @@ class  ProcessGeo(BaseZRP):
             data = data.apply(lambda x: x.str.upper())
             
             data = reduce_whitespace(data)
-            print("")
-            print(data.state.unique())
-            
             na_dict =  {"^\\s*$": None,
                        "^NAN$": None,
                        "^NONE$": None}
             data = data.replace(na_dict, regex=True)
-            print("")
-            print(data.state.unique())
             # Remove/replace special characters
             for col in numeric_cols:
                 data[col] = data[col].apply(lambda x: re.sub("[^0-9]",\
@@ -590,7 +586,7 @@ class  ProcessGeo(BaseZRP):
         street_addr_results = Parallel(n_jobs = self.n_jobs, prefer="threads", verbose=1)(delayed((address_mining))(street_addr_dict, i) for i in tqdm(list(data.index)))
 
         data[self.street_address] = street_addr_results
-        data[self.city]  = data[self.city].str.replace("[^\\w\\s]", "", regex=True)
+#         data[self.city]  = data[self.city].str.replace("[^\\w\\s]", "", regex=True)
 
         # State
         data[self.state]  = data[self.state].str.replace("[^\\w\\s]", "", regex=True)

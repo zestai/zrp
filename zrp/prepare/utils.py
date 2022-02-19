@@ -7,8 +7,8 @@ from os.path import join, expanduser
 import json
 import fiona
 import warnings
-warnings.filterwarnings("ignore")
-    
+warnings.filterwarnings(action='ignore')
+ 
 
 def load_json(path):
     """
@@ -163,7 +163,6 @@ def load_mappings(support_files_path):
         Filepath or name of directory where files are stored
     """        
     mapping_file_path = os.path.expanduser(support_files_path)
-    print(mapping_file_path)
     # add zip to county mapping
     state_mapping = load_json(os.path.join(mapping_file_path,
                                            "state_mapping.json"))

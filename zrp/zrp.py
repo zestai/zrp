@@ -76,6 +76,7 @@ class ZRP(BaseZRP):
     def __init__(self, file_path=None, pipe_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.pipe_path = pipe_path
+        self.params_dict =  kwargs
 
     def fit(self):
         return self
@@ -94,23 +95,10 @@ class ZRP(BaseZRP):
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.file_path)
-            
-        data = data.rename(columns = {self.first_name : "first_name", 
-                              self.middle_name : "middle_name", 
-                              self.last_name : "last_name",
-                              self.house_number : "house_number", 
-                              self.street_address : "street_address", 
-                              self.city : "city",
-                              self.zip_code : "zip_code",
-                              self.state : "state", 
-                              self.block_group : "block_group", 
-                              self.census_tract : "census_tract"
-                             }
-                  )
         
         make_directory(self.out_path)
 
-        z_prepare = ZRP_Prepare(file_path=self.file_path)
+        z_prepare = ZRP_Prepare(file_path=self.file_path, **self.params_dict)
         z_prepare.fit(data)
         prepared_data = z_prepare.transform(data)
 
@@ -118,7 +106,7 @@ class ZRP(BaseZRP):
         if self.pipe_path is None:
             self.pipe_path = join(curpath, "modeling/models")
 
-        z_predict = ZRP_Predict(file_path=self.file_path, pipe_path=self.pipe_path)
+        z_predict = ZRP_Predict(file_path=self.file_path, pipe_path=self.pipe_path, **self.params_dict)
         z_predict.fit(prepared_data)
         predict_out = z_predict.transform(prepared_data)
 
@@ -126,7 +114,7 @@ class ZRP(BaseZRP):
             bisg_data = prepared_data.copy()
             bisg_data = bisg_data[~bisg_data.index.duplicated(keep='first')]
 
-            bisgw = BISGWrapper()
+            bisgw = BISGWrapper(**self.params_dict)
             full_bisg_proxies = bisgw.transform(bisg_data)
             save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_output.feather")
 
