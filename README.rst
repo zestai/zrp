@@ -129,8 +129,8 @@ Input data, **df**, into the prediction/modeling pipeline **MUST** contain the f
       106         0.177411    0.015208    0.003767    0.041668    0.761946    1.0                   0.0                    0.0                    
       109         0.000541    0.000416    0.000376    0.000932    0.997736    1.0                   0.0                    0.0                    
       ...         ...         ...         ...         ...         ...         ...                   ...                    ...                    
-      556         0.0         0.0         0.0         0.0         0.0         0.0                   0.0                    0.0                    
-      557         0.0         0.0         0.0         0.0         0.0         0.0                   0.0                    0.0                    
+      556         NaN         NaN         NaN         NaN         NaN         0.0                   0.0                    0.0                    
+      557         NaN         NaN         NaN         NaN         NaN         0.0                   0.0                    0.0                    
      =========== =========== =========== =========== =========== =========== ===================== ====================== ==================  
 
 One of the parameters to the `parent class <./zrp/prepare/base.py>`_ that ZRP() inherits from is ``file_path``. This parameter allows you to specify where the ``artifacts/`` folder is outputted during the run of the ZRP. Once the run is complete, the ``artifacts/`` folder will contain the outputted race/ethnicity proxies and additional logs documenting the validity of input data. ``file_path`` **need not** be specified. If it is not defined, the ``artifacts/`` folder will be placed in the same directory of the script running zrp. Subsequent runs will, however, overwrite the files in ``artifacts/``; providing a unique directory path for ``file_path`` will avoid this.
