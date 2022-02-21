@@ -161,7 +161,7 @@ class BaseValidate():
         """
         geo_dict = {}
         geo_dict["length_check"] = data[self.zip_code].str.len().value_counts(dropna = False).to_dict()
-        geo_dict["numeric_check"] = data[self.zip_code].str.isnumeric().all()
+        geo_dict["numeric_check"] = bool(data[self.zip_code].str.isnumeric().all())
         return(geo_dict)
     
     def is_census_tract(self, data):
@@ -174,7 +174,7 @@ class BaseValidate():
         """
         geo_dict = {}
         geo_dict["length_check"] = data[self.census_tract].str.len().value_counts(dropna = False).to_dict()
-        geo_dict["numeric_check"] = data[self.census_tract].str.isnumeric().all()
+        geo_dict["numeric_check"] = bool(data[self.census_tract].str.isnumeric().all())
         return(geo_dict)
     
     def is_block_group(self, data):
@@ -187,7 +187,7 @@ class BaseValidate():
         """
         geo_dict = {}
         geo_dict["length_check"] = data[self.block_group].str.len().value_counts(dropna = False).to_dict()
-        geo_dict["numeric_check"] = data[self.block_group].str.isnumeric().all()
+        geo_dict["numeric_check"] = bool(data[self.block_group].str.isnumeric().all())
         return(geo_dict)
     
     def is_mapped(self, data):
@@ -292,6 +292,9 @@ class ValidateGeo(BaseValidate):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.census_tract = 'GEOID_CT'
+        self.block_group = 'GEOID_BG'
+        self.zip_code = 'GEOID_ZIP'
         
     def fit(self):
         return self

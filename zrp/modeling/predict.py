@@ -19,7 +19,8 @@ import joblib
 import surgeo
 import xgboost
 
-
+import warnings
+warnings.filterwarnings(action='ignore')
 
 from zrp.modeling import src
 from zrp.modeling.src.app_preprocessor import HandleCompoundNames
@@ -97,7 +98,7 @@ class BISGWrapper(BaseZRP):
         if (self.last_name not in input_data.columns):
             raise ValueError('Last name needs to be provided when initializing this class. Please provide last name data in a column named "last_name" or set the custom name of the last name column in the data')
         if self.zip_code not in input_data.columns:
-            raise ValueError('Zip or postal code name needs to be provided when initializing this class. Please provide zip code data in a column named "zip_ode" or set the custom name of the zip code column in the data')
+            raise ValueError('Zip or postal code name needs to be provided when initializing this class. Please provide zip code data in a column named "zip_code" or set the custom name of the zip code column in the data')
         return self
     
     def transform(self, input_data):
@@ -134,14 +135,16 @@ class BISGWrapper(BaseZRP):
             'hispanic': 'HISPANIC'
         }, inplace=True) 
         combo = combo.set_index(self.key)
+        combo = combo[~combo.index.duplicated(keep='first')]
+        
         # Generate proxy at threshold
-        subset = combo[['WHITE', 'BLACK', 'AAPI', 'AIAN', 'HISPANIC'
-                       ]]
+        subset = combo.filter(['WHITE', 'BLACK', 'AAPI', 'AIAN', 'HISPANIC'
+                       ])
         identifiedRaces = subset.idxmax(axis=1)
         combo[f"{self.race}_proxy"] = identifiedRaces
         combo['source_bisg'] = 1
-        proxies = combo[["AAPI", "AIAN", "BLACK", "HISPANIC",
-                         "WHITE", f"{self.race}_proxy", "source_bisg"]]            
+        proxies = combo.filter(["AAPI", "AIAN", "BLACK", "HISPANIC",
+                         "WHITE", f"{self.race}_proxy", "source_bisg"])   
         return(proxies)
 
 
@@ -335,6 +338,7 @@ class ZRP_Predict(BaseZRP):
     def __init__(self, pipe_path, file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.pipe_path = pipe_path
+        self.params_dict = kwargs
         self.census_tract = 'GEOID_CT'
         self.block_group = 'GEOID_BG'
         self.zip_code = 'GEOID_ZIP'
@@ -394,19 +398,19 @@ class ZRP_Predict(BaseZRP):
             
         out_list = []
         if not df_0.empty:
-            zrp_bg = ZRP_Predict_BlockGroup(self.pipe_path)
+            zrp_bg = ZRP_Predict_BlockGroup(self.pipe_path, **self.params_dict)
             out_0 = zrp_bg.transform(df_0.filter(flb))
             out_list.append(out_0)    
         if not df_1.empty:
-            zrp_ct = ZRP_Predict_CensusTract(self.pipe_path)
+            zrp_ct = ZRP_Predict_CensusTract(self.pipe_path, **self.params_dict)
             out_1 = zrp_ct.transform(df_1.filter(flc))
             out_list.append(out_1)    
         if not df_2.empty:
-            zrp_zp = ZRP_Predict_ZipCode(self.pipe_path)
+            zrp_zp = ZRP_Predict_ZipCode(self.pipe_path, **self.params_dict)
             out_2 = zrp_zp.transform(df_2.filter(flz))
             out_list.append(out_2)    
         if not df_3.empty:
-            bisgw = BISGWrapper()
+            bisgw = BISGWrapper(**self.params_dict)
             bisgw.fit(df_3)
             out_3 = bisgw.transform(df_3)
             out_list.append(out_3)  
