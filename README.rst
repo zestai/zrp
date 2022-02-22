@@ -5,6 +5,13 @@ ____________________
   :target: https://zrp-docs.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
 
+.. image:: https://badge.fury.io/py/zrp.svg
+    :target: https://badge.fury.io/py/zrp
+
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/zestai/zrp/HEAD
+ 
+ 
 Zest Race Predictor (ZRP) is an open-source machine learning algorithm that estimates the race/ethnicity of an individual using only their full name and home address as inputs. ZRP improves upon the most widely used racial and ethnic data estimation method, Bayesian Improved Surname Geocoding (BISG), developed by RAND Corporation in 2009. 
 
 ZRP was built using ML techniques such as gradient boosting and trained on voter data from the southeastern U.S. It was then validated on a national sample using adjusted tract-level American Community Survey (ACS) data. (Model training procedures are provided.)
@@ -34,7 +41,7 @@ Install requires an internet connection. We recommend installing zrp inside a `p
 
  pip install zrp
 
-After installing via pip, you need to download the lookup tables using the following command:
+After installing via pip, you need to download the lookup tables and pipelines using the following command:
 ::
 
  python -m zrp download
@@ -71,6 +78,11 @@ ___________
 To get started using the ZRP, first ensure the download is complete (as described above) and xgboost == 1.0.2 
 
 Check out the guides in the `examples <./examples>`_ folder. Clone the repo in order to obtain the example notebooks and data; this is not provided in the pip installable package. If you're experiencing issues, first consult our `common issues guide <./common_issues.rst>`_.
+
+`Here <https://mybinder.org/v2/gh/zestai/zrp/HEAD>`_, we additionally provide an interactive virtual environment, via Binder, with ZRP installed. Once you open this link and are taken to the JupyterLab environment, open up a terminal and run the following: 
+::
+
+ python -m zrp download
 
 Next, we present the primary ways you'll use ZRP. 
 
