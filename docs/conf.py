@@ -1,3 +1,5 @@
+import sphinx_rtd_theme
+
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -22,7 +24,7 @@ copyright = '2022, Kasey Matthews, Austin Li, Christien Williams, Sean Kamkar, J
 author = 'Kasey Matthews, Austin Li, Christien Williams, Sean Kamkar, Jay Budzik'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.9'
+release = '0.1.20'
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,6 +34,7 @@ release = '0.1.9'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx_rtd_theme'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -48,7 +51,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

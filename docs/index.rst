@@ -6,8 +6,7 @@
 Welcome to Zest Race Predictor's documentation!
 ===============================================
 
-.. automodule:: zrp
-    :members:
+Zest Race Predictor (ZRP) is an open-source machine learning algorithm that estimates the race/ethnicity of an individual using only their full name and home address as inputs.
 
 .. toctree::
    :maxdepth: 2
@@ -22,4 +21,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-* Source Code: https://github.com/zestai/zrp
+* `Source Code <https://github.com/zestai/zrp>`_
+* `Contact us <abetterway@zest.ai>`_
