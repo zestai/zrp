@@ -14,6 +14,10 @@ Zest Race Predictor (ZRP) is an open-source machine learning algorithm that esti
 
    readme
 
+* **Helpful Docs**:
+  :doc:`Releasing </releasing>` |
+  :doc:`Model Report </model_report>` |
+  :doc:`Common Issues </common_issues>`
 
 Indices and tables
 ==================
