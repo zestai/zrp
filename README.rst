@@ -43,7 +43,7 @@ _____
 
 Training Data
 ==============
-The models available in this package were trained on voter registration data from the states of Florida and North Carolina. Summary statistics on these datasets and additional datasets used as validation can be found `here <./dataset_statistics.txt>`_ . 
+The models available in this package were trained on voter registration data from the states of Florida , Georgia, and North Carolina. Summary statistics on these datasets and additional datasets used as validation can be found `here <./dataset_statistics.txt>`_ . 
 
 Consult the following to download state voter registration data:
  * `North Carolina <https://www.ncsbe.gov/results-data/voter-registration-data>`_
@@ -70,7 +70,7 @@ Check out the guides in the `examples <./examples>`_ folder. Clone the repo in o
 
 Next, we present the primary ways you'll use ZRP. 
 
-ZRP Predict
+ZRP Predictions
 =============
 
 **Summary of commands:**
@@ -119,19 +119,19 @@ Input data, **df**, into the prediction/modeling pipeline **MUST** contain the f
 
       >>> zrp_output
       
-     =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
-                  AAPI        AIAN        BLACK       HISPANIC    WHITE       source_block_group    source_census_tract    source_zip_code    OTHER   
-     =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
+     =========== =========== =========== =========== =========== =========== ===================== ====================== ==================  
+                  AAPI        AIAN        BLACK       HISPANIC    WHITE       source_block_group    source_census_tract    source_zip_code      
+     =========== =========== =========== =========== =========== =========== ===================== ====================== ==================  
       ZEST_KEY                                                                                                                                        
-      10          0.021916    0.021960    0.004889    0.012153    0.939082    1.0                   NaN                    NaN                NaN     
-      100         0.009462    0.013033    0.003875    0.008469    0.965162    1.0                   NaN                    NaN                NaN     
-      103         0.107332    0.000674    0.000584    0.021980    0.869429    1.0                   NaN                    NaN                NaN     
-      106         0.177411    0.015208    0.003767    0.041668    0.761946    1.0                   NaN                    NaN                NaN     
-      109         0.000541    0.000416    0.000376    0.000932    0.997736    1.0                   NaN                    NaN                NaN     
-      ...         ...         ...         ...         ...         ...         ...                   ...                    ...                ...     
-      556         NaN         NaN         NaN         NaN         NaN         NaN                   NaN                    NaN                NaN     
-      557         NaN         NaN         NaN         NaN         NaN         NaN                   NaN                    NaN                NaN     
-     =========== =========== =========== =========== =========== =========== ===================== ====================== ================== ======== 
+      10          0.021916    0.021960    0.004889    0.012153    0.939082    1.0                   0.0                    0.0                    
+      100         0.009462    0.013033    0.003875    0.008469    0.965162    1.0                   0.0                    0.0                    
+      103         0.107332    0.000674    0.000584    0.021980    0.869429    1.0                   0.0                    0.0                    
+      106         0.177411    0.015208    0.003767    0.041668    0.761946    1.0                   0.0                    0.0                    
+      109         0.000541    0.000416    0.000376    0.000932    0.997736    1.0                   0.0                    0.0                    
+      ...         ...         ...         ...         ...         ...         ...                   ...                    ...                    
+      556         NaN         NaN         NaN         NaN         NaN         0.0                   0.0                    0.0                    
+      557         NaN         NaN         NaN         NaN         NaN         0.0                   0.0                    0.0                    
+     =========== =========== =========== =========== =========== =========== ===================== ====================== ==================  
 
 One of the parameters to the `parent class <./zrp/prepare/base.py>`_ that ZRP() inherits from is ``file_path``. This parameter allows you to specify where the ``artifacts/`` folder is outputted during the run of the ZRP. Once the run is complete, the ``artifacts/`` folder will contain the outputted race/ethnicity proxies and additional logs documenting the validity of input data. ``file_path`` **need not** be specified. If it is not defined, the ``artifacts/`` folder will be placed in the same directory of the script running zrp. Subsequent runs will, however, overwrite the files in ``artifacts/``; providing a unique directory path for ``file_path`` will avoid this.
 
@@ -211,7 +211,7 @@ __________
 
 The models included in this package were trained on publicly-available voter registration data and validated multiple times: on hold out sets of voter registration data and on a national sample of PPP loan forgiveness data.  The results were consistent across tests:  20-30% more African Americans correctily identified as African American, and 60% fewer whites identified as people of color as compared with the status quo BISG method.  
 
-Performance on the national PPP loan forgiveness dataset was as follows (comparing ZRP softmax with the BISG-80 method):
+Performance on the national PPP loan forgiveness dataset was as follows (comparing ZRP softmax with the BISG method):
 
 *African American*
 

@@ -1,4 +1,5 @@
 from os.path import dirname, join, expanduser
+from zrp.validate import ValidateGeo
 from .preprocessing import *
 from .base import BaseZRP
 from .utils import *
@@ -12,58 +13,6 @@ import re
 
 import warnings
 warnings.filterwarnings(action='ignore')
-
-def get_reduced(tmp_data):
-    keep_cols = ['ZEST_KEY', 'first_name', 'middle_name', 'last_name',
-                 'house_number', 'street_address', 'city', 'state', 'zip_code',
-                 'BLKGRPCE', 'BLKGRPCE10', 'COUNTYFP', 'COUNTYFP10', 'FROMHN', 'TOHN',
-                 'LFROMADD', 'LTOADD', 'PUMACE', 'PUMACE10', 'RFROMADD', 'RTOADD', 'SIDE',
-                 'STATEFP', 'STATEFP10', 'TBLKGPCE', 'TRACTCE', 'TRACTCE10', 'TTRACTCE',
-                 'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_KEY_COL', 'ZEST_STATE',
-                 'ZEST_ZIP', 'GEOID_ZIP', 'GEOID_CT', 'GEOID_BG', 'age', 'original_ethnicity',
-                 'original_race', 'original_sex', 'ethnicity', 'race', 'sex', 'source']
-    na_match_cols = ['BLKGRPCE', 'BLKGRPCE10', 'COUNTYFP', 'COUNTYFP10', 'FROMHN', 'TOHN',
-                     'LFROMADD', 'LTOADD', 'PUMACE', 'PUMACE10', 'RFROMADD', 'RTOADD', 'SIDE',
-                     'STATEFP', 'STATEFP10', 'TBLKGPCE', 'TRACTCE', 'TRACTCE10', 'TTRACTCE',
-                     'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_STATE', 'ZEST_ZIP']
-    red_bit = keep_cols + ['HN_Match', 'ZIP_Match', 'RAW_ZEST_STATEFP']
-
-    tmp_data = tmp_data.filter(red_bit)
-
-    geocd = tmp_data.copy()
-    nomatch = tmp_data.copy()
-
-    geocd = geocd[(geocd.HN_Match.astype(float) == 1) & (geocd.ZIP_Match.astype(float) == 1)]
-    geokeys = list(geocd['ZEST_KEY'].unique())
-
-    nomatch = nomatch[~nomatch['ZEST_KEY'].isin(geokeys)]
-    nomatch = nomatch.drop_duplicates('ZEST_KEY')
-
-    geocd['TRACTCE'] = geocd.groupby('ZEST_KEY')['TRACTCE'].transform(lambda x: x.value_counts().idxmax())
-    geocd['BLKGRPCE'] = geocd.groupby('ZEST_KEY')['BLKGRPCE'].transform(lambda x: x.value_counts().idxmax())
-    geocd['ZCTA5CE'] = geocd.groupby('ZEST_KEY')['ZCTA5CE'].transform(lambda x: x.value_counts().idxmax())
-    geocd['COUNTYFP'] = geocd.groupby('ZEST_KEY')['COUNTYFP'].transform(lambda x: x.value_counts().idxmax())
-
-    geocd = geocd.drop_duplicates('ZEST_KEY')
-    geocd["GEOID_CT"] = geocd[["RAW_ZEST_STATEFP", "COUNTYFP", "TRACTCE"]].apply(lambda x: "".join(x.dropna()), axis=1)
-    geocd["GEOID_BG"] = geocd[["GEOID_CT", "BLKGRPCE"]].apply(lambda x: "".join(x.dropna()), axis=1)
-    geocd = geocd.set_index('ZEST_KEY')
-
-    if len(nomatch) > 1:
-        nomatch[na_match_cols] = None
-        nomatch = nomatch.set_index('ZEST_KEY')
-        data_out = pd.concat([geocd, nomatch])
-        data_out["GEOID_ZIP"] = np.where(data_out["ZCTA5CE"].isna(), data_out.zip_code, data_out["ZCTA5CE"])
-        
-        data_out = data_out.filter(keep_cols)
-    else:
-        data_out = geocd.filter(keep_cols)
-        data_out["GEOID_ZIP"] = np.where(data_out["ZCTA5CE"].isna(), data_out.zip_code, data_out["ZCTA5CE"])
-    
-    data_out["GEOID"] = None
-    data_out["GEOID"].fillna(data_out["GEOID_BG"]).fillna(data_out["GEOID_CT"]).fillna(data_out["GEOID_ZIP"])
-    return(data_out)
-
 
 
 def geo_search(geo_files_path, year, st_cty_code):
@@ -152,9 +101,62 @@ class ZGeo(BaseZRP):
     def __init__(self, file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.key = 'ZEST_KEY'
+        self.params_dict =  kwargs
+
 
     def fit(self):
         return self
+
+    def get_reduced(self, tmp_data):
+        keep_cols = ['ZEST_KEY', 'first_name', 'middle_name', 'last_name',
+                     'house_number', 'street_address', 'city', 'state', 'zip_code',
+                     'BLKGRPCE', 'BLKGRPCE10', 'COUNTYFP', 'COUNTYFP10', 'FROMHN', 'TOHN',
+                     'LFROMADD', 'LTOADD', 'PUMACE', 'PUMACE10', 'RFROMADD', 'RTOADD', 'SIDE',
+                     'STATEFP', 'STATEFP10', 'TBLKGPCE', 'TRACTCE', 'TRACTCE10', 'TTRACTCE',
+                     'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_KEY_COL', 'ZEST_STATE',
+                     'ZEST_ZIP', 'GEOID_ZIP', 'GEOID_CT', 'GEOID_BG', 'age', 'original_ethnicity',
+                     'original_race', 'original_sex', 'ethnicity', 'race', 'sex', 'source']
+        na_match_cols = ['BLKGRPCE', 'BLKGRPCE10', 'COUNTYFP', 'COUNTYFP10', 'FROMHN', 'TOHN',
+                         'LFROMADD', 'LTOADD', 'PUMACE', 'PUMACE10', 'RFROMADD', 'RTOADD', 'SIDE',
+                         'STATEFP', 'STATEFP10', 'TBLKGPCE', 'TRACTCE', 'TRACTCE10', 'TTRACTCE',
+                         'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_STATE', 'ZEST_ZIP']
+        red_bit = keep_cols + ['HN_Match', 'ZIP_Match', 'RAW_ZEST_STATEFP']
+
+        tmp_data = tmp_data.filter(red_bit)
+
+        geocd = tmp_data.copy()
+        nomatch = tmp_data.copy()
+
+        geocd = geocd[(geocd.HN_Match.astype(float) == 1) & (geocd.ZIP_Match.astype(float) == 1)]
+        geokeys = list(geocd['ZEST_KEY'].unique())
+
+        nomatch = nomatch[~nomatch['ZEST_KEY'].isin(geokeys)]
+        nomatch = nomatch.drop_duplicates('ZEST_KEY')
+
+        geocd['TRACTCE'] = geocd.groupby('ZEST_KEY')['TRACTCE'].transform(lambda x: x.value_counts().idxmax())
+        geocd['BLKGRPCE'] = geocd.groupby('ZEST_KEY')['BLKGRPCE'].transform(lambda x: x.value_counts().idxmax())
+        geocd['ZCTA5CE'] = geocd.groupby('ZEST_KEY')['ZCTA5CE'].transform(lambda x: x.value_counts().idxmax())
+        geocd['COUNTYFP'] = geocd.groupby('ZEST_KEY')['COUNTYFP'].transform(lambda x: x.value_counts().idxmax())
+
+        geocd = geocd.drop_duplicates('ZEST_KEY')
+        geocd["GEOID_CT"] = geocd[["RAW_ZEST_STATEFP", "COUNTYFP", "TRACTCE"]].apply(lambda x: "".join(x.dropna()), axis=1)
+        geocd["GEOID_BG"] = geocd[["GEOID_CT", "BLKGRPCE"]].apply(lambda x: "".join(x.dropna()), axis=1)
+        geocd = geocd.set_index('ZEST_KEY')
+
+        if len(nomatch) > 1:
+            nomatch[na_match_cols] = None
+            nomatch = nomatch.set_index('ZEST_KEY')
+            data_out = pd.concat([geocd, nomatch])
+            data_out["GEOID_ZIP"] = np.where(data_out["ZCTA5CE"].isna(), data_out[self.zip_code], data_out["ZCTA5CE"])
+
+            data_out = data_out.filter(keep_cols)
+        else:
+            data_out = geocd.filter(keep_cols)
+            data_out["GEOID_ZIP"] = np.where(data_out["ZCTA5CE"].isna(), data_out[self.zip_code], data_out["ZCTA5CE"])
+
+        data_out["GEOID"] = None
+        data_out["GEOID"].fillna(data_out["GEOID_BG"]).fillna(data_out["GEOID_CT"]).fillna(data_out["GEOID_ZIP"])
+        return(data_out)
 
     def geo_match(self, geo_df):
         """
@@ -175,7 +177,6 @@ class ZGeo(BaseZRP):
         geo_df["ZIP_Match_2"] = np.where(geo_df.ZCTA5CE10 == geo_df[self.zip_code], 1, 0)   
         geo_df["NEW_SUPER_ZIP"] = np.where(geo_df.ZIP_Match_1 == 1, geo_df.ZEST_ZIP, geo_df.ZCTA5CE10)
         geo_df["ZIP_Match"] = np.where(geo_df.NEW_SUPER_ZIP == geo_df[self.zip_code], 1, 0)
-        
         
         return(geo_df)    
     
@@ -201,40 +202,26 @@ class ZGeo(BaseZRP):
         except AttributeError:
             data = load_file(self.file_path)
             print("   Data file is loaded")
-        
-        data = data.rename(columns = {self.first_name : "first_name", 
-                                      self.middle_name : "middle_name", 
-                                      self.last_name : "last_name",
-                                      self.house_number : "house_number", 
-                                      self.street_address : "street_address", 
-                                      self.city : "city",
-                                      self.zip_code : "zip_code",
-                                      self.state : "state", 
-                                      self.block_group : "block_group", 
-                                      self.census_tract : "census_tract"
-                             }
-                  )
             
-        prg = ProcessGeo()
+        prg = ProcessGeo(**self.params_dict)
         data = prg.transform(data, processed=processed, replicate=replicate)
-        
         print("   [Start] Mapping geo data")
         state = most_common(list(data[self.state].unique()))
+        geoids = ["GEOID_ZIP", "GEOID_CT", "GEOID_BG"]
         
         if len(geo)>2:
             file_list = geo_search(out_geo_path, self.year, geo)
             aef = geo_read(file_list)
+            aef = aef.drop(geoids, axis=1)
         if len(geo) <= 2:
             aef = load_file(os.path.join(out_geo_path, f"Zest_Geo_Lookup_{self.year}_State_{geo}.parquet"))
+            aef = aef.drop(geoids, axis=1)
 
         data["ZEST_FULLNAME"] = data[self.street_address]
         print("      ...merge user input & lookup table")
         geo_df = aef.merge(data, on="ZEST_FULLNAME", how="right")
-        
         geo_df = geo_range(geo_df)
-
         geo_df = self.geo_match(geo_df)
-        
         print("      ...mapping")
         all_keys = list(geo_df[self.key].unique())
         odf = geo_df.copy()
@@ -246,8 +233,13 @@ class ZGeo(BaseZRP):
         odf = odf[odf[self.key].isin(add_na_keys)]
 
         geo_df = pd.concat([geo_df, odf])
-
-        geo_df = get_reduced(geo_df)
+        geo_df = self.get_reduced(geo_df)
+        
+        geo_validate = ValidateGeo()
+        geo_validate.fit()
+        geo_validators_in = geo_validate.transform(geo_df)
+        save_json(geo_validators_in, self.out_path, "input_geo_validator.json") 
+        print("   [Completed] Validating input geo data")        
 
         if save_table:
             make_directory(self.out_path)

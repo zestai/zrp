@@ -3,7 +3,8 @@ from .base import BaseZRP
 from .utils import *
 import pandas as pd
 import os
-
+import warnings
+warnings.filterwarnings(action='ignore')
 
 def acs_search(year, span):
     """
@@ -59,8 +60,6 @@ class ACSModelPrep(BaseZRP):
         acs_zip: str
             ACS zip code lookup table
         """
-        # Block Group
-        mbggk_list = list(set(data.GEOID_BG.unique()).intersection(set(acs_bg.GEOID.unique())))
 
         print(" ...Copy dataframes")
         ## Merge by current
@@ -70,39 +69,51 @@ class ACSModelPrep(BaseZRP):
         nm = data.copy()
 
         print(" ...Block group")
+        try:
+            # Block Group
+            mbggk_list = list(set(data.GEOID_BG.unique()).intersection(set(acs_bg.GEOID.unique())))        
+            mbggk = mbggk[(mbggk.GEOID_BG.isin(mbggk_list))].reset_index(drop=False)
+            mbggk_zkeys = list(mbggk.index)
+            mbggk = mbggk.merge(acs_bg,
+                                left_on="GEOID_BG",
+                                right_on="GEOID").set_index(self.key)
+            mbggk["acs_source"] = "BG"
+        except AttributeError:
+            mbggk_zkeys = []
+            mbggk = pd.DataFrame()
 
-        mbggk = mbggk[(mbggk.GEOID_BG.isin(mbggk_list))].reset_index(drop=False)
-        mbggk_zkeys = list(mbggk.index)
-        mbggk = mbggk.merge(acs_bg,
-                            left_on="GEOID_BG",
-                            right_on="GEOID").set_index(self.key)
-        mbggk["acs_source"] = "BG"
-
+        try:
         # Census Tract
-        mctgk_list = list(set(data.GEOID_CT.unique()).intersection(set(acs_ct.GEOID.unique())))
-        prev_zkeys = mbggk_zkeys
+            mctgk_list = list(set(data.GEOID_CT.unique()).intersection(set(acs_ct.GEOID.unique())))
+            prev_zkeys = mbggk_zkeys
 
-        mctgk = mctgk[~(mctgk.index.isin(prev_zkeys)) & \
-                      (mctgk["GEOID_CT"].isin(mctgk_list))].reset_index(drop=False)
-        mctgk_zkeys = list(mctgk.index)
-        print(" ...Census tract")
-        mctgk = mctgk.merge(acs_ct,
-                            left_on="GEOID_CT",
-                            right_on="GEOID").set_index(self.key)
-        mctgk["acs_source"] = "CT"
-
+            mctgk = mctgk[~(mctgk.index.isin(prev_zkeys)) & \
+                          (mctgk["GEOID_CT"].isin(mctgk_list))].reset_index(drop=False)
+            mctgk_zkeys = list(mctgk.index)
+            print(" ...Census tract")
+            mctgk = mctgk.merge(acs_ct,
+                                left_on="GEOID_CT",
+                                right_on="GEOID").set_index(self.key)
+            mctgk["acs_source"] = "CT"
+        except AttributeError:
+            mctgk_zkeys = []            
+            mctgk = pd.DataFrame()
+        try:
         # Merge by Zip
-        mbz_list = list(set(data["GEOID_ZIP"].unique()).intersection(set(acs_zip.GEOID.unique())))
-        prev_zkeys_0 = mbggk_zkeys + mctgk_zkeys
-        print(" ...Zip code")
+            mbz_list = list(set(data["GEOID_ZIP"].unique()).intersection(set(acs_zip.GEOID.unique())))
+            prev_zkeys_0 = mbggk_zkeys + mctgk_zkeys
+            print(" ...Zip code")
 
-        mbz = mbz[~(mbz.index.isin(prev_zkeys_0)) & \
-                  (mbz["GEOID_ZIP"].isin(mbz_list))].reset_index(drop=False)
-        mbz_zkeys = list(mbz.index)
-        mbz = mbz.merge(acs_zip,
-                        right_on="GEOID",
-                        left_on="GEOID_ZIP").set_index(self.key)
-        mbz["acs_source"] = "ZIP"
+            mbz = mbz[~(mbz.index.isin(prev_zkeys_0)) & \
+                      (mbz["GEOID_ZIP"].isin(mbz_list))].reset_index(drop=False)
+            mbz_zkeys = list(mbz.index)
+            mbz = mbz.merge(acs_zip,
+                            right_on="GEOID",
+                            left_on="GEOID_ZIP").set_index(self.key)
+            mbz["acs_source"] = "ZIP"
+        except AttributeError:
+            mbz_zkeys = []
+            mbz = pd.DataFrame()
 
         # No Merge
         print(" ...No match")
@@ -131,25 +142,18 @@ class ACSModelPrep(BaseZRP):
         except AttributeError:
             data = load_file(input_data)
             print("Input data file is loaded")
-        
-        data = data.rename(columns = {self.first_name : "first_name", 
-                                      self.middle_name : "middle_name", 
-                                      self.last_name : "last_name",
-                                      self.house_number : "house_number", 
-                                      self.street_address : "street_address", 
-                                      self.city : "city",
-                                      self.zip_code : "zip_code",
-                                      self.state : "state", 
-                                      self.block_group : "block_group", 
-                                      self.census_tract : "census_tract"
-                             }
-                  )
 
         if "GEOID_ZIP" not in data.columns:
             print("Generating Geo IDs")
-            data["GEOID_ZIP"] = data["ZEST_ZIP"]
-            data["GEOID_CT"] = data["STATEFP"] + data["COUNTYFP"] + data["TRACTCE"]
-            data["GEOID_BG"] = data["GEOID_CT"] + data["BLKGRPCE"]
+            data["GEOID_ZIP"] = data[self.zip_code]
+            try:
+                data["GEOID_CT"] = data[self.census_tract]
+            except KeyError:
+                pass
+            try:
+                data["GEOID_BG"] = data[self.block_group]
+            except KeyError:
+                pass
 
         file_list_z, file_list_c, file_list_b = acs_search(self.year,
                                                            self.span)

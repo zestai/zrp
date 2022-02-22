@@ -91,20 +91,3 @@ The biggest concern of Random Forest and XGBoost models is overfitting. Therefor
 
 Neural Networks can handle very complex problems but are very difficult to initiate. There can be millions of parameters – each of which requires tuning – in a simple Neural Network. These parameters can include a number of hidden layers, inputs or outputs of each hidden layer, optimization algorithms, activation functions – all of which make it difficult to optimize the Neural Network.
 
-Data Pipeline
-=============
-
-For model training, we input dataframes consisting of ____________-. From the input, we map an individual's address to their census tract via computed geo lookup tables. We match on this census tract to derive an additional set of demographic data to add to the feature vector. Thus, __________________ are ultimately the predictive variables used in the model.
-
-We one hot encode the race labels. Using each bit of the encoding as a unique target, we then treat first, middle, and last names as categorical features, and target encode these features. In target encoding, features are replaced by a function of the posterior probability of the target (a race label) given a particular categorical value (first, middle, or last name), and the prior probability of the target over all the training data. Ultimately, an individual's name is represented in the final feature vector as multiple target encodings. 
-
-For inference, like with training, we feed in dataframes as input, addresses are mapped to census tracts and thus ACS demographic information, and feature vectors are built from these data and encoded name features. ........
-
-Model Outputs
-=============
-
-... if the ZRP algorithm cannot be computed, due to isues with inputs or intermediate lookup tables, we attempt to compute the BISG result. If this fails as well...
-
-Model Performance
-__________________
-
