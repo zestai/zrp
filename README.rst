@@ -1,6 +1,8 @@
 Zest Race Predictor
 ____________________
 
+.. image:: https://readthedocs.org/projects/zrp-docs/badge/?version=latest
+
 Zest Race Predictor (ZRP) is an open-source machine learning algorithm that estimates the race/ethnicity of an individual using only their full name and home address as inputs. ZRP improves upon the most widely used racial and ethnic data estimation method, Bayesian Improved Surname Geocoding (BISG), developed by RAND Corporation in 2009. 
 
 ZRP was built using ML techniques such as gradient boosting and trained on voter data from the southeastern U.S. It was then validated on a national sample using adjusted tract-level American Community Survey (ACS) data. (Model training procedures are provided.)
