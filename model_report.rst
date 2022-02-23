@@ -1,3 +1,7 @@
+ZRP Model Development Documentation
+====================================
+
+
 Problem Statement
 __________________
 
@@ -14,8 +18,9 @@ Zest’s data science team developed the Zest Race Predictor (ZRP) as a BISG rep
 Modeling Data
 ______________
 
-Training Data
-==============
+
+**Names, Addresses, and Class Labels** 
+
 The initial model development dataset includes voter registration data from the states of Florida and North Carolina. Summary statistics on these datasets and additional datasets used as validation can be found `here <./dataset_statistics.txt>`_ . 
 
 Consult the following to download state voter registration data:
@@ -28,8 +33,7 @@ Consult the following to download state voter registration data:
 
 Voter registration data was selected because it is a large, publicly-available database of names, addresses and ground truth labels (self-reported race and ethnicity).  Ideally a more comprehensive list of names addresses and self-reported race/ethnicity from the US Census Bureau would be used to train the model, but such a dataset is not publicly available.
 
-American Community Survey (ACS) Data:
-=====================================
+**American Community Survey (ACS) Attributes** 
  
 The US Census Bureau details that, "the American Community Survey (ACS) is an ongoing survey that provides data every year -- giving communities the current information they need to plan investments and services. The ACS covers a broad range of topics about social, economic, demographic, and housing characteristics of the U.S. population. The 5-year estimates from the ACS are "period" estimates that represent data collected over a period of time. The primary advantage of using multiyear estimates is the increased statistical reliability of the data for less populated areas and small population subgroups. The 5-year estimates are available for all geographies down to the block group level." ( Bureau, US Census. “American Community Survey 5-Year Data (2009-2019).” Census.gov, 8 Dec. 2021, https://www.census.gov/data/developers/data-sets/acs-5year.html. )
 
@@ -39,9 +43,9 @@ ACS data is available in 1 or 5 year spans. The 5yr ACS data is the most compreh
 Model Development
 __________________
 
-  * **Data Preparation:** Initial dataset definition, data validation and analysis, segmentation and sampling, data cleansing, feature creation, target and data selection
-  * **Model Training:** Algorithm selection, hyperparameter tuning and optimization
-  * **Model Evaluation:** Model validation, benchmarking approach, model performance, difference drivers, model stability and model limitations
+  * **Data Preparation:** Initial dataset definition, segmentation and sampling, data cleansing, feature creation, target and data selection
+  * **Model Training:** Algorithm selection, hyperparameter selection
+  * **Model Evaluation:** Model validation, benchmarking and model performance
 
 Data Preparation
 _________________
@@ -229,7 +233,10 @@ A hold out dataset was constructed using Alabama voter registration data.  Predi
 +----------+-----------+-----------+-----------+
 
 
+Model Limitations
+_________________
 
+This model is designed to predict race/ethnicity based on names and addresses of people residing in the United States only.
 
 
 
