@@ -227,7 +227,7 @@ __________
 
 The models included in this package were trained on publicly-available voter registration data and validated multiple times: on hold out sets of voter registration data and on a national sample of PPP loan forgiveness data.  The results were consistent across tests:  20-30% more African Americans correctily identified as African American, and 60% fewer whites identified as people of color as compared with the status quo BISG method.  
 
-To see our validation analysis with Alabama voter registration data, please check out this notebook<https://github.com/zestai/zrp/blob/main/examples/analysis/Alabama_Case_Study.md>.
+To see our validation analysis with Alabama voter registration data, please check out `this notebook<https://github.com/zestai/zrp/blob/main/examples/analysis/Alabama_Case_Study.md>`.
 
 Performance on the national PPP loan forgiveness dataset was as follows (comparing ZRP softmax with the BISG method):
 
