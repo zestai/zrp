@@ -80,7 +80,7 @@ df.shape
 
 
 ##### Encode key
-While the Alabama voter registration data available to the public, the key is hashed to maintain voter privacy. 
+While the Alabama voter registration data is available to the public, the key is hashed to maintain voter privacy. 
 
 
 ```python
@@ -537,7 +537,7 @@ zrp_output.index.values[0:1]
 
 #### Invoke the Performance module on the Alabama sample data
 
-
+`ZRP_Performance.transform()` takes in proxy_data and ground_truth as parameters. `zrp_output` (the output of `ZRP.transform(df)`) contains both a race_proxy column, and a race column, which is the ground truth. Since `zrp_output` contains both proxy_data and ground_truth columns, we can pass it in for both parameters in `ZRP_Performance.transform()` as shown below.
 
 ```python
 zrp_perf = ZRP_Performance()
@@ -549,7 +549,7 @@ output_metrics = zrp_perf.transform(zrp_output, zrp_output)
     The key is already set
 
 
-By default multiple performance metrics are generated. Lets review the True Positive Rate, the metric labeled TPR. In this case the TPR conveys the percentage of correct approximated race in the true race/ethnicity class. For reference, ideally the TPR should be as close to 1 as possible 
+By default multiple performance metrics are generated. Lets review the True Positive Rate, the metric labeled TPR. In this case the TPR conveys the percentage of correct approximated race in the true race/ethnicity class. For reference, ideally the TPR should be as close to 1 as possible. 
 
 
 ```python
@@ -1776,7 +1776,7 @@ area_perf.fit()
 
 
 
-Transform ZRP Outputsm
+Transform ZRP Outputs
 
 
 ```python
