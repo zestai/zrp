@@ -129,7 +129,7 @@ XGBoost 1.0.2 was used to train the model with the following hyperparameters:
 +---------------------+----------------------+
 
 
-4,517,348 names, locations, and self-reported race/ethnicities from the Florida and North Carolina voter registration database were used for training.
+4,517,348 names, locations, and self-reported race/ethnicities from the Florida, Georgia and North Carolina voter registration database were used for training.
 
 Sample weights were consutructed such that proportion of the sample weight associated with each race/ethnicity in the training dataset matches the national distribution of race/ethnicity.
 
