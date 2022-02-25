@@ -60,7 +60,7 @@ In order to facilitate fast translation from address to Census block group, trac
 
 To build the training and test datasets, the voter registration data is joined with ACS attributes via the address matching process described above.  
 
-The full list of predictive variables in the model can be found `here. <https://github.com/zestai/zrp/blob/main/zrp/modeling/feature_definitions.rst>`
+The full list of predictive variables in the model can be found `here. <https://github.com/zestai/zrp/blob/main/zrp/modeling/feature_definitions.md>`
 
 
 
