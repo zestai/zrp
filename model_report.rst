@@ -141,16 +141,19 @@ XGBoost 1.0.2 was used to train the model with the following hyperparameters:
 
 Sample weights were consutructed such that proportion of the sample weight associated with each race/ethnicity in the training dataset matches the national distribution of race/ethnicity.
 
+Several models are trained:  one for Census block group, one for Census tract, and another for the ZIP Code.  T
+
 Prediction Process
 ____________________
 
+The inputs to ZRP include name and address.  The address is used to lookup attributes of the correpsonding region.  The lookup process starts with retrieval of Census block group attributes.  If the block group lookup fails, then Census tract attributes are retrieved.  If the Census tract lookup fails, then ZIP code attributes are retrieved.  ACS attributes associated with the retrieved geographic area are then appended to the first, middle, and last name.  The resulting vector of predictors is then used as input to the corresponding model (e.g., block group, tract, or ZIP-based model).
 
 
 Model Evaluation
 ==================
 
 
-A hold out dataset was constructed using Alabama voter registration data.  Predictive performance on the Alabama hold out dataset is shown below:
+A hold out dataset was constructed using Alabama voter registration data comprised of 250,000 randomly sampled records.  Predictive performance of the ZRP model on the Alabama hold out dataset is shown below:
 
 **BLACK** (African American)
 
