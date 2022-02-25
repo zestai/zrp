@@ -21,7 +21,7 @@ Modeling Data
 
 **Names, Addresses, and Class Labels** 
 
-The initial model development dataset includes voter registration data from the states of Florida, North Carolina, and Georgia. Summary statistics on these datasets and additional datasets used as validation can be found `here <./dataset_statistics.txt>`_ . 
+The initial model development dataset includes voter registration data from the states of Florida, North Carolina, and Georgia. Summary statistics on these datasets and additional datasets used as validation can be found `here <https://github.com/zestai/zrp/blob/main/dataset_statistics.txt>`_ . 
 
 Consult the following to download state voter registration data:
  * `North Carolina <https://www.ncsbe.gov/results-data/voter-registration-data>`_
