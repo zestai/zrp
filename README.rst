@@ -54,7 +54,7 @@ _____
 
 Training Data
 ==============
-The models available in this package were trained on voter registration data from the states of Florida , Georgia, and North Carolina. Summary statistics on these datasets and additional datasets used as validation can be found `here <./dataset_statistics.txt>`_ . 
+The models available in this package were trained on voter registration data from the states of Florida , Georgia, and North Carolina. Summary statistics on these datasets and additional datasets used as validation can be found `here <https://github.com/zestai/zrp/blob/main/dataset_statistics.txt>`_ . 
 
 Consult the following to download state voter registration data:
  * `North Carolina <https://www.ncsbe.gov/results-data/voter-registration-data>`_
@@ -77,7 +77,7 @@ ___________
 
 To get started using the ZRP, first ensure the download is complete (as described above) and xgboost == 1.0.2 
 
-Check out the guides in the `examples <./examples>`_ folder. Clone the repo in order to obtain the example notebooks and data; this is not provided in the pip installable package. If you're experiencing issues, first consult our `common issues guide <./common_issues.rst>`_.
+Check out the guides in the `examples <https://github.com/zestai/zrp/tree/main/examples>`_ folder. Clone the repo in order to obtain the example notebooks and data; this is not provided in the pip installable package. If you're experiencing issues, first consult our `common issues guide <https://github.com/zestai/zrp/blob/main/common_issues.rst>`_.
 
 `Here <https://mybinder.org/v2/gh/zestai/zrp/HEAD>`_, we additionally provide an interactive virtual environment, via Binder, with ZRP installed. Once you open this link and are taken to the JupyterLab environment, open up a terminal and run the following: 
 ::
@@ -108,7 +108,7 @@ ZRP Predictions
 
      - Prepares data to generate race & ethnicity proxies
 
-  You can find parameter descriptions in the `ZRP class <./zrp/zrp.py>`_ and it's `parent class <./zrp/prepare/base.py>`_.
+  You can find parameter descriptions in the `ZRP class <https://github.com/zestai/zrp/blob/main/zrp/zrp.py>`_ and it's `parent class <https://github.com/zestai/zrp/blob/main/zrp/prepare/base.py>`_.
 
 ::
 
@@ -128,7 +128,7 @@ ZRP Predictions
  |            | **df** : *{DataFrame}* Pandas dataframe containing input data (see below for necessary columns)                          |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
 
-Input data, **df**, into the prediction/modeling pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, and zest key. Consult our `common issues guide <./common_issues.rst>`_ to ensure you're input data is the correct format.
+Input data, **df**, into the prediction/modeling pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, and zest key. Consult our `common issues guide <https://github.com/zestai/zrp/blob/main/common_issues.rst>`_ to ensure you're input data is the correct format.
 
 -  Output: A dataframe with the following columns: AAPI	AIAN	BLACK	HISPANIC	WHITE	source_block_group	source_zip_code	source_bisg 
    ::
@@ -149,7 +149,7 @@ Input data, **df**, into the prediction/modeling pipeline **MUST** contain the f
       557         NaN         NaN         NaN         NaN         NaN         0.0                   0.0                    0.0                    
      =========== =========== =========== =========== =========== =========== ===================== ====================== ==================  
 
-One of the parameters to the `parent class <./zrp/prepare/base.py>`_ that ZRP() inherits from is ``file_path``. This parameter allows you to specify where the ``artifacts/`` folder is outputted during the run of the ZRP. Once the run is complete, the ``artifacts/`` folder will contain the outputted race/ethnicity proxies and additional logs documenting the validity of input data. ``file_path`` **need not** be specified. If it is not defined, the ``artifacts/`` folder will be placed in the same directory of the script running zrp. Subsequent runs will, however, overwrite the files in ``artifacts/``; providing a unique directory path for ``file_path`` will avoid this.
+One of the parameters to the `parent class <https://github.com/zestai/zrp/blob/main/zrp/prepare/base.py>`_ that ZRP() inherits from is ``file_path``. This parameter allows you to specify where the ``artifacts/`` folder is outputted during the run of the ZRP. Once the run is complete, the ``artifacts/`` folder will contain the outputted race/ethnicity proxies and additional logs documenting the validity of input data. ``file_path`` **need not** be specified. If it is not defined, the ``artifacts/`` folder will be placed in the same directory of the script running zrp. Subsequent runs will, however, overwrite the files in ``artifacts/``; providing a unique directory path for ``file_path`` will avoid this.
 
 ZRP Build
 =============
@@ -183,7 +183,7 @@ ZRP Build
  |            | **zrp_model_source** : *{str}* Indicates the source of zrp_modeling data to use.                                         |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
  
- You can find more detailed parameter descriptions in the `ZRP_Build class <./zrp/modeling/pipeline_builder.py>`_. ZRP_Build() also inherits initlizing parameters from its `parent class <./zrp/prepare/base.py>`_.
+ You can find more detailed parameter descriptions in the `ZRP_Build class <https://github.com/zestai/zrp/blob/main/zrp/modeling/pipeline_builder.py>`_. ZRP_Build() also inherits initlizing parameters from its `parent class <https://github.com/zestai/zrp/blob/main/zrp/prepare/base.py>`_.
      
 ::
 
@@ -203,7 +203,7 @@ ZRP Build
  |            | **df** : *{DataFrame}* Pandas dataframe containing input data (see below for necessary columns)                          |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
 
-Input data, **df**, into this pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, zest key, and race. Consult our `common issues guide <./common_issues.rst>`_ to ensure you're input data is the correct format.
+Input data, **df**, into this pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, zest key, and race. Consult our `common issues guide <https://github.com/zestai/zrp/blob/main/common_issues.rst>`_ to ensure you're input data is the correct format.
 
 -  Output: A dictionary of race & ethnicity probablities and labels.
 
@@ -302,11 +302,11 @@ _______
 Contributing
 _____________
 
-Contributions are encouraged! For small bug fixes and minor improvements, feel free to just open a PR. For larger changes, please open an issue first so that other contributors can discuss your plan, avoid duplicated work, and ensure it aligns with the goals of the project. Be sure to also follow the `Code of Conduct <./CODE_OF_CONDUCT.md>`_. Thanks!
+Contributions are encouraged! For small bug fixes and minor improvements, feel free to just open a PR. For larger changes, please open an issue first so that other contributors can discuss your plan, avoid duplicated work, and ensure it aligns with the goals of the project. Be sure to also follow the `Code of Conduct <https://github.com/zestai/zrp/blob/main/CODE_OF_CONDUCT.md>`_. Thanks!
 
 Maintainers
 ===========
-Maintainers should additionally consult our documentation on `releasing <./releasing.rst>`_. Follow the steps there to push new releases to Pypi and Github releases. With respect to Github releases, we provide new releases to ensure relevant pipelines and look up tables requisite for package download and use are consistently up to date. 
+Maintainers should additionally consult our documentation on `releasing <https://github.com/zestai/zrp/blob/main/releasing.rst>`_. Follow the steps there to push new releases to Pypi and Github releases. With respect to Github releases, we provide new releases to ensure relevant pipelines and look up tables requisite for package download and use are consistently up to date. 
 
 Wishlist
 __________
