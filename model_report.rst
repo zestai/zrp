@@ -1,9 +1,9 @@
 ZRP Model Development Documentation
-====================================
+####################################
 
 
 Problem Statement
-__________________
+==================
 
 To comply with federal fair lending laws, banks and credit unions must prove they don’t discriminate based on race and other protected statuses. But lenders aren’t allowed (except in mortgage lending) to ask the race of the applicant. And, even in mortgage lending, almost a third of applicants put nothing down.
 
@@ -16,12 +16,12 @@ We’re not saying to throw BISG out, but let’s use it only until a better alt
 Zest’s data science team developed the Zest Race Predictor (ZRP) as a BISG replacement. At its core is a machine-learning model that estimates race using first, middle, and last names and a richer location data set gathered by the US Census.  By using more data:  full name and many more location attributes -- and better math:  gradient boosting -- ZRP significantly improvess the accuracy of race estimation.
 
 Modeling Data
-______________
+==================
 
 
 **Names, Addresses, and Class Labels** 
 
-The initial model development dataset includes voter registration data from the states of Florida and North Carolina. Summary statistics on these datasets and additional datasets used as validation can be found `here <./dataset_statistics.txt>`_ . 
+The initial model development dataset includes voter registration data from the states of Florida, North Carolina, and Georgia. Summary statistics on these datasets and additional datasets used as validation can be found `here <./dataset_statistics.txt>`_ . 
 
 Consult the following to download state voter registration data:
  * `North Carolina <https://www.ncsbe.gov/results-data/voter-registration-data>`_
@@ -41,14 +41,14 @@ ACS data is available in 1 or 5 year spans. The 5yr ACS data is the most compreh
 
 
 Model Development
-__________________
+##################
 
   * **Data Preparation:** Initial dataset definition, segmentation and sampling, data cleansing, feature creation, target and data selection
   * **Model Training:** Algorithm selection, hyperparameter selection
   * **Model Evaluation:** Model validation, benchmarking and model performance
 
 Data Preparation
-_________________
+==================
 
 Initial versions of the ZRP were place-specific.  That is, a given ZIP code was a predictor in the model.  This resulted in a model that was limited to work in the specific places in which it had been trained.  However, not all states release their voter records, and so the challenge was to make a model that could be trained using voter registration data from some small number of states, yet still predict accurately in other unseen geographic areas.
 
@@ -64,8 +64,8 @@ The full list of predictive variables in the model can be found `here. <https://
 
 
 
-Algorithms & Model Training
-________________
+Algorithms & Model Training Process
+=====================================
 
 The problem of predicting race falls within in the class of problems for which supervised machine learning classification algorithms are used. Supervised machine learning algorithms try to create a functional dependence between data points and a given target variable. In this case, the algorithms created a functional dependence between data related to an individual’s name as well as his/her address, and their race/ethnicity.  Classification algorithms try to predict a finite number of target choices; for instance: Black, White, Hispanic, AAPI, AIAN, or Multiracial.
 
@@ -107,6 +107,14 @@ The biggest concern associated with XGBoost models is overfitting. Therefore, it
 
 While tree-based models excel on tabular data like we have here, Neural Networks can handle even more complex problems, yet neural networks come with addiitional complexity.   Due to the tabular nature of the data, and keepiing things simple, we selected XGBoost for the ZRP.  A neural network algorithm would be more appropriate if we were considering pictures of people in addition to tabular attributes.
 
+
+Feature engineering
+____________________
+
+
+Model Creation
+____________________
+
 XGBoost 1.0.2 was used to train the model with the following hyperparameters:
 
 
@@ -133,9 +141,13 @@ XGBoost 1.0.2 was used to train the model with the following hyperparameters:
 
 Sample weights were consutructed such that proportion of the sample weight associated with each race/ethnicity in the training dataset matches the national distribution of race/ethnicity.
 
+Prediction Process
+____________________
+
+
 
 Model Evaluation
-________________
+==================
 
 
 A hold out dataset was constructed using Alabama voter registration data.  Predictive performance on the Alabama hold out dataset is shown below:
@@ -234,7 +246,7 @@ A hold out dataset was constructed using Alabama voter registration data.  Predi
 
 
 Model Limitations
-_________________
+==================
 
 This model is designed to predict race/ethnicity based on names and addresses of people residing in the United States only.
 
