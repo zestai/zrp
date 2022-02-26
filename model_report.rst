@@ -83,34 +83,40 @@ In order to develop the model, representative data with self-reported name, addr
 
 The model development dataset is established when treating the voter registration data as one dataset. The model development dataset was split into 4 distinct subsets: one for training, one for internal validation, one for final testing, and a hold out to support ongoing model development. The hold out contains about 30% of the data by state. Aiming for an unbiased representation of the data, we employed random sampling when choosing the dataset splits. The multi-split strategy ensures that the model is not overfitting to the training dataset; that it will be robust to future, unseen data; that the performance is not overstated; and that updates can be implemented. Please refer to the split table below to see the current splits.
 
-+-------+----------+---------------+
-|Dataset|Total Obs|Total Train Obs|
-+-------+----------+---------------+
-|Florida|14,215,868|5,049,617|
-+-------+----------+---------------+
-|Georgia|6,676,561|1,942,893|
-+-------+----------+---------------+
-|North Carolina|6,586,528|2,574,455|
-+-------+----------+---------------+
+
++------------------+--------------+-----------------+
+| Dataset          | Total Obs    | Total Train Obs | 
++------------------+--------------+-----------------+
+| Florida          | 14,215,868   | 5,049,617       | 
++------------------+--------------+-----------------+
+| Georgia          | 6,676,561    | 1,942,893       | 
++------------------+--------------+-----------------+
+| North Carolina   | 6,586,528    | 2,574,455       | 
++------------------+--------------+-----------------+
+
 
 
 Data Summary
 ____________________
 The disaggregated race and ethnicity class information is tabulated below for the training dataset and the United States popultion estimates. 
 
-+-------+----------+---------------+---------------+
-|Class|Train Count|Train Percent| National Estimate (%)|
-+-------+----------+---------------+---------------+
-|Asian American and Pacific Islander|215,866|2.3%|6.1%|
-+-------+----------+---------------+---------------+
-|American Indian and Alaskan Native|41,872|0.4%|1.3%|
-+-------+----------+---------------+---------------+
-|African American or Black|2,001,315|20.9%|13.4%|
-+-------+----------+---------------+---------------+
-|Hispanic or Latino|1,182,740|12.4%|18.5%|
-+-------+----------+---------------+---------------+
-|White|6,125,172|64.0%|60.1%|
-+-------+----------+---------------+---------------+
++---------------------+-------------+---------------+-----------------------+
+| Class               | Train Count | Train Percent | National Estimate (%) |
++---------------------+-------------+---------------+-----------------------+
+| Asian American and  |             |               |                       |
+| Pacific Islander    | 215,866     | 2.3%          | 6.1%                  |
++---------------------+-------------+---------------+-----------------------+
+| American Indian     |             |               |                       |
+| and Alaskan Native  | 41,872      | 0.4%          | 1.3%                  |
++---------------------+-------------+---------------+-----------------------+
+| African American    |             |               |                       |
+| or Black            | 2,001,315   | 20.9%         | 13.4%                 |
++---------------------+-------------+---------------+-----------------------+
+| Hispanic or Latino  | 1,182,740   | 12.4%         | 18.5%                 |
++---------------------+-------------+---------------+-----------------------+
+| White               | 6,125,172   | 64.0%         | 60.1%                 |
++---------------------+-------------+---------------+-----------------------+
+
 
 Note there was no consistent classification of race identities of multiracial or other so they were not included in model development.
 
@@ -119,39 +125,39 @@ ____________________
 Sample weights were consutructed such that proportion of the sample weight associated with each race/ethnicity in the training dataset mimics the national distribution of race/ethnicity. The look-a-like sample weighting was done at the state level.
 
 
-+-------+----------+----------+
-|state | race | sample_weight |
-+-------+----------+----------+
-| Florida | WHITE | 0.9406 |
-+-------+----------+----------+
-| Florida | BLACK | 0.9770 |
-+-------+----------+----------+
-| Florida | AIAN | 3.9046 |
-+-------+----------+----------+
-| Florida | HISPANIC | 0.9565 |
-+-------+----------+----------+
-| Florida | AAPI | 2.8882 |
-+-------+----------+----------+
-| Georgia | WHITE | 1.1152 |
-+-------+----------+----------+
-| Georgia | BLACK | 0.3718 |
-+-------+----------+----------+
-| Georgia | AAPI | 1.6984 |
-+-------+----------+----------+
-| Georgia | HISPANIC | 3.4281 |
-+-------+----------+----------+
-| Georgia | AIAN | 2.6944 |
-+-------+----------+----------+
-| North Carolina | WHITE | 0.8509 |
-+-------+----------+----------+
-| North Carolina | BLACK | 0.5763 |
-+-------+----------+----------+
-| North Carolina | AIAN | 2.1578 |
-+-------+----------+----------+
-| North Carolina | HISPANIC | 5.4349 |
-+-------+----------+----------+
-| North Carolina | AAPI | 4.0384 |
-+-------+----------+----------+
++-----------------+-----------------+---------------+
+| state           | race            | sample_weight |
++-----------------+-----------------+---------------+
+| Florida         | WHITE            | 0.9406       |
++-----------------+-----------------+---------------+
+| Florida         | BLACK           | 0.9770        |
++-----------------+-----------------+---------------+
+| Florida         | AIAN            | 3.9046        |
++-----------------+-----------------+---------------+
+| Florida         | HISPANIC        | 0.9565        |
++-----------------+-----------------+---------------+
+| Florida         | AAPI            | 2.8882        |
++-----------------+-----------------+---------------+
+| Georgia         | WHITE            | 1.1152       |
++-----------------+-----------------+---------------+
+| Georgia         | BLACK           | 0.3718        |
++-----------------+-----------------+---------------+
+| Georgia         | AAPI            | 1.6984        |
++-----------------+-----------------+---------------+
+| Georgia         | HISPANIC        | 3.4281        |
++-----------------+-----------------+---------------+
+| Georgia         | AIAN            | 2.6944        |
++-----------------+-----------------+---------------+
+| North Carolina  | WHITE            | 0.8509       |
++-----------------+-----------------+---------------+
+| North Carolina  | BLACK           | 0.5763        |
++-----------------+-----------------+---------------+
+| North Carolina  | AIAN            | 2.1578        |
++-----------------+-----------------+---------------+
+| North Carolina  | HISPANIC        | 5.4349        |
++-----------------+-----------------+---------------+
+| North Carolina  | AAPI            | 4.0384        |
++-----------------+-----------------+---------------+
 
 
 
@@ -205,23 +211,24 @@ ____________________
 The feature engineering pipeline takes name and ACS features as input to prepare data for model build or race predictions (also refered to as race proxies). First, the data is reduced to required modeling features using 'Drop Features'. Next compound last names are handled by splitting compound last names across n rows. Let's take a look at an example if person is named Farrah A. Len-Doe, the input to 'Compound Name FE' will be one dedicated record, as seen below:   
 
 
-+-------+----------+-------+----------+-------+----------+-------+----------+-------+
-|ZEST_KEY| first_name | middle_name | last_name | house_number | street_address | city | state | zip_code
-+-------+----------+-------+----------+-------+----------+-------+----------+-------+
-| Z00100 | Farrah | A. | Len-Doe | 123 | N main st | burbank | ca | 91505 |
-+-------+----------+-------+----------+-------+----------+-------+----------+-------+
++----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
+| ZEST_KEY | first_name | middle_name | last_name | house_number | street_address | city     | state  | zip_code |
++----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
+| Z00100   | Farrah     | A.          | Len-Doe   | 123          | N main st      | burbank  | ca     | 91505    |
++----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
+
 
 
 That expands to two rows with unique last name values per row.
 
 
-+-------+----------+-------+----------+-------+----------+-------+----------+-------+
-|ZEST_KEY| first_name | middle_name | last_name | house_number | street_address | city | state | zip_code
-+-------+----------+-------+----------+-------+----------+-------+----------+-------+
-| Z00100 | Farrah | A. | Len | 123 | N main st | burbank | ca | 91505 |
-+-------+----------+-------+----------+-------+----------+-------+----------+-------+
-| Z00100 | Farrah | A. | Doe | 123 | N main st | burbank | ca | 91505 |
-+-------+----------+-------+----------+-------+----------+-------+----------+-------+
++----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
+| ZEST_KEY | first_name | middle_name | last_name | house_number | street_address | city     | state  | zip_code |
++----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
+| Z00100   | Farrah     | A.          | Len       | 123          | N main st      | burbank  | ca     | 91505    |
++----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
+| Z00100   | Farrah     | A.          | Doe       | 123          | N main st      | burbank  | ca     | 91505    |
++----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
 
 
 After compound last names are handled, 'App FE' executes general name feature engineering. 'MultiLabelBinarizer` is used to convert the set of targets to, an array-like object, a binary matrix indicating the presence of a class. Targets associated with each record are one hot encoded using 'MultiLabelBinarizer`. Then first, middle and last name are encoded using 'TargetEncoder'. "For the case of categorical target: features are replaced with a blend of posterior probability of the target given particular categorical value and the prior probability of the target over all the training data."( `ref <https://contrib.scikit-learn.org/category_encoders/targetencoder.html>`_). Next the pipeline focuses on engineering of the ACS features. 'CustomRatios' generates ratios, percents, and linear combinations of select ACS features. After generating ACS engineered features, the pipelie resolves the many-to-one data created by the 'Compound Name FE' step by aggregating across expected name columns, at the unique key level. At this point all geo-specific features, like block group, tract, and zip code are no-longer in the feature space. Missing values are imputed using mean, for all numeric features. Lastly, the training dataset's least missing, most unique features with the highest variance and importance are selected. 
@@ -269,19 +276,23 @@ Model Evaluation
 
 A validation dataset was constructed using 2021 Alabama voter registration data comprised of about 235,000 randomly sampled records. Around 230,000 records had appropriate data for generating race predictions. Please refer to the *Data Sampling* section to review filtration criteria. The race and ethnicity class information is tabulated below for the Alabama validation dataset. The table include United States popultion estimates by race and ethnicity, these estiamtes are not indicative of the true registered voter population.
 
-+-------+----------+----------------------------+
-|Class| Sample Percent | National Estimate (%)
-+-------+----------+----------------------------+
-|Asian American and Pacific Islander| 1.1% | 1.6% |
-+-------+----------+----------------------------+
-|American Indian and Alaskan Native| 0.3% | 0.7% |
-+-------+----------+----------------------------+
-|African American or Black| 23.6% | 26.8% |
-+-------+----------+----------------------------+
-|Hispanic or Latino| 2.5% | 4.6% |
-+-------+----------+----------------------------+
-|White| 72.6% | 65.3% |
-+-------+----------+----------------------------+
+
++---------------------+----------------+-----------------------+
+| Class               | Sample Percent | National Estimate (%) |
++---------------------+----------------+-----------------------+
+| Asian American and  |                |                       |
+| Pacific Islander    |  1.1%          | 1.6%                  |
++---------------------+----------------+-----------------------+
+| American Indian     |                |                       |
+| and Alaskan Native  |  0.3%          | 0.7%                  |
++---------------------+----------------+-----------------------+
+| African American    |                |                       |
+| or Black            |  23.6%         | 26.8%                 |
++---------------------+----------------+-----------------------+
+| Hispanic or Latino  |  2.5%          | 4.6%                  |
++---------------------+----------------+-----------------------+
+| White               |  72.6%         | 65.3%                 |
++---------------------+----------------+-----------------------+
 
 
 The benchmark model used for comparison in this section is BISG. Across the board, with significant class sizes, we can see ZRP outperform BISG. BISG falls short when proxying race or ethnicity of minority groups exhibited by low TPRs across  minority classes. Predictive performance of the ZRP model on the Alabama validation dataset is shown below:
