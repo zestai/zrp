@@ -33,6 +33,7 @@ Consult the following to download state voter registration data:
 
 Voter registration data was selected because it is a large, publicly-available database of names, addresses and ground truth labels (self-reported race and ethnicity).  Ideally a more comprehensive list of names addresses and self-reported race/ethnicity from the US Census Bureau would be used to train the model, but such a dataset is not publicly available.
 
+
 **American Community Survey (ACS) Attributes** 
  
 The US Census Bureau details that, "the American Community Survey (ACS) is an ongoing survey that provides data every year -- giving communities the current information they need to plan investments and services. The ACS covers a broad range of topics about social, economic, demographic, and housing characteristics of the U.S. population. The 5-year estimates from the ACS are "period" estimates that represent data collected over a period of time. The primary advantage of using multiyear estimates is the increased statistical reliability of the data for less populated areas and small population subgroups. The 5-year estimates are available for all geographies down to the block group level." ( Bureau, US Census. “American Community Survey 5-Year Data (2009-2019).” Census.gov, 8 Dec. 2021, https://www.census.gov/data/developers/data-sets/acs-5year.html. )
@@ -43,24 +44,114 @@ ACS data is available in 1 or 5 year spans. The 5yr ACS data is the most compreh
 Model Development
 ##################
 
-  * **Data Preparation:** Initial dataset definition, segmentation and sampling, data cleansing, feature creation, target and data selection
+  * **Data Preparation:** Initial dataset definition, sampling, data cleansing, feature creation, target and data selection
   * **Model Training:** Algorithm selection, hyperparameter selection
   * **Model Evaluation:** Model validation, benchmarking and model performance
+  
+
 
 Data Preparation
 ==================
+The modeling process began with data acquisiton. The acquired voter registration data, Census shapefiles, and ACS demographic data contain a super-set of information of the following nature:
 
-Initial versions of the ZRP were place-specific.  That is, a given ZIP code was a predictor in the model.  This resulted in a model that was limited to work in the specific places in which it had been trained.  However, not all states release their voter records, and so the challenge was to make a model that could be trained using voter registration data from some small number of states, yet still predict accurately in other unseen geographic areas.
+* Data used for processing
+* Data used for model training
+* Data used for model validation
+* Data not appropriate for modeling (later excluded or not used)
 
-To address this challenge, the next generation ZRP models use Census block group, tract, or ZIP code attributes.  During the summer of 2021, Harvard undergraduate Austin Li joined the Zest team to develop this next generation of models.  Austin developed a method of geocoding an address to look up its Census block group, tract, or ZIP code by leveraging the Census `ARCGIS TIGER/Line Shapefiles <https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html>`.  The smallest, most granular, matching area (block group, tract, or ZIP code) is then used to look up attributes of that location in the American Community Survey database, which provides demographic data at the block group, tract and ZIP code levels.
 
-ACS attributes were normalized to percentages of total or to standard statistics (e.g., % of the block group that self-reported they were African American, or median household income for the tract).  By using the normalized attributes of the location instead of the location itself, the model ZRP model can now transfer learnings from one block group, tract or ZIP code to another and thus operate nationwide.
+Overview
+____________________
 
-In order to facilitate fast translation from address to Census block group, tract, or (in the worst case) ZIP Code, attributes, lookup tables are compiled.
+Initial versions of the ZRP were place-specific.  That is, a given zip code was a predictor in the model.  This resulted in a model that was limited to work in the specific places in which it had been trained.  However, not all states release their voter records, and so the challenge was to make a model that could be trained using voter registration data from some small number of states, yet still predict accurately in other unseen geographic areas.
+
+To address this challenge, the next generation ZRP models use Census block group, tract, or zip code attributes.  During the summer of 2021, Harvard undergraduate Austin Li joined the Zest team to develop this next generation of models.  Austin developed a method of geocoding an address to look up its Census block group, tract, or ZIP code by leveraging the Census `ARCGIS TIGER/Line Shapefiles <https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html>`.  The smallest, most granular, matching area (block group, tract, or zip code) is then used to look up attributes of that location in the American Community Survey database, which provides demographic data at the block group, tract and zip code levels.
+
+Many ACS attributes were normalized to percentages of total or to standard statistics (e.g., % of the block group that self-reported they were African American, or median household income for the tract).  By using the normalized attributes of the location instead of the location itself, the model ZRP model can now transfer learnings from one block group, tract or zip code to another and thus operate nationwide.
+
+In order to facilitate fast translation from address to Census block group, tract, or (in the worst case) zip Code, attributes, lookup tables are compiled.
 
 To build the training and test datasets, the voter registration data is joined with ACS attributes via the address matching process described above.  
 
 The full list of predictive variables in the model can be found `here. <https://github.com/zestai/zrp/blob/main/zrp/modeling/feature_definitions.md>`
+
+
+
+Data Sampling
+____________________
+In order to develop the model, representative data with self-reported name, address, and race needed to be acquired. The current ZRP data preparation includes 2021 Florida, Georgia, and North Carolina voter registration datasets. Exploratory data analysis (EDA) exposed data that was not appropriate for modeling. Following EDA each dataset was reduced based on the following filtration criteria records were removed that: requested public record exemption, did not contain adequate address information, exhibited high missingness, non-unique, or did not self-report race or ethnicity. 
+
+The model development dataset is established when treating the voter registration data as one dataset. The model development dataset was split into 4 distinct subsets: one for training, one for internal validation, one for final testing, and a hold out to support ongoing model development. The hold out contains about 30% of the data by state. Aiming for an unbiased representation of the data, we employed random sampling when choosing the dataset splits. The multi-split strategy ensures that the model is not overfitting to the training dataset; that it will be robust to future, unseen data; that the performance is not overstated; and that updates can be implemented. Please refer to the split table below to see the current splits.
+
++-------+----------+---------------+
+|Dataset|Total Obs|Total Train Obs|
++-------+----------+---------------+
+|Florida|14,215,868|5,049,617|
++-------+----------+---------------+
+|Georgia|6,676,561|1,942,893|
++-------+----------+---------------+
+|North Carolina|6,586,528|2,574,455|
++-------+----------+---------------+
+
+
+Data Summary
+____________________
+The disaggregated race and ethnicity class information is tabulated below for the training dataset and the United States popultion estimates. 
+
++-------+----------+---------------+---------------+
+|Class|Train Count|Train Percent| National Estimate (%)|
++-------+----------+---------------+---------------+
+|Asian American and Pacific Islander|215,866|2.3%|6.1%|
++-------+----------+---------------+---------------+
+|American Indian and Alaskan Native|41,872|0.4%|1.3%|
++-------+----------+---------------+---------------+
+|African American or Black|2,001,315|20.9%|13.4%|
++-------+----------+---------------+---------------+
+|Hispanic or Latino|1,182,740|12.4%|18.5%|
++-------+----------+---------------+---------------+
+|White|6,125,172|64.0%|60.1%|
++-------+----------+---------------+---------------+
+
+Note there was no consistent classification of race identities of multiracial or other so they were not included in model development.
+
+Sample Weights
+____________________
+Sample weights were consutructed such that proportion of the sample weight associated with each race/ethnicity in the training dataset mimics the national distribution of race/ethnicity. The look-a-like sample weighting was done at the state level.
+
+
++-------+----------+----------+
+|state | race | sample_weight |
++-------+----------+----------+
+| Florida | WHITE | 0.9406 |
++-------+----------+----------+
+| Florida | BLACK | 0.9770 |
++-------+----------+----------+
+| Florida | AIAN | 3.9046 |
++-------+----------+----------+
+| Florida | HISPANIC | 0.9565 |
++-------+----------+----------+
+| Florida | AAPI | 2.8882 |
++-------+----------+----------+
+| Georgia | WHITE | 1.1152 |
++-------+----------+----------+
+| Georgia | BLACK | 0.3718 |
++-------+----------+----------+
+| Georgia | AAPI | 1.6984 |
++-------+----------+----------+
+| Georgia | HISPANIC | 3.4281 |
++-------+----------+----------+
+| Georgia | AIAN | 2.6944 |
++-------+----------+----------+
+| North Carolina | WHITE | 0.8509 |
++-------+----------+----------+
+| North Carolina | BLACK | 0.5763 |
++-------+----------+----------+
+| North Carolina | AIAN | 2.1578 |
++-------+----------+----------+
+| North Carolina | HISPANIC | 5.4349 |
++-------+----------+----------+
+| North Carolina | AAPI | 4.0384 |
++-------+----------+----------+
 
 
 
@@ -71,7 +162,8 @@ The problem of predicting race falls within in the class of problems for which s
 
 Classification models can be classified according to the mathematical form of the underlying prediction function: linear and non-linear models. In linear models, the separation between distinct classes, or the relationship between different continuous variables, can be modeled using a linear function. Logistic regression, traditionally used for credit modeling, is an example of a linear model, while decision trees and neural networks are non-linear models.
 
-Several types of classification models could be used to address the problem of predicting race. The pros and cons of several options are listed in the table below.
+Several types of classification models could be used to address the problem of predicting race. The pros and cons of several options are 
+ed in the table below.
 
 +-------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------+
 |              Model Type             |                                                               Benefits                                                              |                                   Limitations                                   |
@@ -110,6 +202,29 @@ While tree-based models excel on tabular data like we have here, Neural Networks
 
 Feature engineering
 ____________________
+The feature engineering pipeline takes name and ACS features as input to prepare data for model build or race predictions (also refered to as race proxies). First, the data is reduced to required modeling features using 'Drop Features'. Next compound last names are handled by splitting compound last names across n rows. Let's take a look at an example if person is named Farrah A. Len-Doe, the input to 'Compound Name FE' will be one dedicated record, as seen below:   
+
+
++-------+----------+-------+----------+-------+----------+-------+----------+-------+
+|ZEST_KEY| first_name | middle_name | last_name | house_number | street_address | city | state | zip_code
++-------+----------+-------+----------+-------+----------+-------+----------+-------+
+| Z00100 | Farrah | A. | Len-Doe | 123 | N main st | burbank | ca | 91505 |
++-------+----------+-------+----------+-------+----------+-------+----------+-------+
+
+
+That expands to two rows with unique last name values per row.
+
+
++-------+----------+-------+----------+-------+----------+-------+----------+-------+
+|ZEST_KEY| first_name | middle_name | last_name | house_number | street_address | city | state | zip_code
++-------+----------+-------+----------+-------+----------+-------+----------+-------+
+| Z00100 | Farrah | A. | Len | 123 | N main st | burbank | ca | 91505 |
++-------+----------+-------+----------+-------+----------+-------+----------+-------+
+| Z00100 | Farrah | A. | Doe | 123 | N main st | burbank | ca | 91505 |
++-------+----------+-------+----------+-------+----------+-------+----------+-------+
+
+
+After compound last names are handled, 'App FE' executes general name feature engineering. 'MultiLabelBinarizer` is used to convert the set of targets to, an array-like object, a binary matrix indicating the presence of a class. Targets associated with each record are one hot encoded using 'MultiLabelBinarizer`. Then first, middle and last name are encoded using 'TargetEncoder'. "For the case of categorical target: features are replaced with a blend of posterior probability of the target given particular categorical value and the prior probability of the target over all the training data."( `ref <https://contrib.scikit-learn.org/category_encoders/targetencoder.html>`_). Next the pipeline focuses on engineering of the ACS features. 'CustomRatios' generates ratios, percents, and linear combinations of select ACS features. After generating ACS engineered features, the pipelie resolves the many-to-one data created by the 'Compound Name FE' step by aggregating across expected name columns, at the unique key level. At this point all geo-specific features, like block group, tract, and zip code are no-longer in the feature space. Missing values are imputed using mean, for all numeric features. Lastly, the training dataset's least missing, most unique features with the highest variance and importance are selected. 
 
 
 Model Creation
@@ -137,23 +252,39 @@ XGBoost 1.0.2 was used to train the model with the following hyperparameters:
 +---------------------+----------------------+
 
 
-4,517,348 names, locations, and self-reported race/ethnicities from the Florida, Georgia and North Carolina voter registration database were used for training.
+Around 9.5 million names, locations, and self-reported race/ethnicities from the 2021 Florida, Georgia and North Carolina voter registration database were set aside for training.
 
-Sample weights were consutructed such that proportion of the sample weight associated with each race/ethnicity in the training dataset matches the national distribution of race/ethnicity.
+Several models are trained:  one for Census block group, one for Census tract, and another for the zip code. 
 
-Several models are trained:  one for Census block group, one for Census tract, and another for the ZIP Code.  T
 
 Prediction Process
 ____________________
 
-The inputs to ZRP include name and address.  The address is used to lookup attributes of the correpsonding region.  The lookup process starts with retrieval of Census block group attributes.  If the block group lookup fails, then Census tract attributes are retrieved.  If the Census tract lookup fails, then ZIP code attributes are retrieved.  ACS attributes associated with the retrieved geographic area are then appended to the first, middle, and last name.  The resulting vector of predictors is then used as input to the corresponding model (e.g., block group, tract, or ZIP-based model).
+The inputs to ZRP include name and address.  The address is used to lookup attributes of the correpsonding region.  The lookup process starts with retrieval of Census block group attributes.  If the block group lookup fails, then Census tract attributes are retrieved.  If the Census tract lookup fails, then ZIP code attributes are retrieved.  ACS attributes associated with the retrieved geographic area are then appended to the first, middle, and last name.  The resulting vector of predictors is then used as input to the corresponding model (e.g., block group, tract, or zip code-based model).
 
 
 Model Evaluation
 ==================
 
 
-A hold out dataset was constructed using Alabama voter registration data comprised of 250,000 randomly sampled records.  Predictive performance of the ZRP model on the Alabama hold out dataset is shown below:
+A validation dataset was constructed using 2021 Alabama voter registration data comprised of about 235,000 randomly sampled records. Around 230,000 records had appropriate data for generating race predictions. Please refer to the *Data Sampling* section to review filtration criteria. The race and ethnicity class information is tabulated below for the Alabama validation dataset. The table include United States popultion estimates by race and ethnicity, these estiamtes are not indicative of the true registered voter population.
+
++-------+----------+----------------------------+
+|Class| Sample Percent | National Estimate (%)
++-------+----------+----------------------------+
+|Asian American and Pacific Islander| 1.1% | 1.6% |
++-------+----------+----------------------------+
+|American Indian and Alaskan Native| 0.3% | 0.7% |
++-------+----------+----------------------------+
+|African American or Black| 23.6% | 26.8% |
++-------+----------+----------------------------+
+|Hispanic or Latino| 2.5% | 4.6% |
++-------+----------+----------------------------+
+|White| 72.6% | 65.3% |
++-------+----------+----------------------------+
+
+
+The benchmark model used for comparison in this section is BISG. Across the board, with significant class sizes, we can see ZRP outperform BISG. BISG falls short when proxying race or ethnicity of minority groups exhibited by low TPRs across  minority classes. Predictive performance of the ZRP model on the Alabama validation dataset is shown below:
 
 **BLACK** (African American)
 
