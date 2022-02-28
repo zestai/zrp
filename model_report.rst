@@ -128,7 +128,7 @@ Sample weights were consutructed such that proportion of the sample weight assoc
 +-----------------+-----------------+---------------+
 | state           | race            | sample_weight |
 +-----------------+-----------------+---------------+
-| Florida         | WHITE            | 0.9406       |
+| Florida         | WHITE           | 0.9406        |
 +-----------------+-----------------+---------------+
 | Florida         | BLACK           | 0.9770        |
 +-----------------+-----------------+---------------+
@@ -138,7 +138,7 @@ Sample weights were consutructed such that proportion of the sample weight assoc
 +-----------------+-----------------+---------------+
 | Florida         | AAPI            | 2.8882        |
 +-----------------+-----------------+---------------+
-| Georgia         | WHITE            | 1.1152       |
+| Georgia         | WHITE           | 1.1152        |
 +-----------------+-----------------+---------------+
 | Georgia         | BLACK           | 0.3718        |
 +-----------------+-----------------+---------------+
@@ -148,7 +148,7 @@ Sample weights were consutructed such that proportion of the sample weight assoc
 +-----------------+-----------------+---------------+
 | Georgia         | AIAN            | 2.6944        |
 +-----------------+-----------------+---------------+
-| North Carolina  | WHITE            | 0.8509       |
+| North Carolina  | WHITE           | 0.8509        |
 +-----------------+-----------------+---------------+
 | North Carolina  | BLACK           | 0.5763        |
 +-----------------+-----------------+---------------+
