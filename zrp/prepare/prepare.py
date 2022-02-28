@@ -43,7 +43,7 @@ class ZRP_Prepare(BaseZRP):
         if self.block_group:
             bg_lengths =  data[self.block_group].str.len()
             bg_len  = most_common(bg_lengths)
-            assert tract_len == 12,  "Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '0100102020011')"            
+            assert bg_len == 12,  "Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '0100102020011')"            
     
     def transform(self, input_data):
         """
