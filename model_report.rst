@@ -214,7 +214,7 @@ The feature engineering pipeline takes name and ACS features as input to prepare
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
 | ZEST_KEY | first_name | middle_name | last_name | house_number | street_address | city     | state  | zip_code |
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
-| Z00100   | Farrah     | Adeel         | Len-Doe   | 123          | N main st      | burbank  | ca     | 91505    |
+| Z00100   | Farrah     | Adeel       | Len-Doe   | 123          | N main st      | burbank  | ca     | 91505    |
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
 
 
@@ -225,9 +225,9 @@ That expands to two rows with unique last name values per row.
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
 | ZEST_KEY | first_name | middle_name | last_name | house_number | street_address | city     | state  | zip_code |
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
-| Z00100   | Farrah     | Adeel         | Len       | 123          | N main st      | burbank  | ca     | 91505    |
+| Z00100   | Farrah     | Adeel       | Len       | 123          | N main st      | burbank  | ca     | 91505    |
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
-| Z00100   | Farrah     | Adeel         | Doe       | 123          | N main st      | burbank  | ca     | 91505    |
+| Z00100   | Farrah     | Adeel       | Doe       | 123          | N main st      | burbank  | ca     | 91505    |
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
 
 
