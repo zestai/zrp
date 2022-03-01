@@ -208,13 +208,13 @@ While tree-based models excel on tabular data like we have here, Neural Networks
 
 Feature engineering
 ____________________
-The feature engineering pipeline takes name and ACS features as input to prepare data for model build or race predictions (also refered to as race proxies). First, the data is reduced to required modeling features using 'Drop Features'. Next compound last names are handled by splitting compound last names across n rows. Let's take a look at an example if person is named Farrah A. Len-Doe, the input to 'Compound Name FE' will be one dedicated record, as seen below:   
+The feature engineering pipeline takes name and ACS features as input to prepare data for model build or race predictions (also refered to as race proxies). First, the data is reduced to required modeling features using 'Drop Features'. Next compound last names are handled by splitting compound last names across n rows. Let's take a look at an example if person is named Farrah Adeel Len-Doe, the input to 'Compound Name FE' will be one dedicated record, as seen below:   
 
 
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
 | ZEST_KEY | first_name | middle_name | last_name | house_number | street_address | city     | state  | zip_code |
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
-| Z00100   | Farrah     | A.          | Len-Doe   | 123          | N main st      | burbank  | ca     | 91505    |
+| Z00100   | Farrah     | Adeel         | Len-Doe   | 123          | N main st      | burbank  | ca     | 91505    |
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
 
 
@@ -225,9 +225,9 @@ That expands to two rows with unique last name values per row.
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
 | ZEST_KEY | first_name | middle_name | last_name | house_number | street_address | city     | state  | zip_code |
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
-| Z00100   | Farrah     | A.          | Len       | 123          | N main st      | burbank  | ca     | 91505    |
+| Z00100   | Farrah     | Adeel         | Len       | 123          | N main st      | burbank  | ca     | 91505    |
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
-| Z00100   | Farrah     | A.          | Doe       | 123          | N main st      | burbank  | ca     | 91505    |
+| Z00100   | Farrah     | Adeel         | Doe       | 123          | N main st      | burbank  | ca     | 91505    |
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
 
 
