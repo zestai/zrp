@@ -214,16 +214,16 @@ ed in the table below.
 
 Bayseian and linear models were ruled out as the variables (income, education attainment) are not independent, and the decision surface is not linear.  Random forest was also ruled out due to the better performance from XGBoost that is by now well-known.
 
-XGBoost is a tree model based on a boosting algorithm. It reduces variance and also reduces bias. XGBoost reduces variance because it uses multiple models, by bagging like a Random Forest, but simultaneously reduces bias by training the subsequent model based on the errors by previous models. Since XGBoost sequentially learns from the previous models, it often outperforms Random Forest. The model also has the benefits of Random Forest, which is randomizing the sample to reduce variance.
+XGBoost is a tree model based on a boosting algorithm. It reduces variance and also reduces bias. XGBoost reduces variance because it uses multiple models trained on random subsets of the data and employs bagging (or averaging) like a Random Forest.  XGBoost simultaneously reduces bias by training trees sequentially using a technique known as boosting, where each subsequent model is trained based on additional observations and the errors made by by previous models. Since XGBoost sequentially learns using the errors from previous iterations, it often outperforms Random Forest. 
 
-The biggest concern associated with XGBoost models is overfitting. Therefore, it is important to tune the hyperparameters to make sure the model is not overfitted to the Training Dataset and that it exhibits similar performance on both the Training and OOT Datasets. 
+The biggest concern associated with XGBoost models is overfitting. Therefore, it is important to tune the hyperparameters to make sure the model does not overfit to the training dataset and that it exhibits similar performance on both the training and hold out datasets. 
 
-While tree-based models excel on tabular data like we have here, Neural Networks can handle even more complex problems, yet neural networks come with addiitional complexity.   Due to the tabular nature of the data, and keepiing things simple, we selected XGBoost for the ZRP.  A neural network algorithm would be more appropriate if we were considering pictures of people in addition to tabular attributes.
+While tree-based models excel on tabular data like we have here, Neural Networks can handle even more complex prediction problems.  Yet neural networks come with addiitional complexity.   Due to the tabular nature of the data, and in an attempt to keep  things simple, we selected XGBoost for the ZRP.  A neural network algorithm would be more appropriate if we were considering pictures of people in addition to tabular attributes.
 
 
 Feature engineering
 ____________________
-The feature engineering pipeline takes name and ACS features as input to prepare data for model build or race predictions (also refered to as race proxies). First, the data is reduced to required modeling features using 'Drop Features'. Next compound last names are handled by splitting compound last names across n rows. Let's take a look at an example if person is named Farrah Adeel Len-Doe, the input to 'Compound Name FE' will be one dedicated record, as seen below:   
+The feature engineering pipeline takes name and ACS features as input to prepare data for model build or to make race predictions (also refered to as race proxies). First, the data is reduced to required modeling features using 'Drop Features'. Next compound last names are handled by splitting compound last names across n rows. Let's take a look at an example if person is named Farrah Adeel Len-Doe, the input to 'Compound Name FE' will be one dedicated record, as seen below:   
 
 
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
@@ -246,7 +246,11 @@ That expands to two rows with unique last name values per row.
 +----------+------------+-------------+-----------+--------------+----------------+----------+--------+----------+
 
 
-After compound last names are handled, 'App FE' executes general name feature engineering. 'MultiLabelBinarizer` is used to convert the set of targets to, an array-like object, a binary matrix indicating the presence of a class. Targets associated with each record are one hot encoded using 'MultiLabelBinarizer`. Then first, middle and last name are encoded using 'TargetEncoder'. "For the case of categorical target: features are replaced with a blend of posterior probability of the target given particular categorical value and the prior probability of the target over all the training data."( `ref <https://contrib.scikit-learn.org/category_encoders/targetencoder.html>`_). Next the pipeline focuses on engineering of the ACS features. 'CustomRatios' generates ratios, percents, and linear combinations of select ACS features. After generating ACS engineered features, the pipelie resolves the many-to-one data created by the 'Compound Name FE' step by aggregating across expected name columns, at the unique key level. At this point all geo-specific features, like block group, tract, and zip code are no-longer in the feature space. Missing values are imputed using mean, for all numeric features. Lastly, the training dataset's least missing, most unique features with the highest variance and importance are selected. 
+After compound last names are handled, 'App FE' executes general name feature engineering. 'MultiLabelBinarizer` is used to convert the set of targets to, an array-like object, a binary matrix indicating the presence of a class - in this case each race/ethnicity. Targets associated with each record are one hot encoded using 'MultiLabelBinarizer`. Then first, middle and last name are encoded using 'TargetEncoder'. "For the case of categorical target: features are replaced with a blend of posterior probability of the target given particular categorical value and the prior probability of the target over all the training data."( `ref <https://contrib.scikit-learn.org/category_encoders/targetencoder.html>`_). This is where the features such as BLACK_first_name come from.  
+
+Next the pipeline focuses on engineering of the ACS features. 'CustomRatios' generates ratios, percents, and linear combinations of select ACS features. After generating ACS engineered features, the pipelie resolves the many-to-one data created by the 'Compound Name FE' step by aggregating across expected name columns, at the unique key level.  The ACS engineered features are used as predictive variables.  Block group, tract, and ZIP code are not included as predictive variables.  This allows the model to generalize well across geographies.
+
+Missing values are imputed using mean, for all numeric features. Lastly, the training dataset's least missing, most unique features with the highest variance and importance are selected. 
 
 
 Model Creation
@@ -276,13 +280,13 @@ XGBoost 1.0.2 was used to train the model with the following hyperparameters:
 
 Around 9.5 million names, locations, and self-reported race/ethnicities from the 2021 Florida, Georgia and North Carolina voter registration database were set aside for training.
 
-Several models are trained:  one for Census block group, one for Census tract, and another for the zip code. 
+Several models are trained:  one for Census block group, one for Census tract, and another for the ZIP code. 
 
 
 Prediction Process
 ____________________
 
-The inputs to ZRP include name and address.  The address is used to lookup attributes of the correpsonding region.  The lookup process starts with retrieval of Census block group attributes.  If the block group lookup fails, then Census tract attributes are retrieved.  If the Census tract lookup fails, then ZIP code attributes are retrieved.  ACS attributes associated with the retrieved geographic area are then appended to the first, middle, and last name.  The resulting vector of predictors is then used as input to the corresponding model (e.g., block group, tract, or zip code-based model).
+The inputs to ZRP include name and address.  The address is used to lookup attributes of the correpsonding region.  The lookup process starts with retrieval of Census block group attributes.  If the block group lookup fails, then Census tract attributes are retrieved.  If the Census tract lookup fails, then ZIP code attributes are retrieved.  ACS attributes associated with the retrieved geographic area are then appended to the first, middle, and last name.  The resulting vector of predictors is then used as input to the corresponding model (e.g., block group, tract, or ZIP code-based model).
 
 
 Model Evaluation
