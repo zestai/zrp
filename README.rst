@@ -30,7 +30,7 @@ Zest AI began developing ZRP in 2020 to improve the accuracy of our clients’ f
 Notes
 _____
 
-This is the preliminary version and implementation of the ZRP tool. We're dedicated to continue improving both the algorithm and documentation and hope that government agencies, lenders, citizen data scientists and other interested parties will help us improve the model.
+This is the preliminary version and implementation of the ZRP tool. We're dedicated to continue improving both the algorithm and documentation and hope that government agencies, lenders, citizen data scientists and other interested parties will help us improve the model.  Details of the model development process can be found in the `model development documentation <./model_report.rst>`_ 
 
 
 Install
@@ -70,6 +70,14 @@ American Community Survey (ACS) Data:
 The US Census Bureau details that, "the American Community Survey (ACS) is an ongoing survey that provides data every year -- giving communities the current information they need to plan investments and services. The ACS covers a broad range of topics about social, economic, demographic, and housing characteristics of the U.S. population. The 5-year estimates from the ACS are "period" estimates that represent data collected over a period of time. The primary advantage of using multiyear estimates is the increased statistical reliability of the data for less populated areas and small population subgroups. The 5-year estimates are available for all geographies down to the block group level." ( Bureau, US Census. “American Community Survey 5-Year Data (2009-2019).” Census.gov, 8 Dec. 2021, https://www.census.gov/data/developers/data-sets/acs-5year.html. )
 
 ACS data is available in 1 or 5 year spans. The 5yr ACS data is the most comprehensive & is available at more granular levels than 1yr data. It is thus used in this work.
+
+
+
+Model Development Documentation
+___________
+
+Details of the model development process can be found in the `model development documentation <./model_report.rst>`_ 
+
 
 
 Usage and Examples
