@@ -48,11 +48,10 @@ setup(
         ],
     },
     include_package_data=True,
-    install_requires=requirements,  # TODO: put back requirements variable
+    install_requires=requirements, 
     entry_points={
         "console_scripts": [
 
-            # TODO: Once we know what endpoints are being exposed (see ethnicolr's as example)
         ]
     },
-)  # TODO: Update Manifest.in file to include data and other files as suggested here: https://realpython.com/pypi-publish-python-package/#adding-files-to-your-package
+) 
