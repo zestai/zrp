@@ -5,7 +5,6 @@ import re
 import sys
 from os.path import join, expanduser
 import json
-import fiona
 import warnings
 warnings.filterwarnings(action='ignore')
  
@@ -177,32 +176,6 @@ def load_mappings(support_files_path):
             directionals_mapping,
             unit_mapping)
 
-
-def gdbToDf_short(file, indx):
-    """
-    Loads shapefiles
-    
-    Parameters
-    ----------
-    file: str
-        Filepath or name of file to load
-    indx: str
-        Indicates type of shapefile to load in
-    """      
-    dictList = []
-    if indx == "address":
-        with fiona.open(file) as src:
-            for i in range(10000000):
-                dictList.append(next(src)["properties"])
-    else:
-        with fiona.open(file) as src:
-            for i in range(len(src)):
-                dictList.append(next(src)["properties"])
-    df = pd.DataFrame(
-        dictList,
-        columns=dictList[0].keys(),
-    )
-    return df
 
 
 def acs_rename(data):
