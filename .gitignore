@@ -3,6 +3,9 @@ zrp/__MACOSX/
 zrp/data/version
 *.pkl
 
+*.DS_Store
+.gitignore.swp
+
 examples/AL_ZRP_Predictions_Tutorial.ipynb
 
 zrp/modeling/models/block_group/fl_ids.json
