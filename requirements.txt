@@ -2,7 +2,6 @@ category_encoders==2.3.0
 CensusData==1.15
 feature_engine==1.2.0
 fastparquet
-Fiona==1.8.20
 joblib==0.15.1
 numpy
 pandas==1.2.5
