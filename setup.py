@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file
-README = (HERE / "README.rst").read_text()
+README = open((HERE / "README.rst"),  encoding="utf-8")
 
 # The contents of the requirements.txt
 with open("requirements.txt", 'r') as file:
