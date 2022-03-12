@@ -39,6 +39,11 @@ Install
 _______
 
 Install requires an internet connection. We recommend installing zrp inside a `python virtual environment <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`_. The package has been tested on 3.7.4, but should likely work with 3.7.X.
+
+Note: Due to the size and number of lookup tables necesary for the zrp package, total installation requires 3 GB of available space.
+
+Unix-like systems
+==================
 ::
 
  pip install zrp
@@ -48,7 +53,25 @@ After installing via pip, you need to download the lookup tables and pipelines u
 
  python -m zrp download
 
-Note: Due to the size and number of lookup tables necesary for the zrp package, total installation requires 3 GB of available space.
+
+Windows
+=========
+::
+
+  pip install pipwin
+  pipwin install gdal
+  pipwin install fiona
+
+::
+
+  pip install zrp
+
+After installing via pip, you need to download the lookup tables and pipelines using the following command:
+::
+
+  python -m zrp download
+
+
 
 
 Data
