@@ -98,10 +98,10 @@ ACS data is available in 1 or 5 year spans. The 5yr ACS data is the most compreh
 
 
 
-Model Development Documentation
+Model Development and Feature Documentation
 ___________
 
-Details of the model development process can be found in the `model development documentation <./model_report.rst>`_ 
+Details of the model development process can be found in the `model development documentation <./model_report.rst>`_ . Details of the human readable feature definitions as well as feature importances can be found `here <https://github.com/zestai/zrp/tree/main/zrp/modeling#feature-definitions>`_.
 
 
 
