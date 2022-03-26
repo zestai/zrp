@@ -161,7 +161,7 @@ ZRP Predictions
  |            | **df** : *{DataFrame}* Pandas dataframe containing input data (see below for necessary columns)                          |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
 
-Input data, **df**, into the prediction/modeling pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, and zest key. Consult our `common issues guide <https://github.com/zestai/zrp/blob/main/common_issues.rst>`_ to ensure you're input data is the correct format.
+Input data, **df**, into the prediction/modeling pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, and zest key. Consult our `common issues guide <https://github.com/zestai/zrp/blob/main/common_issues.rst>`_ to ensure your input data is the correct format.
 
 -  Output: A dataframe with the following columns: AAPI	AIAN	BLACK	HISPANIC	WHITE	source_block_group	source_zip_code	source_bisg 
    ::
@@ -236,7 +236,7 @@ ZRP Build
  |            | **df** : *{DataFrame}* Pandas dataframe containing input data (see below for necessary columns)                          |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
 
-Input data, **df**, into this pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, zest key, and race. Consult our `common issues guide <https://github.com/zestai/zrp/blob/main/common_issues.rst>`_ to ensure you're input data is the correct format.
+Input data, **df**, into this pipeline **MUST** contain the following columns: first name, middle name, last name, house number, street address (street name), city, state, zip code, zest key, and race. Consult our `common issues guide <https://github.com/zestai/zrp/blob/main/common_issues.rst>`_ to ensure your input data is the correct format.
 
 -  Output: A dictionary of race & ethnicity probablities and labels.
 
