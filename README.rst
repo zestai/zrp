@@ -242,9 +242,9 @@ Input data, **df**, into this pipeline **MUST** contain the following columns: f
 
 As mentioned in the ZRP Predict section above, once the run is complete, the ``artifacts/`` folder will contain the outputted race/ethnicity proxies and additional logs documenting the validity of input data. Similarly, defining ``file_path`` **need not** be specified, but providing a unique directory path for ``file_path`` will avoid overwriting the `artifacts/` folder. When running ZRP Build, however, ``artifacts/`` also contains the processed test and train data, trained model, and pipeline. 
 
-Addition Runs of Your Custom Model
+Additional Runs of Your Custom Model
 ==================================
-After having run ZRP_Build() you can re-use your custome model just like you run ours. All you must do is specify the path to the generated model and pipelines (this path is the same path as '/path/to/desired/output/directory' that you defined previously when running ZRP_Build() in the example above; we call this 'pipe_path'). Thus, you would run:
+After having run ZRP_Build() you can re-use your custom model just like you run the packaged model. All you must do is specify the path to the generated model and pipelines (this path is the same path as '/path/to/desired/output/directory' that you defined previously when running ZRP_Build() in the example above; we call this 'pipe_path'). Thus, you would run:
 ::
 
   >>> from zrp import ZRP
