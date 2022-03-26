@@ -346,7 +346,11 @@ __________
 
 Support for the following capabilities is planned:
 
-- ...nothing right now! (Got an idea? Submit an issue/PR!)
+- add multiracial classification output support
+- national validation datasets and validation partners
+- pointers to additional training data
+- add support for gender and other protected bases
+
 
 License
 _________
