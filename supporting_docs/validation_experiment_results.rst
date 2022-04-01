@@ -33,7 +33,7 @@ The benchmark models used for comparison in this section are BISG and BIFSG. We 
 
 **On the Alabama dataset, ZRP labeled more records than other methods**
 
-.. image:: supporting_docs/al_val_model_hits.png
+.. image:: al_val_model_hits.png
   :width: 800
   :alt: Alternative text
   
@@ -41,13 +41,13 @@ BISG falls short when proxying race or ethnicity of minority groups exhibited by
 
 **On the Alabama dataset, ZRP is better at predicting race compared to other methods (AUC metric)**
 
-.. image:: supporting_docs/al_aucs.png
+.. image:: al_aucs.png
   :width: 800
   :alt: Alternative text
 
 **On the Alabama dataset, ZRP has greater classification accuracy**
 
-.. image:: supporting_docs/al_confusion_matrix.png
+.. image:: al_confusion_matrix.png
   :width: 800
   :alt: Alternative text
 
@@ -57,19 +57,19 @@ Louisiana Voter Registration
 
 **We repeated the Alabama dataset tests on 680,320 Louisiana registered voters.** 
 
-.. image:: supporting_docs/la_dataset_stats.png
+.. image:: la_dataset_stats.png
   :width: 800
   :alt: Alternative text
 
 **On the Louisiana dataset, ZRP is better at predicting race compared to other methods (AUC metric)**
 
-.. image:: supporting_docs/la_aucs.png
+.. image:: la_aucs.png
   :width: 800
   :alt: Alternative text
 
 **On the Louisiana dataset, ZRP has greater classification accuracy**
 
-.. image:: supporting_docs/la_confusion_matrix.png
+.. image:: la_confusion_matrix.png
   :width: 800
   :alt: Alternative text
 
@@ -78,35 +78,35 @@ PPP Loan Forgiveness
 
 **We repeated the evaluation on a Nationwide dataset comprised of 100,173 owners of small businesses in all 50 states and DC** 
 
-.. image:: supporting_docs/ppp_dataset_stats.png
+.. image:: ppp_dataset_stats.png
   :width: 800
   :alt: Alternative text
 
 **ZRP provides a more accurate count of protected individuals**
 
-.. image:: supporting_docs/ppp_counts_stats.png
+.. image:: ppp_counts_stats.png
   :width: 800
   :alt: Alternative text
   
 **On the PPP dataset, ZRP is better at predicting race compared to other methods (AUC metric)**
 
-.. image:: supporting_docs/ppp_aucs.png
+.. image:: ppp_aucs.png
   :width: 800
   :alt: Alternative text
 
 **On the PPP dataset, ZRP has greater classification accuracy**
 
-.. image:: supporting_docs/ppp_confusion_matrix.png
+.. image:: ppp_confusion_matrix.png
   :width: 800
   :alt: Alternative text
   
   
 **ZRP performs well in multiple states**
 
-.. image:: supporting_docs/ppp_regional_1.png
+.. image:: ppp_regional_1.png
   :width: 800
   :alt: Alternative text
   
-.. image:: supporting_docs/ppp_regional_2.png
+.. image:: ppp_regional_2.png
   :width: 800
   :alt: Alternative text
