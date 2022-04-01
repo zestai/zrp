@@ -1,9 +1,34 @@
 ZRP Model Development Documentation
 ####################################
 
+Table of Contents
+=================
+
+`Problem Statement`_
+
+`Modeling Data`_
+
+`Model Development`_
+
+* `Data Preparation`_
+
+  - `Overview`_
+  - `Data Sampling`_
+  - `Data Summary`_
+  - `Sample Weights`_
+
+* `Algorithms & Model Training Process`_
+
+  - `Algorithm Selection`_
+  - `Feature Engineering`_
+  - `Model Creation`_
+  - `Prediction Process`_
+
+* `Model Evaluation`_
+* `Model Limitations`_
 
 Problem Statement
-==================
+======================
 
 To comply with federal fair lending laws, banks and credit unions must prove they don’t discriminate based on race and other protected statuses. But lenders aren’t allowed (except in mortgage lending) to ask the race of the applicant. And, even in mortgage lending, almost a third of applicants put nothing down.
 
@@ -164,6 +189,9 @@ Sample weights were consutructed such that proportion of the sample weight assoc
 Algorithms & Model Training Process
 =====================================
 
+Algorithm Selection
+______________________________
+
 The problem of predicting race falls within in the class of problems for which supervised machine learning classification algorithms are used. Supervised machine learning algorithms try to create a functional dependence between data points and a given target variable. In this case, the algorithms created a functional dependence between data related to an individual’s name as well as his/her address, and their race/ethnicity.  Classification algorithms try to predict a finite number of target choices; for instance: Black, White, Hispanic, AAPI, AIAN, or Multiracial.
 
 Classification models can be classified according to the mathematical form of the underlying prediction function: linear and non-linear models. In linear models, the separation between distinct classes, or the relationship between different continuous variables, can be modeled using a linear function. Logistic regression, traditionally used for credit modeling, is an example of a linear model, while decision trees and neural networks are non-linear models.
@@ -221,7 +249,7 @@ The biggest concern associated with XGBoost models is overfitting. Therefore, it
 While tree-based models excel on tabular data like we have here, Neural Networks can handle even more complex prediction problems.  Yet neural networks come with addiitional complexity.   Due to the tabular nature of the data, and in an attempt to keep  things simple, we selected XGBoost for the ZRP.  A neural network algorithm would be more appropriate if we were considering pictures of people in addition to tabular attributes.
 
 
-Feature engineering
+Feature Engineering
 ____________________
 The feature engineering pipeline takes name and ACS features as input to prepare data for model build or to make race predictions (also refered to as race proxies). First, the data is reduced to required modeling features using 'Drop Features'. Next compound last names are handled by splitting compound last names across n rows. Let's take a look at an example if person is named Farrah Adeel Len-Doe, the input to 'Compound Name FE' will be one dedicated record, as seen below:   
 
@@ -288,6 +316,49 @@ ____________________
 
 The inputs to ZRP include name and address.  The address is used to lookup attributes of the correpsonding region.  The lookup process starts with retrieval of Census block group attributes.  If the block group lookup fails, then Census tract attributes are retrieved.  If the Census tract lookup fails, then ZIP code attributes are retrieved.  ACS attributes associated with the retrieved geographic area are then appended to the first, middle, and last name.  The resulting vector of predictors is then used as input to the corresponding model (e.g., block group, tract, or ZIP code-based model).
 
+This ensemble model architecture can be visualized as follows:
+
+.. image:: supporting_docs/waterfall_diagram.png
+  :width: 800
+  :alt: Alternative text
+  
+Each model has a slightly different feature space, as summarized below:
+
+**ZRP features by source, counts and contribution**
+
++-------------------+-------+------------------------+
+| Source            | Count | % Shapley Contribution |
++===================+=======+========================+
+| Individual’s Name |    15 |                 72.79% |
++-------------------+-------+------------------------+
+| ACS Attributes    |   167 |                  7.59% |
++-------------------+-------+------------------------+
+| Engineered Ratios |    15 |                 19.62% |
++-------------------+-------+------------------------+
+| Total             |   197 |                100.00% |
++-------------------+-------+------------------------+
+
+**Ex.: ZRP Top features**
+
++------+--------------------------------------------------------------+----------------------+
+| Rank |                          Description                         | Shapley Contribution |
++======+==============================================================+======================+
+| 1    | Label encoded** Black or African American last name          |                0.168 |
++------+--------------------------------------------------------------+----------------------+
+| 2    | Label encoded American Indian or Alaska Native last name     |                0.115 |
++------+--------------------------------------------------------------+----------------------+
+| 3    | Label encoded Hispanic last name                             |                0.081 |
++------+--------------------------------------------------------------+----------------------+
+| 4    | Label encoded White last name                                |                0.071 |
++------+--------------------------------------------------------------+----------------------+
+| 5    | Label encoded Asian American and Pacific Islander last name  |                0.048 |
++------+--------------------------------------------------------------+----------------------+
+| 6    | Ratio of non-White to White                                  |                0.046 |
++------+--------------------------------------------------------------+----------------------+
+|      | Sum of all model feature contribution                        |                1.000 |
++------+--------------------------------------------------------------+----------------------+
+
+
 
 Model Evaluation
 ==================
@@ -314,100 +385,29 @@ A validation dataset was constructed using 2021 Alabama voter registration data 
 +---------------------+----------------+-----------------------+
 
 
-The benchmark model used for comparison in this section is BISG. Across the board, with significant class sizes, we can see ZRP outperform BISG. BISG falls short when proxying race or ethnicity of minority groups exhibited by low TPRs across  minority classes. Predictive performance of the ZRP model on the Alabama validation dataset is shown below:
+The benchmark models used for comparison in this section are BISG and BIFSG. We utilize the surgeo implementations for both models. Across the board, with significant class sizes, we can see ZRP outperforms BISG and BIFSG.
 
-**BLACK** (African American)
+**On the Alabama dataset, ZRP labeled more records than other methods**
 
-+----------+-----------+-----------+-----------+
-| Stat.    | ZRP       | BISG      | Pct Diff  |
-+----------+-----------+-----------+-----------+
-| TPR      | 0.738314  | 0.569785  | 25.77%    |
-+----------+-----------+-----------+-----------+
-| TNR      | 0.963988  | 0.907395  | 6.05%     |
-+----------+-----------+-----------+-----------+
-| FPR      | 0.036012  | 0.092605  | -88.0%    |
-+----------+-----------+-----------+-----------+
-| FNR      | 0.261686  | 0.430215  | -48.71%   |
-+----------+-----------+-----------+-----------+
-| PPV      | 0.863487  | 0.654969  | 27.46%    |
-+----------+-----------+-----------+-----------+
-| AUC      | 0.851151  | 0.73859   | 14.16%    |
-+----------+-----------+-----------+-----------+
+.. image:: supporting_docs/al_val_model_hits.png
+  :width: 800
+  :alt: Alternative text
+  
+BISG falls short when proxying race or ethnicity of minority groups exhibited by low TPRs across  minority classes. Predictive performance of the ZRP model on the Alabama validation dataset is shown below:
 
+**On the Alabama dataset, ZRP is better at predicting race compared to other methods (AUC metric)**
 
-**AAPI** (Asian American and Pacific Islander)
+.. image:: supporting_docs/al_aucs.png
+  :width: 800
+  :alt: Alternative text
 
-+----------+-----------+-----------+-----------+
-| Stat.    | ZRP       | BISG      | Pct Diff  |
-+----------+-----------+-----------+-----------+
-| TPR      | 0.665479  | 0.531275  | 22.43%    |
-+----------+-----------+-----------+-----------+
-| TNR      | 0.996707  | 0.998798  | -0.21%    |
-+----------+-----------+-----------+-----------+
-| FPR      | 0.003293  | 0.001202  | 93.05%    |
-+----------+-----------+-----------+-----------+
-| FNR      | 0.334521  | 0.468725  | -33.42%   |
-+----------+-----------+-----------+-----------+
-| PPV      | 0.692054  | 0.83096   | -18.24%   |
-+----------+-----------+-----------+-----------+
-| AUC      | 0.831093  | 0.765036  | 8.28%     |
-+----------+-----------+-----------+-----------+
+**On the Alabama dataset, ZRP has greater classification accuracy**
 
-**WHITE** (White, non-Hispanic)
+.. image:: supporting_docs/al_confusion_matrix.png
+  :width: 800
+  :alt: Alternative text
 
-+----------+-----------+-----------+-----------+
-| Stat.    | ZRP       | BISG      | Pct Diff  |
-+----------+-----------+-----------+-----------+
-| TPR      | 0.947022  | 0.846848  | 11.17%    |
-+----------+-----------+-----------+-----------+
-| TNR      | 0.761921  | 0.634041  | 18.32%    |
-+----------+-----------+-----------+-----------+
-| FPR      | 0.238079  | 0.365959  | -42.34%   |
-+----------+-----------+-----------+-----------+
-| FNR      | 0.052978  | 0.153152  | -97.2%    |
-+----------+-----------+-----------+-----------+
-| PPV      | 0.91339   | 0.859847  | 6.04%     |
-+----------+-----------+-----------+-----------+
-| AUC      | 0.854471  | 0.740444  | 14.3%     |
-+----------+-----------+-----------+-----------+
-
-
-**HISPANIC**  
-
-+----------+-----------+-----------+-----------+
-| Stat.    | ZRP       | BISG      | Pct Diff  |
-+----------+-----------+-----------+-----------+
-| TPR      | 0.852894  | 0.502213  | 51.76%    |
-+----------+-----------+-----------+-----------+
-| TNR      | 0.987567  | 0.990625  | -0.31%    |
-+----------+-----------+-----------+-----------+
-| FPR      | 0.012433  | 0.009375  | 28.05%    |
-+----------+-----------+-----------+-----------+
-| FNR      | 0.147106  | 0.497787  | -108.76%  |
-+----------+-----------+-----------+-----------+
-| PPV      | 0.633697  | 0.57464   | 9.77%     |
-+----------+-----------+-----------+-----------+
-| AUC      | 0.920231  | 0.746419  | 20.86%    |
-+----------+-----------+-----------+-----------+
-
-**AIAN** (Native American)
-
-+----------+-----------+-----------+-----------+
-| Stat.    | ZRP       | BISG      | Pct Diff  |
-+----------+-----------+-----------+-----------+
-| TPR      | 0.041739  | 0.040000  | 4.26%     |
-+----------+-----------+-----------+-----------+
-| TNR      | 0.998926  | 0.999716  | -0.08%    |
-+----------+-----------+-----------+-----------+
-| FPR      | 0.001074  | 0.000284  | 116.4%    |
-+----------+-----------+-----------+-----------+
-| FNR      | 0.958261  | 0.960000  | -0.18%    |
-+----------+-----------+-----------+-----------+
-| PPV      | 0.088889  | 0.261364  | -98.49%   |
-+----------+-----------+-----------+-----------+
-| AUC      | 0.520333  | 0.519858  | 0.09%     |
-+----------+-----------+-----------+-----------+
-
+We additionally complete validation studies of ZRP using Louisiana voter registration data and PPP Loan Forgiveness data (courtesy of `Dr. Sabrina Howell <https://www.stern.nyu.edu/faculty/bio/sabrina-howell>`_ at NYU. The results of the extended study can be found in our `ZRP Validation Experiments' Results <https://github.com/zestai/zrp/blob/main/supporting_docs/validation_experiment_results.rst>`_. 
 
 Model Limitations
 ==================
