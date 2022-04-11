@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file
-README = open((HERE / "README.md"),  encoding="utf-8")
+README = open((HERE / "README.md"))
 
 # The contents of the requirements.txt
 with open("requirements.txt", 'r') as file:
@@ -18,7 +18,7 @@ for r in requirements_raw:
 # This call to setup() does all the work
 setup(
     name="zrp",
-    version="0.2.0",
+    version="0.2.1",
     description="The Zest Race Predictor tool predicts race/ethnicity using a name and address as inputs.",
     long_description=README,
     long_description_content_type="text/markdown",
