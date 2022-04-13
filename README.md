@@ -51,14 +51,32 @@ development documentation](./model_report.rst)
 Install
 =======
 
-Install requires an internet connection. We recommend installing zrp
-inside a [python virtual
-environment](https://docs.python.org/3/library/venv.html#creating-virtual-environments).
-The package has been tested on 3.7.4, but should likely work with 3.7.X.
+Install requires an internet connection. The package has been tested on python 3.7.4, but should likely work with 3.7.X.
 
 Note: Due to the size and number of lookup tables necesary for the zrp
 package, total installation requires 3 GB of available space.
 
+### Setting up your virtual environment
+
+We recommend installing zrp
+inside a [python virtual
+environment](https://docs.python.org/3/library/venv.html#creating-virtual-environments).
+
+Run the following to build your virtual envrionment:
+
+    python3 -m venv /path/to/new/virtual/environment
+
+Activate your virtual environment:
+
+    source /path/to/new/virtual/environment/bin/activate
+ 
+
+Ex.:
+
+    python -m venv /Users/joejones/Documents/ZestAI/zrpvenv
+    source /Users/joejones/Documents/ZestAI/zrpvenv/bin/activate
+    
+    
 ### Unix-like systems
 
     pip install zrp
