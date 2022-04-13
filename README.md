@@ -81,6 +81,8 @@ pipelines using the following command: :
 
     python -m zrp download
 
+If you're experiencing issues with installation, please consult our [Common Issues](https://github.com/zestai/zrp/blob/main/common_issues.rst#manually-installing-lookup-tables-and-pipeline-files) page.
+
 Data
 ====
 
