@@ -406,6 +406,14 @@ BISG falls short when proxying race or ethnicity of minority groups exhibited by
 .. image:: supporting_docs/al_confusion_matrix.png
   :width: 800
   :alt: Alternative text
+  
+**On the Alabama dataset, ZRP Outperforms BISG and BIFSG even when holding name lists constant**
+
+.. image:: supporting_docs/al_confusion_matrix_name_matches.png
+  :width: 800
+  :alt: Alternative text
+
+
 
 We additionally complete validation studies of ZRP using Louisiana voter registration data and PPP Loan Forgiveness data (courtesy of `Dr. Sabrina Howell <https://www.stern.nyu.edu/faculty/bio/sabrina-howell>`_ at NYU. The results of the extended study can be found in our `ZRP Validation Experiments' Results <https://github.com/zestai/zrp/blob/main/supporting_docs/validation_experiment_results.rst>`_. 
 
