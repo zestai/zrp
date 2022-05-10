@@ -241,7 +241,7 @@ class ZRP_Predict_BlockGroup(BaseZRP):
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.proxy_data)
-            
+
         numeric_cols = list(data.filter(regex='^B|^C16').columns)
         data[numeric_cols] = data[numeric_cols].apply(pd.to_numeric, errors='coerce')
         
