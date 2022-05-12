@@ -345,12 +345,13 @@ class ZRP_Predict(BaseZRP):
         
         
     def fit(self, data):
-        assert xgboost.__version__ == "1.0.2", "XGBoost version does not match requirements, required version is 1.0.2"  
+        if xgboost.__version__ != "1.0.2":
+            raise AssertionError("XGBoost version does not match requirements, required version is 1.0.2")
         data_cols =  list(data.columns)
         self.required_cols = [self.first_name, self.middle_name, self.last_name, "GEOID", "B01003_001"]
         val_na = is_missing(data, self.required_cols)
         if val_na:
-            assert True, f"Missing required data {val_na}"        
+            raise ValueError(f"Missing required data {val_na}")
 
         print("   [Start] Validating pipeline input data")
         validator = ValidateInput()
@@ -469,7 +470,8 @@ class FEtoPredict(BaseZRP):
         model.load_model(os.path.join(src_path,"model.txt"))
 #         model = pd.read_pickle(os.path.join(self.pipe_path, f"{pipe_type}/model.pkl") )
         # Load Data
-        assert not input_data.empty, "Feature engineered data is empty or missing. Please provide the feature engineered data as `input_data` to generate predictions."
+        if input_data.empty:
+            raise ValueError("Feature engineered data is empty or missing. Please provide the feature engineered data as `input_data` to generate predictions.")
         fe_data = input_data.copy()
         fe_matrix = xgboost.DMatrix(fe_data)
 
