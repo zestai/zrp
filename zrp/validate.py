@@ -107,7 +107,7 @@ class BaseValidate():
             self.state, self.block_group, self.census_tract,
         ]))
         na_dict = {}
-        for col in data_cols:
+        for col in possible_zrp_cols:
             na_dict[col] = None
             na_dict[col] = data[(data[col].astype(str).str.upper() == "NONE")
                                 | (data[col].astype(str).str.upper() == " ")
