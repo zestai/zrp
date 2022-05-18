@@ -280,7 +280,6 @@ class ZRP_Build(BaseZRP):
     def transform(self, data):
         make_directory(self.outputs_path)
         sample_path = self.outputs_path
-
         # Prepare data
         data = data.rename(columns = {self.first_name : "first_name", 
                               self.middle_name : "middle_name", 
@@ -301,6 +300,7 @@ class ZRP_Build(BaseZRP):
 
         # Data Sampling 
         dsamp = ZRP_DataSampling(file_path=self.file_path)
+
         X_train, X_test, y_train, y_test = dsamp.transform(prepared_data)
 
         data = data.drop_duplicates(subset=['ZEST_KEY'])
@@ -318,9 +318,9 @@ class ZRP_Build(BaseZRP):
 
         y_train[[self.geo_key, self.key]] = y_train[[self.geo_key, self.key]].astype(str)
         sample_weights = y_train[[self.key, 'sample_weight']].copy()
-
-        assert X_train.shape[0] == y_train.shape[
-            0], "Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data"
+        
+        if X_train.shape[0] != y_train.shape[0]:
+            raise AssertionError("Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data")
 
         #### Set Index
         X_train.set_index(self.key, inplace=True)

@@ -80,6 +80,15 @@ class ZRP(BaseZRP):
 
     def fit(self):
         return self
+    
+    def rename_data_columns(self, data):
+        """
+        Renames the user specified columns of the input data to the default column names expected by ZRP.
+        """
+        renamed_columns = {self.first_name: "first_name", self.middle_name: "middle_name", self.last_name: "last_name", self.house_number: "house_number", self.street_address: "street_address", self.city: "city", self.state: "state", self.zip_code: "zip_code"}
+        data = data.rename(columns=renamed_columns)
+        self.params_dict = {}
+        return data
 
     def transform(self, input_data):
         """
@@ -95,6 +104,10 @@ class ZRP(BaseZRP):
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.file_path)
+            
+        
+        data = self.rename_data_columns(data)
+        self.reset_column_names()
         
         make_directory(self.out_path)
 

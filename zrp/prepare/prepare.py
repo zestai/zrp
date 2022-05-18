@@ -30,20 +30,20 @@ class ZRP_Prepare(BaseZRP):
     def __init__(self, file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.params_dict =  kwargs
-
-
-
         
     def fit(self, data):
         if self.census_tract:
             tract_lengths =  data[self.census_tract].str.len()
             tract_len  = most_common(tract_lengths)
-            assert (data[self.census_tract].isalnum).any(), "Cannot provide non-numeric Census Tract code, please remove non-numeric census tract records "
-            assert tract_len == 11,  "Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '010010202001')"
+            if not (data[self.census_tract].isalnum).any():
+                raise ValueError("Cannot provide non-numeric Census Tract code, please remove non-numeric census tract records.")
+            if tract_len != 11:
+                raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '010010202001')")
         if self.block_group:
             bg_lengths =  data[self.block_group].str.len()
             bg_len  = most_common(bg_lengths)
-            assert bg_len == 12,  "Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '0100102020011')"            
+            if bg_len != 12:  
+                raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '0100102020011')")
     
     def transform(self, input_data):
         """
@@ -72,7 +72,8 @@ class ZRP_Prepare(BaseZRP):
 
         print("[Start] Preparing geo data")
         data_path = join(curpath, f'../data/processed')
-        assert len(os.listdir(data_path)) > 0, "Missing required support files please see the README for how to download the support files: https://github.com/zestai/zrp/blob/main/README.rst#install "        
+        if len(os.listdir(data_path)) <= 0:
+            raise "Missing required support files please see the README for how to download the support files: https://github.com/zestai/zrp/blob/main/README.rst#install "        
         
         inv_state_map = load_json(join(data_path, "inv_state_mapping.json"))
         data['zest_in_state_fips'] = data[self.state].replace(inv_state_map)
@@ -106,7 +107,8 @@ class ZRP_Prepare(BaseZRP):
             gdkys = list(geo_dict.keys())
             print("  The following states are included in the data:", gdkys)
             
-            assert set(gdkys) <= set(list(inv_state_map.keys())), "Provided non-standard state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina"
+            if not set(gdkys) <= set(list(inv_state_map.keys())):
+                raise ValueError("Provided non-standard state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina")
             
             geo_out = [] 
             for s in tqdm(gdkys):                
@@ -126,7 +128,8 @@ class ZRP_Prepare(BaseZRP):
             gdkys = list(geo_dict.keys())
             print("  The following states are included in the data:", gdkys)
                   
-            assert set(gdkys) <= set(list(inv_state_map.keys())), "Provided non-standard state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina"
+            if not set(gdkys) <= set(list(inv_state_map.keys())):
+                raise ValueError("Provided non-standard state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina")
 
             geo_out = [] 
             for s in tqdm(gdkys):

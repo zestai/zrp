@@ -102,7 +102,7 @@ class ZGeo(BaseZRP):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.key = 'ZEST_KEY'
         self.params_dict =  kwargs
-
+    
 
     def fit(self):
         return self
@@ -116,6 +116,7 @@ class ZGeo(BaseZRP):
                      'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_KEY_COL', 'ZEST_STATE',
                      'ZEST_ZIP', 'GEOID_ZIP', 'GEOID_CT', 'GEOID_BG', 'age', 'original_ethnicity',
                      'original_race', 'original_sex', 'ethnicity', 'race', 'sex', 'source']
+                
         na_match_cols = ['BLKGRPCE', 'BLKGRPCE10', 'COUNTYFP', 'COUNTYFP10', 'FROMHN', 'TOHN',
                          'LFROMADD', 'LTOADD', 'PUMACE', 'PUMACE10', 'RFROMADD', 'RTOADD', 'SIDE',
                          'STATEFP', 'STATEFP10', 'TBLKGPCE', 'TRACTCE', 'TRACTCE10', 'TTRACTCE',
