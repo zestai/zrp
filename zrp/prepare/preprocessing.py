@@ -586,7 +586,6 @@ class  ProcessGeo(BaseZRP):
         street_addr_results = Parallel(n_jobs = self.n_jobs, prefer="threads", verbose=1)(delayed((address_mining))(street_addr_dict, i) for i in tqdm(list(data.index)))
 
         data[self.street_address] = street_addr_results
-#         data[self.city]  = data[self.city].str.replace("[^\\w\\s]", "", regex=True)
 
         # State
         data[self.state]  = data[self.state].str.replace("[^\\w\\s]", "", regex=True)
