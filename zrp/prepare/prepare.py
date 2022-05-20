@@ -38,12 +38,12 @@ class ZRP_Prepare(BaseZRP):
             if not (data[self.census_tract].isalnum).any():
                 raise ValueError("Cannot provide non-numeric Census Tract code, please remove non-numeric census tract records.")
             if tract_len != 11:
-                raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '010010202001')")
+                raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '01001020201')")
         if self.block_group:
             bg_lengths =  data[self.block_group].str.len()
             bg_len  = most_common(bg_lengths)
             if bg_len != 12:  
-                raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '0100102020011')")
+                raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '010010202001')")
     
     def transform(self, input_data):
         """
