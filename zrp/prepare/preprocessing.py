@@ -602,6 +602,8 @@ class  ProcessGeo(BaseZRP):
             print("      ...replicating address")
             data = replicate_address_2(data, self.street_address, street_suffix_mapping, unit_mapping)
             data = replicate_house_number(data, self.house_number)
+        else: 
+            data = data.reset_index(drop=False)
         
         print("      ...formatting")
         addr_cols = list(set(list(data.columns)).intersection(set([self.zip_code, self.census_tract, self.house_number, self.city, self.state, self.street_address])))

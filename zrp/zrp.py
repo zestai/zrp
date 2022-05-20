@@ -128,7 +128,7 @@ class ZRP(BaseZRP):
             bisg_data = bisg_data[~bisg_data.index.duplicated(keep='first')]
 
             bisgw = BISGWrapper(**self.params_dict)
-            full_bisg_proxies = bisgw.transform(bisg_data)
+            full_bisg_proxies = bisgw.transform(prepared_data[~prepared_data.index.duplicated(keep='first')])
             save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_output.feather")
 
         try:
