@@ -435,7 +435,6 @@ class ValidateGeocoded(BaseValidate):
         try:
             for i in [self.last_name, self.first_name]:
                 tmp = round(validator["pct_na"][i]*100, 2)
-#                 if not tmp < 10:
 #                     raise ValueError(f"Too many missing values in required name feature, {i}. {tmp}% of the values are missing. Please review data and reduce missing. Required features include first name and last name.")
         except (KeyError, ValueError) as e:
             pass
