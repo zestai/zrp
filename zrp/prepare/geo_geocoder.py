@@ -134,10 +134,10 @@ class ZGeo(BaseZRP):
         nomatch = nomatch[~nomatch['ZEST_KEY'].isin(geokeys)]
         nomatch = nomatch.drop_duplicates('ZEST_KEY')
 
-        geocd['TRACTCE'] = geocd.groupby('ZEST_KEY')['TRACTCE'].transform(lambda x: x.value_counts().idxmax())
-        geocd['BLKGRPCE'] = geocd.groupby('ZEST_KEY')['BLKGRPCE'].transform(lambda x: x.value_counts().idxmax())
-        geocd['ZCTA5CE'] = geocd.groupby('ZEST_KEY')['ZCTA5CE'].transform(lambda x: x.value_counts().idxmax())
-        geocd['COUNTYFP'] = geocd.groupby('ZEST_KEY')['COUNTYFP'].transform(lambda x: x.value_counts().idxmax())
+        geocd['TRACTCE'] = geocd.groupby('ZEST_KEY')['TRACTCE'].transform(lambda x: x.mode()[0])
+        geocd['BLKGRPCE'] = geocd.groupby('ZEST_KEY')['BLKGRPCE'].transform(lambda x: x.mode()[0])
+        geocd['ZCTA5CE'] = geocd.groupby('ZEST_KEY')['ZCTA5CE'].transform(lambda x: x.mode()[0])
+        geocd['COUNTYFP'] = geocd.groupby('ZEST_KEY')['COUNTYFP'].transform(lambda x: x.mode()[0])
 
         geocd = geocd.drop_duplicates('ZEST_KEY')
         geocd["GEOID_CT"] = geocd[["RAW_ZEST_STATEFP", "COUNTYFP", "TRACTCE"]].apply(lambda x: "".join(x.dropna()), axis=1)
