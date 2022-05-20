@@ -109,9 +109,10 @@ class BaseValidate():
         na_dict = {}
         for col in possible_zrp_cols:
             na_dict[col] = None
-            na_dict[col] = data[(data[col].astype(str).str.upper() == "NONE")
-                                | (data[col].astype(str).str.upper() == " ")
-                                | (data[col].isna())].shape[0]/data.shape[0]
+            if data[col] == 'object':
+                na_dict[col] = data[col].str.upper().isin(['NONE', ' ', np.nan]).mean()
+            else:
+                na_dict[col] = data[col].isna().mean()
             if col in possible_zrp_cols:
                 if na_dict[col] > 0.10:
                     print(f"       (Warning!!) {col} is {na_dict[col]*100}% missing, this may impact the ability to return race approximations")   
