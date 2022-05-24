@@ -109,7 +109,7 @@ class BaseValidate():
         na_dict = {}
         for col in possible_zrp_cols:
             na_dict[col] = None
-            if data[col] == 'object':
+            if data[col].dtype == 'object':
                 na_dict[col] = data[col].str.upper().isin(['NONE', ' ', np.nan]).mean()
             else:
                 na_dict[col] = data[col].isna().mean()
