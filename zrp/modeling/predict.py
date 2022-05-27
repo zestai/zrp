@@ -567,6 +567,7 @@ class ZRP_Predict(BaseZRP):
         source_cols = list(set(proxies_out.columns).intersection(set([
             'source_zrp_block_group', 'source_zrp_census_tract',
             'source_zrp_zip_code', 'source_bisg', 'source_zrp_block_group_geo_only',
+            'source_zrp_census_tract_geo_only', 'source_zrp_zip_code_geo_only',
             'source_zrp_name_only', 'source_no_proxy'])))
         proxies_out[source_cols] = proxies_out[source_cols].fillna(0)
         proxies_out = proxies_out.sort_values(source_cols)

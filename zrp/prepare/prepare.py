@@ -5,6 +5,7 @@ from .geo_geocoder import *
 from .acs_mapper import *
 from .base import BaseZRP
 from .utils import *
+from os import path as op
 import pandas as pd
 import numpy as np
 import warnings
@@ -16,6 +17,7 @@ import re
 
 import warnings
 warnings.filterwarnings(action='ignore')
+
 
 class ZRP_Prepare(BaseZRP):
     """
@@ -38,12 +40,12 @@ class ZRP_Prepare(BaseZRP):
             if not (data[self.census_tract].isalnum).any():
                 raise ValueError("Cannot provide non-numeric Census Tract code, please remove non-numeric census tract records.")
             if tract_len != 11:
-                raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '010010202001')")
+                raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '01001020201')")
         if self.block_group:
             bg_lengths =  data[self.block_group].str.len()
             bg_len  = most_common(bg_lengths)
             if bg_len != 12:  
-                raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '0100102020011')")
+                raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '010010202001')")
     
     def transform(self, input_data):
         """
@@ -62,6 +64,20 @@ class ZRP_Prepare(BaseZRP):
             data = load_file(self.file_path)
             print("Data file is loaded")
             
+        data_path = join(curpath, f'../data/processed')
+        lookup_tables_config = load_json(join(data_path, "lookup_tables_config.json"))
+
+        geo_folder = op.join(data_path, "geo", lookup_tables_config['geo_year'])
+        acs_folder = op.join(data_path, 'acs', lookup_tables_config['acs_year'], lookup_tables_config['acs_span'])
+        
+        if not ((os.path.isdir(geo_folder)) &
+                (os.path.isdir(acs_folder ))
+               ):
+            raise AssertionError("Missing required support files please see the README for how to download the support files: https://github.com/zestai/zrp/blob/main/README.rst#install ")
+        if not ((len(os.listdir(geo_folder)) > 0) &
+                (len(os.listdir(acs_folder)) > 0)):
+            raise AssertionError("Missing required support files please see the README for how to download the support files: https://github.com/zestai/zrp/blob/main/README.rst#install ") 
+            
         gen_process = ProcessStrings(file_path=self.file_path, **self.params_dict)
         gen_process.fit(data)
         data = gen_process.transform(data)
@@ -71,9 +87,6 @@ class ZRP_Prepare(BaseZRP):
         print("")
 
         print("[Start] Preparing geo data")
-        data_path = join(curpath, f'../data/processed')
-        if len(os.listdir(data_path)) <= 0:
-            raise "Missing required support files please see the README for how to download the support files: https://github.com/zestai/zrp/blob/main/README.rst#install "        
         
         inv_state_map = load_json(join(data_path, "inv_state_mapping.json"))
         data['zest_in_state_fips'] = data[self.state].replace(inv_state_map)

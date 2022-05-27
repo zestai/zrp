@@ -586,7 +586,6 @@ class  ProcessGeo(BaseZRP):
         street_addr_results = Parallel(n_jobs = self.n_jobs, prefer="threads", verbose=1)(delayed((address_mining))(street_addr_dict, i) for i in tqdm(list(data.index)))
 
         data[self.street_address] = street_addr_results
-#         data[self.city]  = data[self.city].str.replace("[^\\w\\s]", "", regex=True)
 
         # State
         data[self.state]  = data[self.state].str.replace("[^\\w\\s]", "", regex=True)
@@ -602,6 +601,8 @@ class  ProcessGeo(BaseZRP):
             print("      ...replicating address")
             data = replicate_address_2(data, self.street_address, street_suffix_mapping, unit_mapping)
             data = replicate_house_number(data, self.house_number)
+        else: 
+            data = data.reset_index(drop=False)
         
         print("      ...formatting")
         addr_cols = list(set(list(data.columns)).intersection(set([self.zip_code, self.census_tract, self.house_number, self.city, self.state, self.street_address])))
