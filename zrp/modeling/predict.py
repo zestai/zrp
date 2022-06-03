@@ -199,7 +199,8 @@ class ZRP_Predict_ZipCode(BaseZRP):
         fe_matrix = xgboost.DMatrix(fe_data)
         
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
-        proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
+#         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
+        proxies.columns = pipe.steps[2][1].mlb_columns
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only:
             proxies['source_zrp_zip_code'] = 1
@@ -258,12 +259,14 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl") )
         
         data = validate_case(data, self.key, self.last_name)
+
         fe_data = pipe.transform(data)
         fe_data = validate_drop(fe_data)
         fe_matrix = xgboost.DMatrix(fe_data)
         
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
-        proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
+#         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
+        proxies.columns = pipe.steps[2][1].mlb_columns
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only and not name_only:
             proxies['source_zrp_block_group'] = 1
@@ -326,7 +329,8 @@ class ZRP_Predict_CensusTract(BaseZRP):
         fe_matrix = xgboost.DMatrix(fe_data)
         
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
-        proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
+#         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
+        proxies.columns = pipe.steps[2][1].mlb_columns 
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only:
             proxies['source_zrp_census_tract'] = 1

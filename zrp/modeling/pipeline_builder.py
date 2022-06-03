@@ -41,18 +41,17 @@ class ZRP_Build_Pipeline(BaseZRP):
     zrp_model_name: str
         Name of zrp_model
     zrp_model_source: str
-        Indicates the source of zrp_modeling data to use. There are three optional sources 'bg' (for block_group), 'ct' (for census_tract), and 'zp' (for zip_code). By default 'census_tract' is inferred.
+        Indicates the source of zrp_modeling data to use. There are three optional sources 'block_group', 'census_tract', and 'zip_code'. By default 'census_tract' is inferred.
     """
 
-    def __init__(self, file_path=None, zrp_model_name='zrp_0', zrp_model_source='ct', *args, **kwargs):
+    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.zrp_model_source = zrp_model_source
         self.outputs_path = os.path.join(self.out_path,
                                          "experiments",
                                          self.zrp_model_name,
-                                         self.zrp_model_source,
-                                         "data")
+                                         self.zrp_model_source)
         self.geo_key = 'GEOID'
 
     def fit(self, X, y):
@@ -105,18 +104,17 @@ class ZRP_Build_Model(BaseZRP):
     zrp_model_name: str
         Name of zrp_model
     zrp_model_source: str
-        Indicates the source of zrp_modeling data to use. There are three optional sources 'bg' (for block_group), 'ct' (for census_tract), and 'zp' (for zip_code). By default 'census_tract' is inferred.
+        Indicates the source of zrp_modeling data to use. There are three optional sources 'block_group', 'census_tract', and 'zip_code'. By default 'census_tract' is inferred.
     """
 
-    def __init__(self, file_path=None, zrp_model_name='zrp_0', zrp_model_source='ct', *args, **kwargs):
+    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.zrp_model_source = zrp_model_source
         self.outputs_path = os.path.join(self.out_path,
                                          "experiments",
                                          self.zrp_model_name,
-                                         self.zrp_model_source,
-                                         "data")
+                                         self.zrp_model_source)
         self.geo_key = 'GEOID'
 
     def fit(self, X, y):
@@ -144,10 +142,7 @@ class ZRP_Build_Model(BaseZRP):
 
         self.y_unique = y[self.race].unique()
         self.y_unique.sort()
-
-        return self
-
-    def transform(self, X):
+        
         make_directory(self.outputs_path)
         # Save zrp_model
         pickle.dump(self.zrp_model, open(os.path.join(self.outputs_path, "zrp_model.pkl"), "wb"))
@@ -155,6 +150,10 @@ class ZRP_Build_Model(BaseZRP):
             self.zrp_model.save_model(os.path.join(self.outputs_path, "model.txt"))
         except:
             pass
+
+        return self
+
+    def transform(self, X):
 
         ##### Return Race Probabilities
         print('\n---\nGenerate & save race predictions (labels)')
@@ -183,18 +182,17 @@ class ZRP_DataSampling(BaseZRP):
     zrp_model_name: str
         Name of zrp_model
     zrp_model_source: str
-        Indicates the source of zrp_modeling data to use. There are three optional sources 'bg' (for block_group), 'ct' (for census_tract), and 'zp' (for zip_code). By default 'census_tract' is inferred.
+        Indicates the source of zrp_modeling data to use. There are three optional sources 'block_group', 'census_tract', and 'zip_code'. By default 'census_tract' is inferred.
     """
 
-    def __init__(self, file_path=None, zrp_model_name='zrp_0', zrp_model_source='ct', *args, **kwargs):
+    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.zrp_model_source = zrp_model_source
         self.outputs_path = os.path.join(self.out_path,
                                          "experiments",
                                          self.zrp_model_name,
-                                         self.zrp_model_source,
-                                         "data")
+                                         self.zrp_model_source)
         self.geo_key = 'GEOID'
 
     def fit(self):
@@ -251,7 +249,7 @@ class ZRP_DataSampling(BaseZRP):
 
 class ZRP_Build(BaseZRP):
     """
-    This class builds a new custom ZRP model trained off of user input data. Supply standard ZRP requirements including name, address, and race to build your custom model-pipeline. Race & ethnicity probablities and labels are returned from this class. The pipeline, model, and supporting data is saved automatically to "./artifacts/experiments/{zrp_model_name}/{zrp_model_source}/data/" in the support files path defined.
+    This class builds a new custom ZRP model trained off of user input data. Supply standard ZRP requirements including name, address, and race to build your custom model-pipeline. The pipeline, model, and supporting data is saved automatically to "./artifacts/experiments/{zrp_model_name}/{zrp_model_source}/" in the support files path defined.
     
     Parameters
     ----------
@@ -259,27 +257,37 @@ class ZRP_Build(BaseZRP):
         Path indicating where to put artifacts folder its files (pipeline, model, and supporting data), generated during intermediate steps.
     zrp_model_name: str
         Name of zrp_model.
-    zrp_model_source: str
-        Indicates the source of zrp_modeling data to use. There are three optional sources 'bg' (for block_group), 'ct' (for census_tract), and 'zp' (for zip_code). By default 'census_tract' is inferred.
     """
 
-    def __init__(self, file_path=None, zrp_model_name='zrp_0', zrp_model_source='ct', *args, **kwargs):
+    def __init__(self, file_path=None, zrp_model_name='zrp_0', *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.zrp_model_name = zrp_model_name
-        self.zrp_model_source = zrp_model_source
-        self.outputs_path = os.path.join(self.out_path,
-                                         "experiments",
-                                         self.zrp_model_name,
-                                         self.zrp_model_source,
-                                         "data")
         self.geo_key = 'GEOID'
 
+    def validate_input_columns(self, data):
+        """
+        Passes if the input data has the requisite columns to run ZRP Build.
+        
+        Parameters
+        -----------
+        
+        data: DataFrame
+            A pandas data frame of user input data.
+        """
+        modeling_col_names = self.get_column_names
+        for name in modeling_col_names():
+            if name not in data.columns:
+                raise KeyError("Your input dataframe has incorrect columns provided. Ensure that the following data is in your input data frame: first_name, middle_name, last_name, house_number, street_address, city, state, zip_code, race. If you have provided this data, ensure that the column names for said data are either the same as the aformentioned data column names, or ensure that you have specified, via arguements, the column names for these data you have provided in your input data frame.")
+        return True
+    
     def fit(self):
         return self
 
     def transform(self, data):
-        make_directory(self.outputs_path)
-        sample_path = self.outputs_path
+        cur_path = dirname(__file__)
+        
+        self.validate_input_columns(data)
+        
         # Prepare data
         data = data.rename(columns = {self.first_name : "first_name", 
                               self.middle_name : "middle_name", 
@@ -290,68 +298,98 @@ class ZRP_Build(BaseZRP):
                               self.zip_code : "zip_code",
                               self.state : "state", 
                               self.block_group : "block_group", 
-                              self.census_tract : "census_tract"
+                              self.census_tract : "census_tract",
+                              self.race: "race"
                              }
                   )
         data = data.drop_duplicates(subset=['ZEST_KEY'])
         z_prepare = ZRP_Prepare(file_path=self.file_path)
         z_prepare.fit(data)
         prepared_data = z_prepare.transform(data)
-
-        # Data Sampling 
-        dsamp = ZRP_DataSampling(file_path=self.file_path)
-
-        X_train, X_test, y_train, y_test = dsamp.transform(prepared_data)
-
-        data = data.drop_duplicates(subset=['ZEST_KEY'])
-        print("Post-sampling shape: ", data.shape)
-
-        print("Unique labels: ", y_train['race'].unique())
-        print("Other unique labels: ", y_test['race'].unique())
-        cur_path = dirname(__file__)
-        feature_list = load_json(os.path.join(cur_path, f'feature_list_{self.zrp_model_source}.json'))
-
-        y_train = y_train.drop_duplicates(self.key)
-        train_keys = list(y_train[self.key].values)
-        X_train = X_train[X_train[self.key].isin(train_keys)]
-        X_train = X_train.drop_duplicates(self.key)
-
-        y_train[[self.geo_key, self.key]] = y_train[[self.geo_key, self.key]].astype(str)
-        sample_weights = y_train[[self.key, 'sample_weight']].copy()
         
-        if X_train.shape[0] != y_train.shape[0]:
-            raise AssertionError("Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data")
+        ft_list_source_map = {'census_tract': 'ct', 'block_group': 'bg', 'zip_code': 'zp'}
+        source_to_geoid_level_map = {'census_tract': 'GEOID_CT', 'block_group': 'GEOID_BG', 'zip_code': 'GEOID_ZIP'}
+        sources = ['block_group', 'census_tract', 'zip_code']
+        
+        for source in sources:
+            print("=========================")
+            print(f"BUILDING {source} MODEL.")
+            print("=========================\n")
+            outputs_path = os.path.join(self.out_path,
+                                             "experiments",
+                                             self.zrp_model_name,
+                                             source)
+            
+            make_directory(outputs_path)
+            
+            # Get features to drop from prepared data
+            print(f"Dropping {list(set(sources).difference({source}))} features")
+            
+            features_to_keep_list = load_json(os.path.join(cur_path, f'feature_list_{ft_list_source_map[source]}.json'))
+            features_to_keep_list.append('race')
+            
+            print("    ...Len features to keep list: ", len(features_to_keep_list))
+            
+            # Get records that can be geocoded down to given source geo level
+            geoid_level = source_to_geoid_level_map[source]
+            relevant_source_data = prepared_data[~prepared_data[geoid_level].isna()]
+            
+            print("    ...Data shape pre feature drop: ", relevant_source_data.shape)
+            relevant_source_data = relevant_source_data[relevant_source_data.columns.intersection(features_to_keep_list)]
+            print("    ...Data shape post feature drop: ", relevant_source_data.shape)
 
-        #### Set Index
-        X_train.set_index(self.key, inplace=True)
-        y_train.set_index(self.key, inplace=True)
-        sample_weights.set_index(self.key, inplace=True)
-        X_train.sort_index(inplace=True)
-        y_train.sort_index(inplace=True)
-        sample_weights.sort_index(inplace=True)
+            # Data Sampling 
+            dsamp = ZRP_DataSampling(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
 
-        feature_cols = list(set(X_train.columns) - set([self.key, self.geo_key, 'GEOID_BG', 'GEOID_CT',
-                                                        'GEOID_ZIP', "first_name", "middle_name",
-                                                        "last_name", 'ZEST_KEY_COL']))
+            X_train, X_test, y_train, y_test = dsamp.transform(relevant_source_data)
 
-        print('   train to numeric')
-        X_train[feature_cols] = X_train[feature_cols].apply(pd.to_numeric, errors='coerce')
+            data = data.drop_duplicates(subset=['ZEST_KEY'])
+            print("Post-sampling shape: ", data.shape)
+            print("\n")
+            print("Unique train labels: ", y_train['race'].unique())
+            print("Unique test labels: ", y_test['race'].unique())
 
-        print('\n---\nSaving raw data')
-        save_feather(X_train, self.outputs_path, "train_raw_data.feather")
-        save_feather(y_train, self.outputs_path, "train_raw_targets.feather")
+            y_train = y_train.drop_duplicates(self.key)
+            train_keys = list(y_train[self.key].values)
+            X_train = X_train[X_train[self.key].isin(train_keys)]
+            X_train = X_train.drop_duplicates(self.key)
 
-        # Build Pipeline
-        build_pipe = ZRP_Build_Pipeline(file_path=self.file_path)
-        build_pipe.fit(X_train, y_train)
-        X_train_fe = build_pipe.transform(X_train)
+            y_train[[self.geo_key, self.key]] = y_train[[self.geo_key, self.key]].astype(str)
+            sample_weights = y_train[[self.key, 'sample_weight']].copy()
 
-        # Build Model
-        build_model = ZRP_Build_Model(file_path=self.file_path)
-        build_model.fit(X_train_fe, y_train)
-        y_hat_train, y_phat_train = build_model.transform(X_train_fe)
+            if X_train.shape[0] != y_train.shape[0]:
+                raise AssertionError("Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data")
 
-        pred_dict = {}
-        pred_dict['labels'] = y_hat_train
-        pred_dict['probablities'] = y_phat_train
-        return (pred_dict)
+            #### Set Index
+            X_train.set_index(self.key, inplace=True)
+            y_train.set_index(self.key, inplace=True)
+            sample_weights.set_index(self.key, inplace=True)
+            X_train.sort_index(inplace=True)
+            y_train.sort_index(inplace=True)
+            sample_weights.sort_index(inplace=True)
+
+            feature_cols = list(set(X_train.columns) - set([self.key, self.geo_key, 'GEOID_BG', 'GEOID_CT',
+                                                            'GEOID_ZIP', "first_name", "middle_name",
+                                                            "last_name", 'ZEST_KEY_COL']))
+
+            print('   train to numeric')
+            X_train[feature_cols] = X_train[feature_cols].apply(pd.to_numeric, errors='coerce')
+
+            print('\n---\nSaving raw data')
+            save_feather(X_train, outputs_path, "train_raw_data.feather")
+            save_feather(y_train, outputs_path, "train_raw_targets.feather")
+
+            # Build Pipeline
+            build_pipe = ZRP_Build_Pipeline(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
+            build_pipe.fit(X_train, y_train)
+            X_train_fe = build_pipe.transform(X_train)
+
+            # Build Model
+            build_model = ZRP_Build_Model(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
+            build_model.fit(X_train_fe, y_train)
+            
+            print(f"Completed building {source} model.")
+        
+        print("\n##############################")
+        print("Custom ZRP model build complete.")
+        

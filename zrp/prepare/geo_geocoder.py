@@ -220,6 +220,7 @@ class ZGeo(BaseZRP):
 
         data["ZEST_FULLNAME"] = data[self.street_address]
         print("      ...merge user input & lookup table")
+        
         geo_df = aef.merge(data, on="ZEST_FULLNAME", how="right")
         geo_df = geo_range(geo_df)
         geo_df = self.geo_match(geo_df)
