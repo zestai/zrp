@@ -328,16 +328,15 @@ class ZRP_Build(BaseZRP):
             features_to_keep_list = load_json(os.path.join(cur_path, f'feature_list_{ft_list_source_map[source]}.json'))
             features_to_keep_list.append('race')
             
-            print("Len features to keep list: ", len(features_to_keep_list))
+            print("    ...Len features to keep list: ", len(features_to_keep_list))
             
             # Get records that can be geocoded down to given source geo level
             geoid_level = source_to_geoid_level_map[source]
             relevant_source_data = prepared_data[~prepared_data[geoid_level].isna()]
             
-            print("Data shape pre feature drop: ", relevant_source_data.shape)
-            print(relevant_source_data.columns.difference(features_to_keep_list))
+            print("    ...Data shape pre feature drop: ", relevant_source_data.shape)
             relevant_source_data = relevant_source_data[relevant_source_data.columns.intersection(features_to_keep_list)]
-            print("Data shape post feature drop: ", relevant_source_data.shape)
+            print("    ...Data shape post feature drop: ", relevant_source_data.shape)
 
             # Data Sampling 
             dsamp = ZRP_DataSampling(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
@@ -346,7 +345,7 @@ class ZRP_Build(BaseZRP):
 
             data = data.drop_duplicates(subset=['ZEST_KEY'])
             print("Post-sampling shape: ", data.shape)
-
+            print("\n")
             print("Unique train labels: ", y_train['race'].unique())
             print("Unique test labels: ", y_test['race'].unique())
 
