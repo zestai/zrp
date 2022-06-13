@@ -27,15 +27,7 @@ The pipelines will be stored with the following paths:
 Preparing the release
 =====================
 
-Observe the following steps in order to safely and correctly prepare and push new Pypi, and Github releases for the zrp packages. Note that in order to ensure continuity between all releases, every new push to the main branch should be accompanied by a new pypi and Github release with appropriate versioning (idential across the various release locations).
-
-If you contribute to the ZRP tool via patches, feature upgrades, or code overhauls that **DO NOT** affect the lookup tables or pipelines in use:
-
-#. Push all changes to the Github
-#. Follow the steps below to prepare a new Pypi package
-    * **NOTE:** when you follow step 2, similar to the example provided, you are to bump the version in setup.py
-  
-If, however, you generate new lookup tables, or pipelines, in your contribution: 
+Observe the following steps in order to safely and correctly prepare and push new Pypi, and Github releases for the zrp packages. Note that in order to ensure continuity between all releases, every new push to the main branch should be accompanied by a new pypi and Github release with appropriate versioning (idential across the various release locations). Thus, you should always
 
 #. Push all changes to the Github. 
     * Ensure that the acs/, geo/ data folders, and the {geo_level}/pipe.pkl files are not tracked in git and are added to the gitignore. 
