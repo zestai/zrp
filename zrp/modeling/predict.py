@@ -189,7 +189,6 @@ class ZRP_Predict_ZipCode(BaseZRP):
         
         model = xgboost.Booster()
         model.load_model(os.path.join(src_path,"model.txt"))
-#         model = pd.read_pickle(os.path.join(src_path,"model.pkl") )
         pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl") )
         
         
@@ -199,10 +198,8 @@ class ZRP_Predict_ZipCode(BaseZRP):
         fe_matrix = xgboost.DMatrix(fe_data)
         
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
-#         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
         proxy_col_headers = pipe.steps[2][1].mlb_columns
         proxy_col_headers.sort()
-#         print(proxy_col_headers1 == ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"])
         proxies.columns = proxy_col_headers
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only:
@@ -258,7 +255,6 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         
         model = xgboost.Booster()
         model.load_model(os.path.join(src_path,"model.txt"))
-#         model = pd.read_pickle(os.path.join(src_path,"model.pkl") )
         pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl") )
         
         data = validate_case(data, self.key, self.last_name)
@@ -270,10 +266,8 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
         proxies.to_csv("proxies.csv")
-#         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
         proxy_col_headers = pipe.steps[2][1].mlb_columns
         proxy_col_headers.sort()
-#         print(proxy_col_headers1 == ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"])
         proxies.columns = proxy_col_headers
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only and not name_only:
@@ -328,7 +322,6 @@ class ZRP_Predict_CensusTract(BaseZRP):
 
         model = xgboost.Booster()
         model.load_model(os.path.join(src_path,"model.txt"))        
-#         model = pd.read_pickle(os.path.join(src_path,"model.pkl") )
         pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl") )
         
         data = validate_case(data, self.key, self.last_name)
@@ -337,10 +330,8 @@ class ZRP_Predict_CensusTract(BaseZRP):
         fe_matrix = xgboost.DMatrix(fe_data)
         
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
-#         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
         proxy_col_headers = pipe.steps[2][1].mlb_columns
         proxy_col_headers.sort()
-#         print(proxy_col_headers1 == ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"])
         proxies.columns = proxy_col_headers
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only:
@@ -416,7 +407,6 @@ class ZRP_Predict(BaseZRP):
                                 | (data[name_col].astype(str).str.upper() == " ")
                                 | (data[name_col].isna()))
                 , has_name_col] = 1 
-#         return(data[has_name_columns])
         return(data)
     
     def transform(self, input_data, save_table=True):
@@ -631,7 +621,7 @@ class FEtoPredict(BaseZRP):
         """
         model = xgboost.Booster()
         model.load_model(os.path.join(src_path,"model.txt"))
-#         model = pd.read_pickle(os.path.join(self.pipe_path, f"{pipe_type}/model.pkl") )
+        
         # Load Data
         if input_data.empty:
             raise ValueError("Feature engineered data is empty or missing. Please provide the feature engineered data as `input_data` to generate predictions.")
