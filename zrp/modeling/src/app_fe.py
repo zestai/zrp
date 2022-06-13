@@ -49,12 +49,9 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
         y_unique = y.unique()
         y_unique.sort()
         self.n_classes = len(y_unique)
-        
-        possible_race_classes = ["AAPI", "AIAN",  "BLACK", "HISPANIC", "WHITE"]
-        
+                
         # handle multi-labeled output
         self.mlb = MultiLabelBinarizer(classes = y_unique)
-        self.mlb_columns = list(set(possible_race_classes) & set(y_unique))
         self.mlb_columns = y_unique
         self.mlb.fit(y.values.reshape(-1,1))
         y_ohe = pd.DataFrame(self.mlb.transform(y.values.reshape(-1,1)), columns=self.mlb_columns)

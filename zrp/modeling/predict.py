@@ -200,7 +200,10 @@ class ZRP_Predict_ZipCode(BaseZRP):
         
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
 #         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
-        proxies.columns = pipe.steps[2][1].mlb_columns
+        proxy_col_headers = pipe.steps[2][1].mlb_columns
+        proxy_col_headers.sort()
+#         print(proxy_col_headers1 == ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"])
+        proxies.columns = proxy_col_headers
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only:
             proxies['source_zrp_zip_code'] = 1
@@ -263,10 +266,15 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         fe_data = pipe.transform(data)
         fe_data = validate_drop(fe_data)
         fe_matrix = xgboost.DMatrix(fe_data)
+        fe_data.to_csv("fe_data.csv")
         
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
+        proxies.to_csv("proxies.csv")
 #         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
-        proxies.columns = pipe.steps[2][1].mlb_columns
+        proxy_col_headers = pipe.steps[2][1].mlb_columns
+        proxy_col_headers.sort()
+#         print(proxy_col_headers1 == ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"])
+        proxies.columns = proxy_col_headers
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only and not name_only:
             proxies['source_zrp_block_group'] = 1
@@ -330,7 +338,10 @@ class ZRP_Predict_CensusTract(BaseZRP):
         
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
 #         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
-        proxies.columns = pipe.steps[2][1].mlb_columns 
+        proxy_col_headers = pipe.steps[2][1].mlb_columns
+        proxy_col_headers.sort()
+#         print(proxy_col_headers1 == ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"])
+        proxies.columns = proxy_col_headers
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only:
             proxies['source_zrp_census_tract'] = 1
