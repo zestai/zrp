@@ -664,8 +664,6 @@ class FEtoPredict(BaseZRP):
 
         
         if save_table:
-            print(os.getcwd())
-            print(self.out_path)
             make_directory(self.out_path)
             file_name = f"{self.pipe_type}_proxy_output.feather"
             save_feather(proxies,
