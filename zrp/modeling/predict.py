@@ -582,7 +582,7 @@ class ZRP_Predict(BaseZRP):
                     failed_proxies.rename(columns={"source_bisg": "source_no_proxy"}, inplace=True)
                     out_list.append(failed_proxies)
                 
-        if df_6.empty or records_failed_bisg_proxy.empty:
+        if df_6.empty or records_failed_bisg_proxy.empty or cannot_proxy_records.empty:
             print("No record failed proxying.")
 
         proxies_out = pd.concat(out_list)
@@ -645,22 +645,27 @@ class FEtoPredict(BaseZRP):
         input_data: pd.DataFrame
             Dataframe to be transformed
         """
+        src_path = os.path.join(self.pipe_path, self.pipe_type)
         model = xgboost.Booster()
         model.load_model(os.path.join(src_path,"model.txt"))
 #         model = pd.read_pickle(os.path.join(self.pipe_path, f"{pipe_type}/model.pkl") )
+        pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl"))
         # Load Data
         if input_data.empty:
             raise ValueError("Feature engineered data is empty or missing. Please provide the feature engineered data as `input_data` to generate predictions.")
         fe_data = input_data.copy()
+        fe_data = fe_data.set_index('ZEST_KEY')
         fe_matrix = xgboost.DMatrix(fe_data)
 
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
-        proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
+        proxies.columns = sorted(pipe.steps[2][1].mlb_columns)
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
-        proxies[f'source_{pipe_type}'] = 1        
+        proxies[f'source_{self.pipe_type}'] = 1        
 
         
         if save_table:
+            print(os.getcwd())
+            print(self.out_path)
             make_directory(self.out_path)
             file_name = f"{self.pipe_type}_proxy_output.feather"
             save_feather(proxies,

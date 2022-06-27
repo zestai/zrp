@@ -122,11 +122,11 @@ class ZRP_Build_Model(BaseZRP):
         ##### specify zrp_model parameters
         print('\n---\nbuilding zrp_model')
 
-        opt_params = {'gamma': 0, #5,
-                      'learning_rate': 0.3, #0.01,
-                      'max_depth': 1, #3, 
-                      'min_child_weight': 1, #500,
-                      'n_estimators': 1, #2000,
+        opt_params = {'gamma': 5,
+                      'learning_rate': 0.01,
+                      'max_depth': 3, 
+                      'min_child_weight': 500,
+                      'n_estimators': 2000,
                       'subsample': 0.20}
 
         ##### Initialize the zrp_model
