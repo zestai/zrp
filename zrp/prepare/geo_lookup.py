@@ -304,11 +304,9 @@ class GeoLookUpBuilder():
 
         aef = gps.transform(aef, state_mapping)
 
-        # make geo keys/ids
-        aef["GEOID_ZIP"] = aef["ZEST_ZIP"]
-        aef["GEOID_CT"] = aef["STATEFP"] + aef["COUNTYFP"] + aef["TRACTCE"]
-        aef["GEOID_BG"] = aef["GEOID_CT"] + aef["BLKGRPCE"]
-
+        final_cols = ['STATEFP', 'COUNTYFP', 'TRACTCE', 'BLKGRPCE', 'ZEST_FULLNAME', 'FROMHN' , 'TOHN', 'ZEST_ZIP', 'ZCTA5CE', 'ZCTA5CE10']
+        aef = aef[final_cols]
+        
         # optional save 
         if save_table:
             make_directory(self.out_geo_path)

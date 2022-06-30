@@ -55,7 +55,6 @@ class ZRP_Prepare(BaseZRP):
             Dataframe to be transformed
         """  
         curpath = dirname(__file__)
-        
         # Load Data
         try:
             data = input_data.copy()
@@ -110,8 +109,10 @@ class ZRP_Prepare(BaseZRP):
             output = geocode.transform(geo_dict[s], geo, processed, replicate, True)
             geocode_out.append(output)
         geo_coded = pd.concat(geocode_out)
-        cols_to_drop = [col for col in geo_coded.columns if col not in data.columns and col not in ['GEOID_ZIP', 'GEOID_CT', 'GEOID_BG', 'GEOID','ZEST_KEY_COL', self.census_tract, self.block_group]]
-        geo_coded = geo_coded.drop(cols_to_drop, axis = 1)
+#         cols_to_drop = [col for col in geo_coded.columns if col not in data.columns and col not in ['GEOID_ZIP', 'GEOID_CT', 'GEOID_BG', 'GEOID','ZEST_KEY_COL', self.census_tract, self.block_group]]
+#         print('aaaaaaaaaaaaaaaaaaaaaaaaaa')
+#         print(cols_to_drop)
+#         geo_coded = geo_coded.drop(cols_to_drop, axis = 1)
         
         # append data unable to enter geo mapping
         geo_coded_keys = list(geo_coded.ZEST_KEY_COL.values)

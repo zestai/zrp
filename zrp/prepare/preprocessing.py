@@ -733,5 +733,4 @@ class  ProcessGLookUp(BaseZRP):
         validate = ValidateInput()
         validate.fit()
         validator_in = validate.transform(data) 
-        print(validator_in)
         return(data)
