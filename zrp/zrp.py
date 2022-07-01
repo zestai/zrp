@@ -92,7 +92,7 @@ class ZRP(BaseZRP):
         """
         renamed_columns = {self.first_name: "first_name", self.middle_name: "middle_name", self.last_name: "last_name", self.house_number: "house_number", self.street_address: "street_address", self.city: "city", self.state: "state", self.zip_code: "zip_code"}
         data = data.rename(columns=renamed_columns)
-        self.params_dict = {}
+        # self.params_dict = {}
         return data
     
     def transform(self, input_data):

@@ -37,7 +37,7 @@ class ZRP_Prepare(BaseZRP):
         if self.census_tract:
             tract_lengths =  data[self.census_tract].str.len()
             tract_len  = most_common(tract_lengths)
-            if not (data[self.census_tract].isalnum).any():
+            if not (data[self.census_tract].apply(lambda x: str(x).isalnum()).any()):
                 raise ValueError("Cannot provide non-numeric Census Tract code, please remove non-numeric census tract records.")
             if tract_len != 11:
                 raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '06037311600')")
@@ -79,7 +79,6 @@ class ZRP_Prepare(BaseZRP):
         if not ((len(os.listdir(geo_folder)) > 0) &
                 (len(os.listdir(acs_folder)) > 0)):
             raise AssertionError("Missing required support files please see the README for how to download the support files: https://github.com/zestai/zrp/blob/main/README.rst#install ") 
-            
         gen_process = ProcessStrings(file_path=self.file_path, **self.params_dict)
         gen_process.fit(data)
         data = gen_process.transform(data)
@@ -94,72 +93,60 @@ class ZRP_Prepare(BaseZRP):
         data['zest_in_state_fips'] = data[self.state].replace(inv_state_map)
         print("")
 
-        if self.census_tract is not None:
-            try:
-                data[self.zip_code] = np.where((data[self.zip_code].isna()) |\
-                                        (data[self.zip_code].str.contains("None")),
-                                           None,
-                                           data[self.zip_code].apply(lambda x: x.zfill(5)))
-                data['GEOID_ZIP'] = data[self.zip_code]
+        geocode = ZGeo(file_path=self.file_path, **self.params_dict)
+        geocode_out = [] 
+        geo_grps = data.groupby([self.state])
+        geo_dict = {}
+        for s, g in geo_grps:
+            geo_dict[s] = g
+        gdkys = list(geo_dict.keys())
+        print("  The following states are included in the data:", gdkys)
+              
+        if not set(gdkys) <= set(list(inv_state_map.keys())):
+            raise ValueError("Provided unrecognizable state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina")
 
-            except (ValueError, KeyError) as e:
-                pass
-            geo_coded = data.copy()
-            try:
-                geo_coded['GEOID_BG'] = geo_coded[self.block_group]
-            except (ValueError, KeyError) as e:
-                pass
-            geo_coded['GEOID_CT'] = geo_coded[self.census_tract]
-            
-        elif (self.census_tract is not None) & (self.street_address is not None):
-            geocode = ZGeo(file_path=self.file_path, **self.params_dict)
-            geocode.fit(geo_coded)
-            geocode_out = [] 
-            geo_grps = data.groupby([self.state])
-            geo_dict = {}
-            for s, g in geo_grps:
-                geo_dict[s] = g
-            gdkys = list(geo_dict.keys())
-            print("  The following states are included in the data:", gdkys)
-            
-            if not set(gdkys) <= set(list(inv_state_map.keys())):
-                raise ValueError("Provided unrecognizable state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina")
-    
-            geo_out = [] 
-            for s in tqdm(gdkys):                
-                print(" ... on state:", str(s))
-                geo = inv_state_map[s].zfill(2)
-                output = geocode.transform(geo_dict[s], geo, True)
-                geocode_out.append(output)
-            geo_coded = pd.concat(geocode_out)
-            geo_coded = geo_coded.drop_duplicates()
-        else:
-            geocode = ZGeo(file_path=self.file_path, **self.params_dict)
-            geocode_out = [] 
-            geo_grps = data.groupby([self.state])
-            geo_dict = {}
-            for s, g in geo_grps:
-                geo_dict[s] = g
-            gdkys = list(geo_dict.keys())
-            print("  The following states are included in the data:", gdkys)
-                  
-            if not set(gdkys) <= set(list(inv_state_map.keys())):
-                raise ValueError("Provided unrecognizable state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina")
-
-            geo_out = [] 
-            for s in tqdm(gdkys):
-                print("   ... on state:", str(s))
-                geo = inv_state_map[s].zfill(2)
-                output = geocode.transform(geo_dict[s], geo, processed, replicate, True)
-                geocode_out.append(output)
-            geo_coded = pd.concat(geocode_out)
+        geo_out = [] 
+        for s in tqdm(gdkys):
+            print("   ... on state:", str(s))
+            geo = inv_state_map[s].zfill(2)
+            output = geocode.transform(geo_dict[s], geo, processed, replicate, True)
+            geocode_out.append(output)
+        geo_coded = pd.concat(geocode_out)
+        cols_to_drop = [col for col in geo_coded.columns if col not in data.columns and col not in ['GEOID_ZIP', 'GEOID_CT', 'GEOID_BG', 'GEOID','ZEST_KEY_COL', self.census_tract, self.block_group]]
+        geo_coded = geo_coded.drop(cols_to_drop, axis = 1)
         
         # append data unable to enter geo mapping
         geo_coded_keys = list(geo_coded.ZEST_KEY_COL.values)
-        data = data[~data.index.isin(geo_coded_keys)]
-        geo_coded = pd.concat([geo_coded, data])
-        
-
+        data_not_geo_coded = data[~data.index.isin(geo_coded_keys)]
+        geo_coded = pd.concat([geo_coded, data_not_geo_coded])
+        # replace GEOIDs with user-defined values where avaliable
+        if self.block_group is not None and self.census_tract is not None:
+            geo_coded = geo_coded.drop([self.block_group, self.census_tract], axis = 1)
+            geo_coded = geo_coded.merge(data[[self.block_group, self.census_tract]], right_index = True, left_index = True, how = 'left')
+            geo_coded['GEOID_BG'] = np.where((geo_coded[self.block_group].isna()) | (geo_coded[self.block_group].str.contains("None") | (geo_coded[self.block_group] == ''))
+                                             ,geo_coded['GEOID_BG']
+                                             ,geo_coded[self.block_group])
+            geo_coded['GEOID_CT'] = np.where((geo_coded[self.census_tract].isna()) | (geo_coded[self.census_tract].str.contains("None") | (geo_coded[self.census_tract] == ''))
+                                             ,geo_coded['GEOID_CT']
+                                             ,geo_coded[self.census_tract])
+            geo_coded = geo_coded.drop([self.block_group, self.census_tract], axis = 1) 
+        elif self.block_group is not None:
+            geo_coded = geo_coded.drop(self.block_group, axis = 1)
+            geo_coded = geo_coded.merge(data[self.block_group], right_index = True, left_index = True, how = 'left')
+            geo_coded['GEOID_BG'] = np.where((geo_coded[self.block_group].isna()) | (geo_coded[self.block_group].str.contains("None") | (geo_coded[self.block_group] == ''))
+                                             ,geo_coded['GEOID_BG']
+                                             ,geo_coded[self.block_group])
+            geo_coded = geo_coded.drop(self.block_group, axis = 1)            
+        elif self.census_tract is not None:
+            geo_coded['GEOID_BG'] = np.nan
+            geo_coded = geo_coded.drop(self.census_tract, axis = 1)
+            geo_coded = geo_coded.merge(data[self.census_tract], right_index = True, left_index = True, how = 'left')
+            print(geo_coded[self.census_tract] == '')
+            geo_coded['GEOID_CT'] = np.where((geo_coded[self.census_tract].isna()) | (geo_coded[self.census_tract].str.contains("None") | (geo_coded[self.census_tract] == ''))
+                                             ,geo_coded['GEOID_CT']
+                                             ,geo_coded[self.census_tract])
+            geo_coded = geo_coded.drop(self.census_tract, axis = 1)
+                                                   
         print("")
         
         print("[Completed] Preparing geo data")
@@ -173,7 +160,6 @@ class ZRP_Prepare(BaseZRP):
         save_json(acs_validator, self.out_path, "input_acs_validator.json")
         print("   [Completed] Validating ACS input data")
         print("")
-
         amp = ACSModelPrep(**self.params_dict)
         amp.fit()
         data_out = amp.transform(geo_coded, False)

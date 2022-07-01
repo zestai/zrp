@@ -267,4 +267,5 @@ def most_common(lizt):
     lizt: list
         List to extract most common element from
     """
+    lizt = list(lizt)
     return max(set(lizt), key=lizt.count)
