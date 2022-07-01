@@ -17,6 +17,7 @@ import re
 import warnings
 warnings.filterwarnings(action='ignore')
 
+
 class ZRP_Prepare(BaseZRP):
     """
     Prepares data to generate race & ethnicity proxies
@@ -40,14 +41,14 @@ class ZRP_Prepare(BaseZRP):
                 raise ValueError("Cannot provide non-numeric Census Tract code, please remove non-numeric census tract records.")
             if tract_len != 11:
                 raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '06037311600')")
-                
+
         if self.block_group:
             bg_lengths =  data[self.block_group].str.len()
             bg_len  = most_common(bg_lengths)
             if bg_len != 12:  
                 raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '060373116003')")
-                
-                
+
+    
     def transform(self, input_data):
         """
         Parameters
@@ -88,8 +89,7 @@ class ZRP_Prepare(BaseZRP):
         print("")
 
         print("[Start] Preparing geo data")
-        data_path = join(curpath, f'../data/processed')
-            
+
         inv_state_map = load_json(join(data_path, "inv_state_mapping.json"))
         data['zest_in_state_fips'] = data[self.state].replace(inv_state_map)
         print("")
@@ -124,7 +124,7 @@ class ZRP_Prepare(BaseZRP):
             
             if not set(gdkys) <= set(list(inv_state_map.keys())):
                 raise ValueError("Provided unrecognizable state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina")
-                
+    
             geo_out = [] 
             for s in tqdm(gdkys):                
                 print(" ... on state:", str(s))
@@ -145,7 +145,7 @@ class ZRP_Prepare(BaseZRP):
                   
             if not set(gdkys) <= set(list(inv_state_map.keys())):
                 raise ValueError("Provided unrecognizable state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina")
-                
+
             geo_out = [] 
             for s in tqdm(gdkys):
                 print("   ... on state:", str(s))

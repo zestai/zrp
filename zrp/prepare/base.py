@@ -115,8 +115,8 @@ class BaseZRP():
         column_names.append(self.state)
         column_names.append(self.zip_code)
         column_names.append(self.race)
-
-        return column_names
+        
+        return(column_names)
 
     def reset_column_names(self):
         """

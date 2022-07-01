@@ -84,7 +84,6 @@ class ZRP(BaseZRP):
     def rename_data_columns(self, data):
         """
         Renames the user specified columns of the input data to the default column names expected by ZRP.
-        
 
         Parameters
         -----------
@@ -110,7 +109,7 @@ class ZRP(BaseZRP):
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.file_path)
-            
+
         data = self.rename_data_columns(data)
         self.reset_column_names()
         

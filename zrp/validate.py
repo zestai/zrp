@@ -4,10 +4,13 @@ import numpy as np
 
 def is_missing(data, required_cols):
     """Checks if all required columns are provided
+    
     Parameter
     ---------
     data: pd.dataframe
         dataframe to make changes to or use for validation
+    required_cols: list
+        list of required columns to check for
     """
     missing_columns = np.setdiff1d(required_cols,data.columns).tolist()
     return(missing_columns)
