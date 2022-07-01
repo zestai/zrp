@@ -80,7 +80,22 @@ class ZRP(BaseZRP):
 
     def fit(self):
         return self
+    
+    def rename_data_columns(self, data):
+        """
+        Renames the user specified columns of the input data to the default column names expected by ZRP.
+        
 
+        Parameters
+        -----------
+        data: pd.Dataframe
+            Dataframe to be transformed
+        """
+        renamed_columns = {self.first_name: "first_name", self.middle_name: "middle_name", self.last_name: "last_name", self.house_number: "house_number", self.street_address: "street_address", self.city: "city", self.state: "state", self.zip_code: "zip_code"}
+        data = data.rename(columns=renamed_columns)
+        self.params_dict = {}
+        return data
+    
     def transform(self, input_data):
         """
         Processes input data and generates ZRP predictions. Generates BISG predictions additionally if specified.
@@ -95,6 +110,9 @@ class ZRP(BaseZRP):
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.file_path)
+            
+        data = self.rename_data_columns(data)
+        self.reset_column_names()
         
         make_directory(self.out_path)
 
@@ -111,11 +129,8 @@ class ZRP(BaseZRP):
         predict_out = z_predict.transform(prepared_data)
 
         if self.bisg:
-            bisg_data = prepared_data.copy()
-            bisg_data = bisg_data[~bisg_data.index.duplicated(keep='first')]
-
             bisgw = BISGWrapper(**self.params_dict)
-            full_bisg_proxies = bisgw.transform(bisg_data)
+            full_bisg_proxies = bisgw.transform(prepared_data[~prepared_data.index.duplicated(keep='first')])
             save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_output.feather")
 
         try:

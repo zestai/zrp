@@ -476,8 +476,9 @@ class ACS_LookupBuilder():
         save_table: bool
             Optional save
         """
-        assert self.geo in ['zip', 'tract',
-                            'block group'], "Require `geo` to be specified as 'zip', 'tract' or 'block group'"
+        if self.geo not in ['zip', 'tract','block group']:
+            raise ValueError("Requires `geo` to be specified as 'zip', 'tract' or 'block group'")
+            
         output = []
 
         if self.geo == 'zip':

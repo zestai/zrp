@@ -100,3 +100,33 @@ class BaseZRP():
 
     def transform(self):
         pass
+
+    def get_column_names(self):
+        """
+        Returns user defined column names of input DF. If user hasn't specified alternative names for columns, the default column names are returned.
+        """
+        column_names = []
+        column_names.append(self.first_name)
+        column_names.append(self.middle_name)
+        column_names.append(self.last_name)
+        column_names.append(self.house_number)
+        column_names.append(self.street_address)
+        column_names.append(self.city)
+        column_names.append(self.state)
+        column_names.append(self.zip_code)
+        column_names.append(self.race)
+
+        return column_names
+
+    def reset_column_names(self):
+        """
+        Resets this class' stored column names to the defaults expected by ZRP. 
+        """
+        self.first_name = "first_name"
+        self.middle_name = "middle_name"
+        self.last_name = "last_name"
+        self.house_number = "house_number"
+        self.street_address = "street_address"
+        self.city = "city"
+        self.state = "state"
+        self.zip_code = "zip_code"

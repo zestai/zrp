@@ -306,8 +306,8 @@ class ZRP_Build(BaseZRP):
         data = data.drop_duplicates(subset=['ZEST_KEY'])
         print("Post-sampling shape: ", data.shape)
 
-        print("Unique labels: ", y_train['race'].unique())
-        print("Other unique labels: ", y_test['race'].unique())
+        print("Unique train labels: ", y_train['race'].unique())
+        print("Unique test labels: ", y_test['race'].unique())
         cur_path = dirname(__file__)
         feature_list = load_json(os.path.join(cur_path, f'feature_list_{self.zrp_model_source}.json'))
 
@@ -319,9 +319,9 @@ class ZRP_Build(BaseZRP):
         y_train[[self.geo_key, self.key]] = y_train[[self.geo_key, self.key]].astype(str)
         sample_weights = y_train[[self.key, 'sample_weight']].copy()
 
-        assert X_train.shape[0] == y_train.shape[
-            0], "Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data"
-
+        if X_train.shape[0] != y_train.shape[0]:
+            raise AssertionError("Unexpected mismatch between shapes. There may be duplicates in the data. Please remove any duplicate rows and ensure all the key column is fully unique.")
+            
         #### Set Index
         X_train.set_index(self.key, inplace=True)
         y_train.set_index(self.key, inplace=True)

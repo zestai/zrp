@@ -107,14 +107,15 @@ class BaseValidate():
             self.state, self.block_group, self.census_tract,
         ]))
         na_dict = {}
-        for col in data_cols:
+        for col in possible_zrp_cols:
             na_dict[col] = None
-            na_dict[col] = data[(data[col].astype(str).str.upper() == "NONE")
-                                | (data[col].astype(str).str.upper() == " ")
-                                | (data[col].isna())].shape[0]/data.shape[0]
+            if data[col].dtype == 'object':
+                na_dict[col] = data[col].str.upper().isin(['NONE', ' ', np.nan]).mean()
+            else:
+                na_dict[col] = data[col].isna().mean()
             if col in possible_zrp_cols:
                 if na_dict[col] > 0.10:
-                    print(f"       (Warning!!) {col} is {na_dict[col]*100}% missing, this may impact the ability to return race approximations")   
+                    print(f"       (Warning!!) {col} is {na_dict[col]*100}% missing")   
         return(na_dict)
     
     def is_geocoded(self, data):
@@ -434,7 +435,6 @@ class ValidateGeocoded(BaseValidate):
         try:
             for i in [self.last_name, self.first_name]:
                 tmp = round(validator["pct_na"][i]*100, 2)
-                assert tmp < 10, f"Too many missing values in required name feature, {i}. {tmp}% of the values are missing. Please review data and reduce missing. Required features include first name and last name." 
         except (KeyError, ValueError) as e:
             pass
         validator["is_geocoded"] = self.is_geocoded(data)

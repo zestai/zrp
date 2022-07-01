@@ -337,7 +337,7 @@ class ProcessStrings(BaseZRP):
             self.required_cols = [self.first_name, self.middle_name, self.last_name, self.zip_code]
         val_na = is_missing(data, self.required_cols)
         if val_na:
-            assert True, f"     Missing required data {val_na}"
+            raise ValueError(f"     Missing required data {val_na}")
         validate = ValidateInput()
         validate.fit()
         validators_in = validate.transform(data)
@@ -512,7 +512,7 @@ class  ProcessGeo(BaseZRP):
         val_na = is_missing(data, self.required_cols)
         val_na = is_missing(data, self.required_cols)
         if val_na:
-            assert True, f"Missing required data {val_na}"
+            raise ValueError(f"Missing required data {val_na}")
         geo_validate = ValidateGeo()
         geo_validate.fit()
         geo_validators_in = geo_validate.transform(data)
@@ -586,7 +586,6 @@ class  ProcessGeo(BaseZRP):
         street_addr_results = Parallel(n_jobs = self.n_jobs, prefer="threads", verbose=1)(delayed((address_mining))(street_addr_dict, i) for i in tqdm(list(data.index)))
 
         data[self.street_address] = street_addr_results
-#         data[self.city]  = data[self.city].str.replace("[^\\w\\s]", "", regex=True)
 
         # State
         data[self.state]  = data[self.state].str.replace("[^\\w\\s]", "", regex=True)
