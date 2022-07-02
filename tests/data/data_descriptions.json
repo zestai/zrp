@@ -1,7 +1,5 @@
 {
   "sm_1": "A small pandas data frame with shape, (5, 14). Contains 5 entries of data which can be entered into ZRP including all requisite column names for ZRP to run.",
-  "sm_2": "A small pandas data frame with shape, (5, 14). Contains 5 entries of data which can be entered into ZRP including all requisite column names for ZRP to run. Contains missings, non-unique keys, and 100% of first_name is na.",
   "sm_3": "A small pandas data frame with shape, (5, 14). Contains an unformatted row with extra spaces, additional numeric characters, and lowercase names. ",
-  "sm_4": "A small pandas data frame with shape, (5, 15). Contains a column not named the expected name (the 'race' column has been renamed to 'r').",
   "sm_5": "A small pandas data frame with shape, (14, 15). The test dataset consists of valid address and name records, records without names but with valid ZRP addresses, records with invalid ZRP but valid BISG addresses and names, records with invalid ZRP and BISG addresses and names, and records with invalid ZRP and BISG addresses and no names. The expected behavior respectively for the dataset are proxies with 'source_zrp_block_group'/'source_zrp_census_tract'/'source_zrp_zip_code', 'source_zrp_block_group_geo_only'/'source_zrp_census_tract_geo_only'/'source_zrp_zip_code_geo_only', 'source_bisg','source_zrp_name_only', 'source_no_proxy'."
 }

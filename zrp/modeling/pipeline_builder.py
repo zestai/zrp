@@ -71,7 +71,7 @@ class ZRP_Build_Pipeline(BaseZRP):
              ("Correlated Feature Selection", SmartCorrelatedSelection(method='pearson',
                                                                        threshold=.95))],
             verbose=True
-        )
+        )      
         #### Fit the Pipeline
         print('\n---\nFitting pipeline')
         self.pipe.fit(X, y[self.race])
@@ -124,7 +124,7 @@ class ZRP_Build_Model(BaseZRP):
 
         opt_params = {'gamma': 5,
                       'learning_rate': 0.01,
-                      'max_depth': 3,
+                      'max_depth': 3, 
                       'min_child_weight': 500,
                       'n_estimators': 2000,
                       'subsample': 0.20}
@@ -323,7 +323,7 @@ class ZRP_Build(BaseZRP):
             make_directory(outputs_path)
             
             # Get features to drop from prepared data
-            print(f"Dropping {list(set(sources).difference({source}))} features")
+            print(f"...Dropping {list(set(sources).difference({source}))} features")
             
             features_to_keep_list = load_json(os.path.join(cur_path, f'feature_list_{ft_list_source_map[source]}.json'))
             features_to_keep_list.append('race')
@@ -344,10 +344,9 @@ class ZRP_Build(BaseZRP):
             X_train, X_test, y_train, y_test = dsamp.transform(relevant_source_data)
 
             data = data.drop_duplicates(subset=['ZEST_KEY'])
-            print("Post-sampling shape: ", data.shape)
-            print("\n")
-            print("Unique train labels: ", y_train['race'].unique())
-            print("Unique test labels: ", y_test['race'].unique())
+            print("       ...User-input data sampling shape: ", data.shape)
+            print("       ...Unique train labels: ", y_train['race'].unique())
+            print("       ...Unique test labels: ", y_test['race'].unique())
 
             y_train = y_train.drop_duplicates(self.key)
             train_keys = list(y_train[self.key].values)
@@ -372,7 +371,7 @@ class ZRP_Build(BaseZRP):
                                                             'GEOID_ZIP', "first_name", "middle_name",
                                                             "last_name", 'ZEST_KEY_COL']))
 
-            print('   train to numeric')
+            print(' Preprocessing training the data')
             X_train[feature_cols] = X_train[feature_cols].apply(pd.to_numeric, errors='coerce')
 
             print('\n---\nSaving raw data')

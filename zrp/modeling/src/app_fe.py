@@ -50,11 +50,11 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
         y_unique.sort()
         self.n_classes = len(y_unique)
         
-        possible_race_classes = ["AAPI", "AIAN",  "BLACK", "HISPANIC", "WHITE"]
+        #possible_race_classes = ["AAPI", "AIAN",  "BLACK", "HISPANIC", "WHITE"]
         
         # handle multi-labeled output
         self.mlb = MultiLabelBinarizer(classes = y_unique)
-        self.mlb_columns = list(set(possible_race_classes) & set(y_unique))
+        #self.mlb_columns = list(set(possible_race_classes) & set(y_unique))
         self.mlb_columns = y_unique
         self.mlb.fit(y.values.reshape(-1,1))
         y_ohe = pd.DataFrame(self.mlb.transform(y.values.reshape(-1,1)), columns=self.mlb_columns)
@@ -123,28 +123,7 @@ class NameAggregation(BaseEstimator, TransformerMixin):
         self.keys = [self.key]
 
     def fit(self, X, y):
-        all_mto_feats = ['AAPI_first_name',
-                         'AAPI_last_name',
-                         'AAPI_middle_name',
-                         'AIAN_first_name',
-                         'AIAN_last_name',
-                         'AIAN_middle_name',
-                         'BLACK_first_name',
-                         'BLACK_last_name',
-                         'BLACK_middle_name',
-                         'HISPANIC_first_name',
-                         'HISPANIC_last_name',
-                         'HISPANIC_middle_name',
-                         'MULTIRACIAL_first_name',
-                         'MULTIRACIAL_last_name',
-                         'MULTIRACIAL_middle_name',
-                         'OTHER_first_name',
-                         'OTHER_last_name',
-                         'OTHER_middle_name',
-                         'WHITE_first_name',
-                         'WHITE_last_name',
-                         'WHITE_middle_name']
-        self.mto_feats = list(set(X.columns).intersection(set(all_mto_feats)))
+        self.mto_feats = [col for col in X.columns if '_first_name' in col or '_last_name' in col or '_middle_name' in col]
         self.drop_cols = self.mto_feats 
         return self
         

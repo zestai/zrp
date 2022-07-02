@@ -4,10 +4,13 @@ import numpy as np
 
 def is_missing(data, required_cols):
     """Checks if all required columns are provided
+    
     Parameter
     ---------
     data: pd.dataframe
         dataframe to make changes to or use for validation
+    required_cols: list
+        list of required columns to check for
     """
     missing_columns = np.setdiff1d(required_cols,data.columns).tolist()
     return(missing_columns)
@@ -115,7 +118,7 @@ class BaseValidate():
                 na_dict[col] = data[col].isna().mean()
             if col in possible_zrp_cols:
                 if na_dict[col] > 0.10:
-                    print(f"       (Warning!!) {col} is {na_dict[col]*100}% missing, this may impact the ability to return race approximations")   
+                    print(f"       (Warning!!) {col} is {na_dict[col]*100}% missing")   
         return(na_dict)
     
     def is_geocoded(self, data):
@@ -131,14 +134,19 @@ class BaseValidate():
         
         geocoded_cts["count"]["GEOID"] = data[(data["GEOID"].str.len()>4)
                                                        & (data.index.duplicated(keep = "first"))].shape[0]
-        geocoded_cts["count"]["Block Group"] = data[(data["GEOID_BG"].str.len()>11)  
-                                                    & (data["GEOID_BG"] == data["GEOID"])
-                                                    & (data["GEOID_BG"].notna())].shape[0]
-        geocoded_cts["count"]["Census Tract"] = data[(data["GEOID_CT"].str.len()>10) 
-                                                     & (data["GEOID_CT"] == data["GEOID"])
+            
+        if data['GEOID_BG'].isna().all():
+            geocoded_cts["count"]["Block Group"] = 0
+        else:
+            geocoded_cts["count"]["Block Group"] = data[(data["GEOID_BG"].str.len()>11)  
+                                                        & (data["GEOID_BG"].notna())].shape[0]
+        if data['GEOID_CT'].isna().all():
+            geocoded_cts["count"]["Census Tract"] = 0
+        else:
+            geocoded_cts["count"]["Census Tract"] = data[(data["GEOID_CT"].str.len()>10) 
                                                      & (data["GEOID_CT"].notna())].shape[0]
+        
         geocoded_cts["count"]["Zip Code"] = data[(data["GEOID_ZIP"].str.len() == 5)  
-                                                 & (data["GEOID_ZIP"] == data["GEOID"])
                                                  & (data["GEOID_ZIP"].notna())].shape[0]
         return(geocoded_cts)
         
@@ -357,7 +365,7 @@ class ValidateInput(BaseValidate):
     def fit(self):
         return self
             
-    def transform(self, data):    
+    def transform(self, data):
         validator = {}
         validator["is_empty"] = self.is_empty(data)
         if validator["is_empty"]:
@@ -435,7 +443,6 @@ class ValidateGeocoded(BaseValidate):
         try:
             for i in [self.last_name, self.first_name]:
                 tmp = round(validator["pct_na"][i]*100, 2)
-#                     raise ValueError(f"Too many missing values in required name feature, {i}. {tmp}% of the values are missing. Please review data and reduce missing. Required features include first name and last name.")
         except (KeyError, ValueError) as e:
             pass
         validator["is_geocoded"] = self.is_geocoded(data)

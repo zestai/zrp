@@ -54,7 +54,7 @@ def save_dataframe(data, path, file_name):
         Name of file
     """      
     data.to_parquet(os.path.join(path, file_name))
-    return (print("Output saved"))
+    return (print("...Output saved"))
 
 
 def save_feather(data, path, file_name):
@@ -72,7 +72,7 @@ def save_feather(data, path, file_name):
     """          
     data.reset_index(drop = False).to_feather(os.path.join(path,
                                                          file_name))
-    return(print("Output saved"))
+    return(print("...Output saved"))
         
 def make_directory(output_directory = None):
     """
@@ -267,4 +267,10 @@ def most_common(lizt):
     lizt: list
         List to extract most common element from
     """
+    lizt = list(lizt)
+    lizt = list(filter(None, lizt))
+    lizt = [x for x in lizt if str(x) !='nan']
+
     return max(set(lizt), key=lizt.count)
+
+

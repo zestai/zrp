@@ -136,10 +136,11 @@ class BISGWrapper(BaseZRP):
         }, inplace=True) 
         combo = combo.set_index(self.key)
         combo = combo[~combo.index.duplicated(keep='first')]
-        
+                
         # Generate proxy at threshold
-        subset = combo.filter(['WHITE', 'BLACK', 'AAPI', 'AIAN', 'HISPANIC'
-                       ])
+        race_col_ov = ['WHITE', 'BLACK', 'AAPI', 'AIAN', 'HISPANIC']
+        subset = combo.filter(race_col_ov)
+        subset = subset[race_col_ov].div(subset[race_col_ov].sum(axis=1), axis=0)              
         identifiedRaces = subset.idxmax(axis=1)
         combo[f"{self.race}_proxy"] = identifiedRaces
         combo['source_bisg'] = 1
@@ -200,7 +201,7 @@ class ZRP_Predict_ZipCode(BaseZRP):
         
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
 #         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
-        proxies.columns = pipe.steps[2][1].mlb_columns
+        proxies.columns = sorted(pipe.steps[2][1].mlb_columns)
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only:
             proxies['source_zrp_zip_code'] = 1
@@ -257,17 +258,15 @@ class ZRP_Predict_BlockGroup(BaseZRP):
         model.load_model(os.path.join(src_path,"model.txt"))
 #         model = pd.read_pickle(os.path.join(src_path,"model.pkl") )
         pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl") )
-        
         data = validate_case(data, self.key, self.last_name)
-
         fe_data = pipe.transform(data)
         fe_data = validate_drop(fe_data)
         fe_matrix = xgboost.DMatrix(fe_data)
-        
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
 #         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
-        proxies.columns = pipe.steps[2][1].mlb_columns
+        proxies.columns = sorted(pipe.steps[2][1].mlb_columns)
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
+        
         if not geo_only and not name_only:
             proxies['source_zrp_block_group'] = 1
         elif geo_only:
@@ -327,10 +326,9 @@ class ZRP_Predict_CensusTract(BaseZRP):
         fe_data = pipe.transform(data)
         fe_data = validate_drop(fe_data)
         fe_matrix = xgboost.DMatrix(fe_data)
-        
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
 #         proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
-        proxies.columns = pipe.steps[2][1].mlb_columns 
+        proxies.columns = sorted(pipe.steps[2][1].mlb_columns)
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
         if not geo_only:
             proxies['source_zrp_census_tract'] = 1
@@ -343,7 +341,7 @@ class ZRP_Predict_CensusTract(BaseZRP):
 class ZRP_Predict(BaseZRP):
     """
     Generates race proxies.
-    Attempts to predict on census tract, then block group, then zip code based on which level ACS data is found for. If
+    Attempts to predict on block group, then census tract, then zip code based on which level ACS data is found for. If
     Geo level data is unattainable, the BISG proxy is computed. No prediction returned if BISG cannot be computed either.
 
     Parameters
@@ -366,11 +364,12 @@ class ZRP_Predict(BaseZRP):
     def fit(self, data):
         if xgboost.__version__ != "1.0.2":
             raise AssertionError("XGBoost version does not match requirements, required version is 1.0.2")
+
         data_cols =  list(data.columns)
         self.required_cols = [self.first_name, self.middle_name, self.last_name, "GEOID", "B01003_001"]
         val_na = is_missing(data, self.required_cols)
         if val_na:
-            raise ValueError(f"Missing required data {val_na}")
+            raise ValueError(f"Missing required data {val_na}")     
 
         print("   [Start] Validating pipeline input data")
         validator = ValidateInput()
@@ -378,7 +377,7 @@ class ZRP_Predict(BaseZRP):
         validator_in = validator.transform(data)
         save_json(validator_in, self.out_path, "input_predict_validator.json")
         print("   [Completed] Validating pipeline input data")
-        print("")        
+        print("")
         return self
     
     def validate_data_has_names(self, data, is_input = True):
@@ -407,7 +406,26 @@ class ZRP_Predict(BaseZRP):
                 , has_name_col] = 1 
 #         return(data[has_name_columns])
         return(data)
-    
+
+    def standard_target_classes(self):
+        """
+        Checks if models were trained on standard set of target classes. Returns True for standard target classes and False for non-standard target classes. 
+        
+        Parameter
+        ---------
+        """
+        model_types = ['block_group', 'census_tract', 'zip_code']
+        all_model_cols = set()
+        for model_type in model_types:
+            src_path = os.path.join(self.pipe_path, model_type)
+            sys.path.append(src_path)
+            pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl"))
+            cols = set(pipe.steps[2][1].mlb_columns)
+            all_model_cols = all_model_cols.union(cols)
+        standard_cols = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
+        target_is_standard = set(all_model_cols) == set(standard_cols)
+        return(target_is_standard)
+
     def transform(self, input_data, save_table=True):
         """
         Processes input data and generates ZRP proxy predictions.
@@ -531,50 +549,61 @@ class ZRP_Predict(BaseZRP):
             zrp_zp_geo_only = ZRP_Predict_ZipCode(self.pipe_path, **self.params_dict)
             out_5 = zrp_zp_geo_only.transform(df_5.filter(flz), geo_only=True)
             out_list.append(out_5)  
-
-        records_failed_bisg_proxy = pd.DataFrame()
-    
         if not df_6.empty:    # BISG
             bisgw = BISGWrapper(**self.params_dict)
             bisgw.fit(df_6)
             out_6 = bisgw.transform(df_6)
-            
-            # Capture successful BISG proxies 
-            bisg_proxies = out_6[~(out_6['race_proxy'].isna())]
-            out_list.append(bisg_proxies) 
-            
-            # Records that failed BISG proxy
-            records_failed_bisg_proxy = df_6.loc[df_6.index.intersection(out_6[out_6['race_proxy'].isna()].index.values)]
-        if not records_failed_bisg_proxy.empty:    # Attempt name only ZRP proxying
-            df_7 = records_failed_bisg_proxy[
-                (records_failed_bisg_proxy['has_first_name'] == 1) |
-                (records_failed_bisg_proxy['has_middle_name'] == 1) |
-                (records_failed_bisg_proxy['has_last_name'] == 1)
-            ]
-            
-            zrp_names_only = ZRP_Predict_BlockGroup(self.pipe_path, **self.params_dict)
-            out_7 = zrp_names_only.transform(df_7.filter(flb), name_only=True)
-            out_list.append(out_7)  
-            
-            record_indices_for_name_only_proxy = list(df_7.index.values)
-            cannot_proxy_records = records_failed_bisg_proxy[~(records_failed_bisg_proxy.index.isin(record_indices_for_name_only_proxy))]
-            
-            if not out_6.empty:
-                failed_proxies = out_6.loc[out_6.index.intersection(cannot_proxy_records.index.values)]
-                failed_proxies.rename(columns={"source_bisg": "source_no_proxy"}, inplace=True)
-                out_list.append(failed_proxies)
+
+            if self.standard_target_classes():
+                # Capture successful BISG proxies 
+                bisg_proxies = out_6[~(out_6[f"{self.race}_proxy"].isna())]
+                out_list.append(bisg_proxies) 
+                
+                # Records that failed BISG proxy
+                records_failed_bisg_proxy = df_6.loc[df_6.index.intersection(out_6[out_6[f"{self.race}_proxy"].isna()].index.values)]
             else:
-                print("No record failed proxying.")
+                # For non-standard classes disregard BISG predictions 
+                records_failed_bisg_proxy = df_6
             
-            
+            if not records_failed_bisg_proxy.empty:    # Attempt name only ZRP proxying
+                df_7 = records_failed_bisg_proxy[
+                    (records_failed_bisg_proxy['has_first_name'] == 1) |
+                    (records_failed_bisg_proxy['has_middle_name'] == 1) |
+                    (records_failed_bisg_proxy['has_last_name'] == 1)
+                ]
+
+                zrp_names_only = ZRP_Predict_BlockGroup(self.pipe_path, **self.params_dict)
+                out_7 = zrp_names_only.transform(df_7.filter(flb), name_only=True)
+                out_list.append(out_7)  
+
+                record_indices_for_name_only_proxy = list(df_7.index.values)
+                cannot_proxy_records = records_failed_bisg_proxy[~(records_failed_bisg_proxy.index.isin(record_indices_for_name_only_proxy))]
+
+                if not cannot_proxy_records.empty:
+                    failed_proxies = out_6.loc[out_6.index.intersection(cannot_proxy_records.index.values)]
+                    failed_proxies.rename(columns={"source_bisg": "source_no_proxy"}, inplace=True)
+                    out_list.append(failed_proxies)
+                
+        if df_6.empty or records_failed_bisg_proxy.empty or cannot_proxy_records.empty:
+            print("   ...Proxies generated")
+
         proxies_out = pd.concat(out_list)
-        source_cols = list(set(proxies_out.columns).intersection(set([
+        
+        # Rearegement of columns    
+        all_source_cols = [
             'source_zrp_block_group', 'source_zrp_census_tract',
             'source_zrp_zip_code', 'source_bisg', 'source_zrp_block_group_geo_only',
             'source_zrp_census_tract_geo_only', 'source_zrp_zip_code_geo_only',
-            'source_zrp_name_only', 'source_no_proxy'])))
+            'source_zrp_name_only', 'source_no_proxy']
+        source_cols = [col for col in all_source_cols if col in proxies_out.columns]
+        race_cols = list(set(proxies_out.columns) - set(source_cols) - set([f"{self.race}_proxy"]))
+        race_cols.sort()
+        ordered_columns = race_cols + [f"{self.race}_proxy"] + source_cols  
+        proxies_out = proxies_out[ordered_columns]
+        
+        proxies_out[race_cols] = proxies_out[race_cols].fillna(0)
         proxies_out[source_cols] = proxies_out[source_cols].fillna(0)
-        proxies_out = proxies_out.sort_values(source_cols)
+        proxies_out = proxies_out.sort_values(source_cols)        
         
         if save_table:
             make_directory(self.out_path)
@@ -618,19 +647,22 @@ class FEtoPredict(BaseZRP):
         input_data: pd.DataFrame
             Dataframe to be transformed
         """
+        src_path = os.path.join(self.pipe_path, self.pipe_type)
         model = xgboost.Booster()
         model.load_model(os.path.join(src_path,"model.txt"))
 #         model = pd.read_pickle(os.path.join(self.pipe_path, f"{pipe_type}/model.pkl") )
+        pipe = pd.read_pickle(os.path.join(src_path, "pipe.pkl"))
         # Load Data
         if input_data.empty:
             raise ValueError("Feature engineered data is empty or missing. Please provide the feature engineered data as `input_data` to generate predictions.")
         fe_data = input_data.copy()
+        fe_data = fe_data.set_index('ZEST_KEY')
         fe_matrix = xgboost.DMatrix(fe_data)
 
         proxies = pd.DataFrame(model.predict(fe_matrix), index = fe_data.index)
-        proxies.columns = ["AAPI", "AIAN", "BLACK", "HISPANIC", "WHITE"]
+        proxies.columns = sorted(pipe.steps[2][1].mlb_columns)
         proxies[f"{self.race}_proxy"] = proxies.idxmax(axis=1)
-        proxies[f'source_{pipe_type}'] = 1        
+        proxies[f'source_{self.pipe_type}'] = 1        
 
         
         if save_table:
