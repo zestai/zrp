@@ -139,17 +139,14 @@ class BaseValidate():
             geocoded_cts["count"]["Block Group"] = 0
         else:
             geocoded_cts["count"]["Block Group"] = data[(data["GEOID_BG"].str.len()>11)  
-                                                        & (data["GEOID_BG"] == data["GEOID"])
                                                         & (data["GEOID_BG"].notna())].shape[0]
         if data['GEOID_CT'].isna().all():
             geocoded_cts["count"]["Census Tract"] = 0
         else:
             geocoded_cts["count"]["Census Tract"] = data[(data["GEOID_CT"].str.len()>10) 
-                                                     & (data["GEOID_CT"] == data["GEOID"])
                                                      & (data["GEOID_CT"].notna())].shape[0]
         
         geocoded_cts["count"]["Zip Code"] = data[(data["GEOID_ZIP"].str.len() == 5)  
-                                                 & (data["GEOID_ZIP"] == data["GEOID"])
                                                  & (data["GEOID_ZIP"].notna())].shape[0]
         return(geocoded_cts)
         
