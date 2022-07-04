@@ -1,6 +1,7 @@
 from zrp.prepare.preprocessing import *
 from os.path import dirname, join, expanduser
 from zrp.prepare.utils import *
+from joblib import Parallel, delayed
 import pandas as pd
 import numpy as np
 import fiona
@@ -113,11 +114,12 @@ class GeoLookUpBuilder():
         Year associated with ACS data. 
     """
 
-    def __init__(self, support_files_path, year):
+    def __init__(self, support_files_path, year, output_folder_suffix):
         self.support_files_path = support_files_path
         self.year = year
+        self.output_folder_suffix = output_folder_suffix
         self.raw_geo_path = os.path.join(self.support_files_path, "raw/geo", self.year)
-        self.out_geo_path = os.path.join(self.support_files_path, "processed/geo", f"{self.year}_backup") #new change update 
+        self.out_geo_path = os.path.join(self.support_files_path, "processed/geo", f"{self.year}_{self.output_folder_suffix}")
 
     def fit(self):
         return self
@@ -317,3 +319,89 @@ class GeoLookUpBuilder():
             print("No tables were saved")
 
         return (aef)
+
+class GeoLookUpLooper(GeoLookUpBuilder):
+    """
+    This class loops through GeoLookUpBuilder() to build geo lookup tables
+    
+    Parameters
+    ----------
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.st_dict = dict()
+
+    def fit(self):
+        """
+        Collects a dictionary of files to loop through
+
+        Parameters
+        ----------
+        """          
+        self.st_dict = dict()
+        shp_list = [shp_file for shp_file in os.listdir(self.raw_geo_path) if '.shp' in shp_file and '.iso.xml' not in shp_file]
+        strings_count = pd.Series(shp_list).str[8:13].value_counts()
+        st_cty_code_list = list(strings_count[strings_count == 3].sort_index().index)
+
+        st_code_list = [st[0:2] for st in st_cty_code_list]
+        st_code_list = np.unique(np.array(st_code_list))
+
+        for st_code in st_code_list:
+            self.st_dict[st_code] = [st_cty for st_cty in st_cty_code_list if st_cty[:2] == st_code]
+        return self
+
+    def __st_cty_builder(self, st_cty_code, geo_build, save_table):
+        """
+        Builds one lookup table on st_cty_code level
+
+        Parameters
+        ----------
+        """       
+        try:
+            geo_build.transform(st_cty_code, save_table = save_table)
+        except: 
+            pass
+    
+    def transform(self, st_list = None, save_st_cty_tables=True, save_st_tables=True, n_jobs = -1):
+        """
+        Returns DataFrame of geo lookup tables
+
+        Parameters
+        ----------
+        st_list: list
+            list of state codes to process
+        save_st_cty_tables: bool
+            Indicator to save st_cty level tables
+        save_st_tables: bool
+            Indicator to save st level tables
+        """        
+
+        if st_list is None:
+            temp_st_dict = self.st_dict
+        else:
+            temp_st_dict = {key: self.st_dict[key] for key in st_list}
+        
+        if save_st_cty_tables:
+            geo_build = GeoLookUpBuilder(support_files_path = self.support_files_path, 
+                                     year = self.year, 
+                                     output_folder_suffix = self.output_folder_suffix)
+            for st_code in temp_st_dict:
+                print(f"Working on st_cty tables (st_code = {st_code})")
+                Parallel(n_jobs = n_jobs, verbose=1)(delayed(self.__st_cty_builder)(st_cty_code, geo_build, save_st_cty_tables) for st_cty_code in temp_st_dict[st_code])
+
+        if save_st_tables:
+            for st_code in temp_st_dict:
+                print(f"Working on st tables (st_code = {st_code})")
+                try:
+                    output_list = []
+                    for st_cty_code in temp_st_dict[st_code]:
+                        input_filename = "".join(["Zest_Geo_Lookup_", self.year, "_", st_cty_code, ".parquet"])
+                        input_filepath = os.path.join(self.out_geo_path, input_filename)
+                        output_list.append(pd.read_parquet(input_filepath))
+                    output = pd.concat(output_list).reset_index(drop = True)
+                    output_filename = "".join(["Zest_Geo_Lookup_", self.year, "_State_", st_code, ".parquet"])
+                    save_dataframe(output, self.out_geo_path, output_filename)
+                except:
+                    pass
+        return (self)
