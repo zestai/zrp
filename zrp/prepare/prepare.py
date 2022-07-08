@@ -80,8 +80,6 @@ class ZRP_Prepare(BaseZRP):
         gen_process.fit(data)
         data = gen_process.transform(data)
         
-        processed = True
-        replicate = True
         print("")
 
         print("[Start] Preparing geo data")
@@ -106,14 +104,10 @@ class ZRP_Prepare(BaseZRP):
         for s in tqdm(gdkys):
             print("   ... on state:", str(s))
             geo = inv_state_map[s].zfill(2)
-            output = geocode.transform(geo_dict[s], geo, processed, replicate, True)
+            output = geocode.transform(geo_dict[s], geo, processed = True, replicate = True, save_table = True)
             geocode_out.append(output)
         geo_coded = pd.concat(geocode_out)
-#         cols_to_drop = [col for col in geo_coded.columns if col not in data.columns and col not in ['GEOID_ZIP', 'GEOID_CT', 'GEOID_BG', 'GEOID','ZEST_KEY_COL', self.census_tract, self.block_group]]
-#         print('aaaaaaaaaaaaaaaaaaaaaaaaaa')
-#         print(cols_to_drop)
-#         geo_coded = geo_coded.drop(cols_to_drop, axis = 1)
-        
+
         # append data unable to enter geo mapping
         geo_coded_keys = list(geo_coded.ZEST_KEY_COL.values)
         data_not_geo_coded = data[~data.index.isin(geo_coded_keys)]
