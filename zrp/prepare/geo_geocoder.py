@@ -201,7 +201,10 @@ class ZGeo(BaseZRP):
         HN_match_keys = list(geo_df['ZEST_KEY_LONG'].unique())
         no_HN_match_keys = list(set(all_keys) - set(HN_match_keys))
         
-        df_no_HN = odf[odf['ZEST_KEY_LONG'].isin(no_HN_match_keys)]       
+        df_no_HN = odf[odf['ZEST_KEY_LONG'].isin(no_HN_match_keys)]
+        na_match_cols = ['BLKGRPCE', 'FROMHN', 'TOHN', 'small', 'big', 'ZIP_Match_1', 'ZIP_Match_2','NEW_SUPER_ZIP', 'ZIP_Match']
+        df_no_HN[na_match_cols] = None
+        
         df_no_HN = self.__majority_vote_deduplication(df_no_HN, 'ZEST_KEY_LONG')
               
         #ZIP matched, HN matched, Parity not matched

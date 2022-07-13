@@ -305,10 +305,25 @@ class GeoLookUpBuilder():
         state_mapping = load_json(data_path)
 
         aef = gps.transform(aef, state_mapping)
-
-        final_cols = ['STATEFP', 'COUNTYFP', 'TRACTCE', 'BLKGRPCE', 'ZEST_FULLNAME', 'FROMHN' , 'TOHN', 'ZEST_ZIP', 'ZCTA5CE', 'ZCTA5CE10']
-        aef = aef[final_cols]
         
+        # Fill the gaps in HN
+        aef = aef.astype({'FROMHN_RIGHT':'float', 'TOHN_RIGHT':'float'})
+        aef = aef.reset_index(drop = True)
+        aef['shifted_FROMHN_RIGHT'] = aef.groupby(['PARITY', 'ZEST_ZIP', 'ZEST_FULLNAME', 'FROMHN_LEFT'])['FROMHN_RIGHT']\
+                                         .apply(lambda x: x.shift(-1))
+        new_aef = aef[(aef['shifted_FROMHN_RIGHT'] != aef['TOHN_RIGHT'] + 2) & (aef['shifted_FROMHN_RIGHT'].notna())]
+        new_aef['FROMHN_RIGHT'] = (new_aef['TOHN_RIGHT'] + 2)
+        new_aef['TOHN_RIGHT']  = (new_aef['shifted_FROMHN_RIGHT'] -2)
+        new_aef['BLKGRPCE'] = None
+        new_aef['marker'] = 1
+        aef = pd.concat([aef,new_aef])       
+        aef = aef.sort_values(['PARITY', 'ZEST_ZIP', 'ZEST_FULLNAME', 'FROMHN_LEFT', 'FROMHN_RIGHT'])                    
+        aef = aef.reset_index(drop = True)
+        
+        final_cols = ['STATEFP', 'COUNTYFP', 'TRACTCE', 'BLKGRPCE', 'ZEST_FULLNAME', 'FROMHN' , 'TOHN', 'ZEST_ZIP', 
+                      'ZCTA5CE', 'ZCTA5CE10', 'FROMHN_LEFT', 'FROMHN_RIGHT', 'TOHN_LEFT', 'TOHN_RIGHT', 'PARITY', 'marker']
+        aef = aef[final_cols]                    
+        print(aef.columns)
         # optional save 
         if save_table:
             make_directory(self.out_geo_path)

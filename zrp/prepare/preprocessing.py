@@ -173,36 +173,7 @@ def address_mining(data, i):
     return(data[i])
 
 
-class HandleTracts():
-    """
-    HandleTracts parses the American Community Survey response format into state, county, and tracts.
-    It will also create a GEO_KEY for merging with geocoded user data.
-    """
-    def __init__(self):
-        super().__init__()
-    
-    def fit(self, data):
-        pass
-    
-    def transform(self, data):
-        """
-        Parameters
-        ----------
-        data: pd.DataFrame
-           ACS dataFrame to make changes to 
-        """
-        if not isinstance(data, pd.DataFrame):
-            raise ValueError("Input must be a dataframe")
-        acs_ct = data.copy()
-        acs_zip = data.copy()
-        
-        acs_rename(acs_ct)
-        acs_rename(acs_zip)
-        
-        acs_trt_split(acs_ct, feature="result")
-        acs_zip_split(acs_zip, feature="result")
-        
-        return(acs_ct, acs_zip)
+
 
 def replicate_house_number(data, house_number, add_to_flg):
     """
@@ -343,6 +314,64 @@ def replicate_north_n(data, street_address, add_to_flg):
 #     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
 #     return dataout
        
+def split_char_position(a_string):
+    position = [i for i, s in enumerate(a_string) if not s.isdigit()][-1] + 1
+    return position
+
+def split_HN(df):
+    numeric_map = (df['FROMHN'].str.isnumeric()) | (df['FROMHN'].isna()) | (df['FROMHN'] == '')
+    df_numeric = df[numeric_map]
+    df_non_numeric = df[~numeric_map]
+    
+    for col in ['FROMHN', 'TOHN']:  
+        df_numeric[f'{col}_LEFT'] = ''
+        df_numeric[f'{col}_RIGHT'] = df_numeric[col]
+        
+        df_non_numeric[f'{col}_LEFT']  = df_non_numeric[col].apply(lambda a_string: a_string[:split_char_position(a_string)])
+        df_non_numeric[f'{col}_RIGHT'] = df_non_numeric[col].apply(lambda a_string: a_string[split_char_position(a_string):])
+    
+    return pd.concat([df_numeric, df_non_numeric])
+
+def sort_HN_columns(df):
+    df['FROMHN_RIGHT'] = pd.to_numeric(df['FROMHN_RIGHT'])
+    df['TOHN_RIGHT']   = pd.to_numeric(df['TOHN_RIGHT'])
+    from_hn = np.where(df['FROMHN_RIGHT'] <= df['TOHN_RIGHT'], df['FROMHN_RIGHT'], df['TOHN_RIGHT'])
+    to_hn   = np.where(df['FROMHN_RIGHT'] <= df['TOHN_RIGHT'], df['TOHN_RIGHT'], df['FROMHN_RIGHT'])
+    df['FROMHN_RIGHT'] = from_hn
+    df['TOHN_RIGHT'] = to_hn
+    return(df)
+    
+class HandleTracts():
+    """
+    HandleTracts parses the American Community Survey response format into state, county, and tracts.
+    It will also create a GEO_KEY for merging with geocoded user data.
+    """
+    def __init__(self):
+        super().__init__()
+    
+    def fit(self, data):
+        pass
+    
+    def transform(self, data):
+        """
+        Parameters
+        ----------
+        data: pd.DataFrame
+           ACS dataFrame to make changes to 
+        """
+        if not isinstance(data, pd.DataFrame):
+            raise ValueError("Input must be a dataframe")
+        acs_ct = data.copy()
+        acs_zip = data.copy()
+        
+        acs_rename(acs_ct)
+        acs_rename(acs_zip)
+        
+        acs_trt_split(acs_ct, feature="result")
+        acs_zip_split(acs_zip, feature="result")
+        
+        return(acs_ct, acs_zip)
+    
 class ProcessStrings(BaseZRP):
     """
     ProcessStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
@@ -801,9 +830,11 @@ class  ProcessGLookUp(BaseZRP):
         spec_cols = list(set(list(data_cols)).intersection(set([self.zip_code, self.block_group, self.county, self.state, self.census_tract])))
         data[spec_cols] = norm_na(data[spec_cols], self.na_values)
         data = reduce_whitespace(data)
+        data = split_HN(data)
+        data = sort_HN_columns(data)
+        
         print("   [Completed] Processing lookup data")
         
-        data_cols = list(data.columns)
         validate = ValidateInput()
         validate.fit()
         validator_in = validate.transform(data) 
