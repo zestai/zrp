@@ -279,25 +279,27 @@ class ProcessStrings(BaseZRP):
     ----------
     key: str 
         Key to set as index. If not provided, a key will be generated.
-    first_name: str
+    first_name: str 
         Name of first name column
-    middle_name: str
+    middle_name: str 
         Name of middle name column
-    last_name: str
+    last_name: str 
         Name of last name/surname column
-    house_number: str
+    house_number: str 
         Name of house number column. Also known as primary address number this is the unique number assigned to a building to delineate it from others on a street. This is usually the first component of a delivery address line.
-    street_address: str
+    street_address: str (required)
         Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
     city: str
         Name of city column
-    state: str
+    state: str 
         Name of state column
-    zip_code: str
+    zip_code: str 
         Name of zip or postal code column
-    census_tract: str
+    block_group: str (optional)
+        Name of block group column
+    census_tract: str (optional)
         Name of census tract column
-    support_files_path:
+    support_files_path: str (optional)
         File path with support data
     street_address_2: str, optional
         Name of additional address column
@@ -305,9 +307,9 @@ class ProcessStrings(BaseZRP):
         Name of column containing full name preix (ie Dr, Sr, and Esq )
     name_suffix: str, optional
         Name of column containing full name suffix (ie jr, iii, and phd)
-    na_values: list
+    na_values: list, optional
         List of missing values to replace 
-    file_path: str
+    file_path: str, optional
         Input data file path
     geocode: bool
         Whether to geocode
@@ -327,17 +329,20 @@ class ProcessStrings(BaseZRP):
     def fit(self, data):
         data_cols = list(data.columns)
         print("   [Start] Validating input data")
+        base_req = [self.first_name, self.middle_name, self.last_name, self.state, self.zip_code, self.street_address]
         if self.census_tract in data_cols:
-            self.required_cols = [self.first_name, self.middle_name, self.last_name, self.census_tract]
-        elif (self.census_tract in data_cols) & (self.block_group in data_cols):
-            self.required_cols = [self.first_name, self.middle_name, self.last_name, self.census_tract, self.block_group]
-        elif (self.zip_code in data_cols) & (self.geocode==True):
-            self.required_cols = [self.first_name, self.middle_name, self.last_name, self.zip_code, self.house_number, self.street_address, self.city, self.state]
-        elif (self.zip_code in data_cols) & (self.geocode==False):
-            self.required_cols = [self.first_name, self.middle_name, self.last_name, self.zip_code]
+            self.required_cols = base_req + [self.census_tract]
+        if self.block_group in data_cols:
+            self.required_cols = base_req + [self.block_group]
+        if (self.census_tract in data_cols) & (self.block_group in data_cols):
+            self.required_cols = base_req + [self.census_tract, self.block_group]
+        else:
+            self.required_cols = base_req + [self.house_number]
+            
+            
         val_na = is_missing(data, self.required_cols)
         if val_na:
-            raise ValueError(f"     Missing required data {val_na}")
+            raise ValueError(f"     Missing required data {val_na}")            
         validate = ValidateInput()
         validate.fit()
         validators_in = validate.transform(data)

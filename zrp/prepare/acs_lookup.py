@@ -477,7 +477,7 @@ class ACS_LookupBuilder():
             Optional save
         """
         if self.geo not in ['zip', 'tract','block group']:
-            raise ValueError("Require `geo` to be specified as 'zip', 'tract' or 'block group'")
+            raise ValueError("Requires `geo` to be specified as 'zip', 'tract' or 'block group'")
         output = []
 
         if self.geo == 'zip':
