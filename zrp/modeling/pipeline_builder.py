@@ -71,9 +71,12 @@ class ZRP_Build_Pipeline(BaseZRP):
              ("Correlated Feature Selection", SmartCorrelatedSelection(method='pearson',
                                                                        threshold=.95))],
             verbose=True
-        )      
+        )
         #### Fit the Pipeline
         print('\n---\nFitting pipeline')
+        print(X.shape)
+        print(y.shape)
+        print()
         self.pipe.fit(X, y[self.race])
 
         return self
@@ -85,7 +88,9 @@ class ZRP_Build_Pipeline(BaseZRP):
         #### Transform
         ##### This step creates the feature engineering data
         print('\n---\nTransforming FE data')
+        print(X.shape)
         X_train_fe = self.pipe.transform(X=X)
+        print(X_train_fe.shape)
 
         # Save train fe data
         print('\n---\nSaving FE data')
@@ -124,7 +129,7 @@ class ZRP_Build_Model(BaseZRP):
 
         opt_params = {'gamma': 5,
                       'learning_rate': 0.01,
-                      'max_depth': 3, 
+                      'max_depth': 3,
                       'min_child_weight': 500,
                       'n_estimators': 2000,
                       'subsample': 0.20}
@@ -135,6 +140,7 @@ class ZRP_Build_Model(BaseZRP):
                                        **opt_params)
         ##### Fit
         print('\n---\nfitting zrp_model')
+
         self.zrp_model.fit(
             X, y[self.race],
             sample_weight=y.sample_weight
@@ -185,7 +191,7 @@ class ZRP_DataSampling(BaseZRP):
         Indicates the source of zrp_modeling data to use. There are three optional sources 'block_group', 'census_tract', and 'zip_code'. By default 'census_tract' is inferred.
     """
 
-    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', *args, **kwargs):
+    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', population_weights_dict=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.zrp_model_source = zrp_model_source
@@ -194,6 +200,7 @@ class ZRP_DataSampling(BaseZRP):
                                          self.zrp_model_name,
                                          self.zrp_model_source)
         self.geo_key = 'GEOID'
+        self.population_weights_dict = population_weights_dict
 
     def fit(self):
         return self
@@ -201,30 +208,19 @@ class ZRP_DataSampling(BaseZRP):
     def transform(self, data):
         make_directory(self.outputs_path)
         df = data.copy()
-
-        # Keep geocoded data & data with labels
-        #         df = df[(df[self.geo_key].notna()) & (df[self.geo_key]!="None")]
         df = df[(df[self.race].notna()) & (df[self.race] != "None")]
-        df_keys = list(df.index.unique())
 
         # sample weights normalizing to us population
-        aapi_ratio = df[self.race].value_counts(normalize=True).AAPI if 'AAPI' in df[self.race] else 1
-        black_ratio = df[self.race].value_counts(normalize=True).BLACK if 'BLACK' in df[self.race] else 1
-        hispanic_ratio = df[self.race].value_counts(normalize=True).HISPANIC if 'HISPANIC' in df[self.race] else 1
-        aian_ratio = df[self.race].value_counts(normalize=True).AIAN if 'AIAN' in df[self.race] else 1
-        other_ratio = df[self.race].value_counts(normalize=True).OTHER if 'OTHER' in df[self.race] else 1
-        white_ratio = df[self.race].value_counts(normalize=True).WHIATE if 'WHIATE' in df[self.race] else 1
-
-        df["sample_weight"] = df[self.race].map(
-            {
-                "AAPI": (0.061 / 1.022) / aapi_ratio,
-                "BLACK": (0.134 / 1.022) / black_ratio,
-                "HISPANIC": (0.185 / 1.022) / hispanic_ratio,
-                "AIAN": (0.013 / 1.022) / aian_ratio,
-                "OTHER": (0.028 / 1.022) / other_ratio,
-                "WHITE": (0.601 / 1.022) / white_ratio,
-            }
-        )
+        target_classes = list(df[self.race].unique())
+        ratios = dict()
+        for tc in target_classes:
+            ratios[tc] = df[self.race].value_counts(normalize=True)[tc]
+        
+        sw_full_map = dict()
+        for tc in target_classes:
+            sw_full_map[tc] = np.round(self.population_weights_dict[tc]/ratios[tc] ,5)
+    
+        df["sample_weight"] = df[self.race].map(sw_full_map)
 
         # Split working data
         df.reset_index(inplace=True)
@@ -280,14 +276,72 @@ class ZRP_Build(BaseZRP):
                 raise KeyError("Your input dataframe has incorrect columns provided. Ensure that the following data is in your input data frame: first_name, middle_name, last_name, house_number, street_address, city, state, zip_code, race. If you have provided this data, ensure that the column names for said data are either the same as the aformentioned data column names, or ensure that you have specified, via arguements, the column names for these data you have provided in your input data frame.")
         return True
     
+    def validate_target_classes(self, data, population_weights_dict, standard_population_weights_dicts):
+        """
+        Passes if the input data target classes are correctly specified.
+        
+        Parameters
+        -----------
+        
+        data: DataFrame
+            A pandas data frame of user input data.
+        population_weights_dict: dict
+            Prevalence of target classes within the USA population as provided by the end-user
+        population_weights_dicts: list
+            List of available dictionaries containing standard population weights
+        """
+        user_target_classes = set(data[self.race].unique())
+        if population_weights_dict is None:
+            matched_set_of_classes = 0
+            for standard_population_weights in standard_population_weights_dicts:
+                if user_target_classes == set(standard_population_weights.keys()):
+                    matched_set_of_classes = 1
+                    break
+            if matched_set_of_classes == 0:
+                raise ValueError(f'Non-standard set of target classes provided: \n\n\
+...standard_sets = {[sorted(list(standard_population_weights.keys())) for standard_population_weights in standard_population_weights_dicts]} \n\n\
+...provided = {sorted(list(user_target_classes))}\n\n\
+"population_weights_dict" parameter must to specified to train on non-standard target classes')
+        else:
+            weights_classes = set(population_weights_dict.keys())
+            if  weights_classes!= user_target_classes:
+                raise ValueError(f'Dataset target classes and "population_weights_dict" target classes do not match')
+            else:
+                if sum(population_weights_dict.values()) != 1:
+                    raise ValueError('Sum of "population_weights_dict" classes must be equal to 1')
+
+    def select_population_weights_dict(self, data, standard_population_weights_dicts):
+        """
+        Returns matching standard population weights dictionary.
+        
+        Parameters
+        -----------
+        
+        data: DataFrame
+            A pandas data frame of user input data.
+        population_weights_dicts: list
+            List of available dictionaries containing standard population weights
+        """
+        user_target_classes = set(data[self.race].unique())
+        for standard_population_weights in standard_population_weights_dicts:
+            if user_target_classes == set(standard_population_weights.keys()):
+                return standard_population_weights
+    
     def fit(self):
         return self
 
-    def transform(self, data):
+    def transform(self, data, population_weights_dict = None):
         cur_path = dirname(__file__)
-        
         self.validate_input_columns(data)
         
+        standard_population_weights_path = os.path.join(cur_path, '../data/processed/standard_population_weights.json')
+        with open(standard_population_weights_path, 'r') as f:
+            standard_population_weights_dicts = json.load(f)
+        data["race"] = data["race"].str.replace(' ','_')
+        data["race"] = data["race"].str.upper()
+        self.validate_target_classes(data, population_weights_dict, standard_population_weights_dicts)
+        if population_weights_dict is None:
+            population_weights_dict = self.select_population_weights_dict(data, standard_population_weights_dicts)
         # Prepare data
         data = data.rename(columns = {self.first_name : "first_name", 
                               self.middle_name : "middle_name", 
@@ -306,7 +360,8 @@ class ZRP_Build(BaseZRP):
         z_prepare = ZRP_Prepare(file_path=self.file_path)
         z_prepare.fit(data)
         prepared_data = z_prepare.transform(data)
-        
+
+
         ft_list_source_map = {'census_tract': 'ct', 'block_group': 'bg', 'zip_code': 'zp'}
         source_to_geoid_level_map = {'census_tract': 'GEOID_CT', 'block_group': 'GEOID_BG', 'zip_code': 'GEOID_ZIP'}
         sources = ['block_group', 'census_tract', 'zip_code']
@@ -323,7 +378,7 @@ class ZRP_Build(BaseZRP):
             make_directory(outputs_path)
             
             # Get features to drop from prepared data
-            print(f"...Dropping {list(set(sources).difference({source}))} features")
+            print(f"Dropping {list(set(sources).difference({source}))} features")
             
             features_to_keep_list = load_json(os.path.join(cur_path, f'feature_list_{ft_list_source_map[source]}.json'))
             features_to_keep_list.append('race')
@@ -339,14 +394,15 @@ class ZRP_Build(BaseZRP):
             print("    ...Data shape post feature drop: ", relevant_source_data.shape)
 
             # Data Sampling 
-            dsamp = ZRP_DataSampling(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
+            dsamp = ZRP_DataSampling(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name,population_weights_dict = population_weights_dict)
 
             X_train, X_test, y_train, y_test = dsamp.transform(relevant_source_data)
 
             data = data.drop_duplicates(subset=['ZEST_KEY'])
-            print("       ...User-input data sampling shape: ", data.shape)
-            print("       ...Unique train labels: ", y_train['race'].unique())
-            print("       ...Unique test labels: ", y_test['race'].unique())
+            print("Post-sampling shape: ", data.shape)
+            print("\n")
+            print("Unique train labels: ", y_train['race'].unique())
+            print("Unique test labels: ", y_test['race'].unique())
 
             y_train = y_train.drop_duplicates(self.key)
             train_keys = list(y_train[self.key].values)
@@ -371,7 +427,6 @@ class ZRP_Build(BaseZRP):
                                                             'GEOID_ZIP', "first_name", "middle_name",
                                                             "last_name", 'ZEST_KEY_COL']))
 
-            print(' Preprocessing training the data')
             X_train[feature_cols] = X_train[feature_cols].apply(pd.to_numeric, errors='coerce')
 
             print('\n---\nSaving raw data')
