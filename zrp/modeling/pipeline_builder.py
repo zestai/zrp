@@ -74,9 +74,6 @@ class ZRP_Build_Pipeline(BaseZRP):
         )
         #### Fit the Pipeline
         print('\n---\nFitting pipeline')
-        print(X.shape)
-        print(y.shape)
-        print()
         self.pipe.fit(X, y[self.race])
 
         return self
@@ -88,9 +85,8 @@ class ZRP_Build_Pipeline(BaseZRP):
         #### Transform
         ##### This step creates the feature engineering data
         print('\n---\nTransforming FE data')
-        print(X.shape)
+
         X_train_fe = self.pipe.transform(X=X)
-        print(X_train_fe.shape)
 
         # Save train fe data
         print('\n---\nSaving FE data')
