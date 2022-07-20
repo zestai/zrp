@@ -136,10 +136,11 @@ class BISGWrapper(BaseZRP):
         }, inplace=True) 
         combo = combo.set_index(self.key)
         combo = combo[~combo.index.duplicated(keep='first')]
-        
+                
         # Generate proxy at threshold
-        subset = combo.filter(['WHITE', 'BLACK', 'AAPI', 'AIAN', 'HISPANIC'
-                       ])
+        race_col_ov = ['WHITE', 'BLACK', 'AAPI', 'AIAN', 'HISPANIC']
+        subset = combo.filter(race_col_ov)
+        subset = subset[race_col_ov].div(subset[race_col_ov].sum(axis=1), axis=0)              
         identifiedRaces = subset.idxmax(axis=1)
         combo[f"{self.race}_proxy"] = identifiedRaces
         combo['source_bisg'] = 1
@@ -363,11 +364,12 @@ class ZRP_Predict(BaseZRP):
     def fit(self, data):
         if xgboost.__version__ != "1.0.2":
             raise AssertionError("XGBoost version does not match requirements, required version is 1.0.2")
+
         data_cols =  list(data.columns)
         self.required_cols = [self.first_name, self.middle_name, self.last_name, "GEOID", "B01003_001"]
         val_na = is_missing(data, self.required_cols)
         if val_na:
-            raise ValueError(f"Missing required data {val_na}")
+            raise ValueError(f"Missing required data {val_na}")     
 
         print("   [Start] Validating pipeline input data")
         validator = ValidateInput()
@@ -583,7 +585,7 @@ class ZRP_Predict(BaseZRP):
                     out_list.append(failed_proxies)
                 
         if df_6.empty or records_failed_bisg_proxy.empty or cannot_proxy_records.empty:
-            print("No record failed proxying.")
+            print("   ...Proxies generated")
 
         proxies_out = pd.concat(out_list)
         

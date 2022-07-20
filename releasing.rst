@@ -104,7 +104,7 @@ Github Releases
 
 #. Click "Draft a new release"
 
-#. Enter the new relesae title in the following format: "zrp" + "-" + "VERSION"
+#. Enter the new release title in the following format: "zrp" + "-" + "VERSION"
 
     * Ex.: "zrp-0.1.0"
 

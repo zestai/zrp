@@ -22,10 +22,11 @@ class ZRP(BaseZRP):
     
     Parameters
     ----------
+
     support_files_path: "data/processed"
         File path with support data.
-    key: str, default 'ZEST_KEY'
-        Key to set as index. If not provided, a key will be generated.
+    key: str, default 'ZEST_KEY', 
+        Key to set as index. Optional. If not provided, a key will be generated.
     first_name: str, default 'first_name'
         Name of first name column
     middle_name: str, default 'middle_name'
@@ -33,7 +34,7 @@ class ZRP(BaseZRP):
     last_name: str, default 'last_name'
         Name of last name/surname column
     house_number: str, default 'house_number'
-        Name of house number column. Also known as primary address number this is the unique number assigned to a building to delineate it from others on a street. This is usually the first component of a delivery address line.
+        Name of house number column. Also known as primary address number this is the unique number assigned to a building to delineate it from others on a street. This is usually the first component of a delivery address line. Optional to not provide if Census GEOIDs are provided and no geocoding is required.
     street_address: str, default 'street_address'
         Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
     city: str, default 'city'
@@ -42,12 +43,12 @@ class ZRP(BaseZRP):
         Name of state column.
     zip_code: str, default 'zip_code'
         Name of zip or postal code column.
-    race: str, default 'race'
+    race: str, default 'race', optional
         Name of the race column
-    proxy: str, default 'probs'
-        Specifies whether to return proxy results as 'probs' (the proxy probabilities) or 'labels'.
-    census_tract: str
-        Name of census tract column
+    census_tract: str, optional
+        Name of Census tract column. Recommended to provide if available or a geocoder is typically implemented.
+    block_group: str, optional
+        Name of Census block group column. Recommended to provide if available or a geocoder is typically implemented.
     street_address_2: str, optional
         Name of additional address column
     name_prefix: str, optional
@@ -59,7 +60,7 @@ class ZRP(BaseZRP):
     file_path: str, optional
         Path where to put artifacts and other files generated during intermediate steps. 
     geocode: bool, default True
-        Whether to geocode.
+        Geocoding indicator, to be deprecated by version 0.4.0.
     bisg: bool, default True
         Whether to return BISG proxies. 
     readout: bool, default True
@@ -84,12 +85,17 @@ class ZRP(BaseZRP):
     def rename_data_columns(self, data):
         """
         Renames the user specified columns of the input data to the default column names expected by ZRP.
+
+        Parameters
+        -----------
+        data: pd.Dataframe
+            Dataframe to be transformed
         """
         renamed_columns = {self.first_name: "first_name", self.middle_name: "middle_name", self.last_name: "last_name", self.house_number: "house_number", self.street_address: "street_address", self.city: "city", self.state: "state", self.zip_code: "zip_code"}
         data = data.rename(columns=renamed_columns)
         # self.params_dict = {}
         return data
-
+    
     def transform(self, input_data):
         """
         Processes input data and generates ZRP predictions. Generates BISG predictions additionally if specified.
@@ -104,8 +110,7 @@ class ZRP(BaseZRP):
             data = input_data.copy()
         except AttributeError:
             data = load_file(self.file_path)
-            
-        
+
         data = self.rename_data_columns(data)
         self.reset_column_names()
         
@@ -124,9 +129,6 @@ class ZRP(BaseZRP):
         predict_out = z_predict.transform(prepared_data)
 
         if self.bisg:
-            bisg_data = prepared_data.copy()
-            bisg_data = bisg_data[~bisg_data.index.duplicated(keep='first')]
-
             bisgw = BISGWrapper(**self.params_dict)
             full_bisg_proxies = bisgw.transform(prepared_data[~prepared_data.index.duplicated(keep='first')])
             save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_output.feather")
