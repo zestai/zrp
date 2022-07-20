@@ -52,42 +52,6 @@ def geo_read(file_list):
         aef = pd.concat([aef, tmp], axis=0)
     return (aef)
 
-
-def geo_zoom(geo_df):
-    """
-    Matches census tract
-    
-    Parameters
-    ----------
-    geo_df: pd.DataFrame
-        Dataframe with geo data
-    """
-    geo_df = geo_df[(geo_df.HN_Match == 1) &
-                    (geo_df.ZIP_Match == 1)]
-    return (geo_df)
-
-
-def geo_range(geo_df):
-    """
-    Define house number range indicators
-    
-    Parameters
-    ----------
-    geo_df: pd.DataFrame
-        Dataframe with geo data
-    """
-    geo_df["small"] = np.where(
-        (geo_df.FROMHN > geo_df.TOHN) & (geo_df.FROMHN.str.len() >= geo_df.TOHN.str.len()),
-        geo_df.TOHN,
-        geo_df.FROMHN)
-
-    geo_df["big"] = np.where(
-        (geo_df.FROMHN > geo_df.TOHN) & (geo_df.FROMHN.str.len() >= geo_df.TOHN.str.len()),
-        geo_df.FROMHN,
-        geo_df.TOHN)
-    return(geo_df)    
-
-
 class ZGeo(BaseZRP):
     """
     This class geocodes addresses.
@@ -106,80 +70,39 @@ class ZGeo(BaseZRP):
 
     def fit(self):
         return self
-
-    def get_reduced(self, tmp_data):
-        keep_cols = ['ZEST_KEY', 'first_name', 'middle_name', 'last_name',
-                     'house_number', 'street_address', 'city', 'state', 'zip_code',
-                     'BLKGRPCE', 'BLKGRPCE10', 'COUNTYFP', 'COUNTYFP10', 'FROMHN', 'TOHN',
-                     'LFROMADD', 'LTOADD', 'PUMACE', 'PUMACE10', 'RFROMADD', 'RTOADD', 'SIDE',
-                     'STATEFP', 'STATEFP10', 'TBLKGPCE', 'TRACTCE', 'TRACTCE10', 'TTRACTCE',
-                     'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_KEY_COL', 'ZEST_STATE',
-                     'ZEST_ZIP', 'GEOID_ZIP', 'GEOID_CT', 'GEOID_BG', 'age', 'original_ethnicity',
-                     'original_race', 'original_sex', 'ethnicity', 'race', 'sex', 'source']
-                
-        na_match_cols = ['BLKGRPCE', 'BLKGRPCE10', 'COUNTYFP', 'COUNTYFP10', 'FROMHN', 'TOHN',
-                         'LFROMADD', 'LTOADD', 'PUMACE', 'PUMACE10', 'RFROMADD', 'RTOADD', 'SIDE',
-                         'STATEFP', 'STATEFP10', 'TBLKGPCE', 'TRACTCE', 'TRACTCE10', 'TTRACTCE',
-                         'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_STATE', 'ZEST_ZIP']
-        red_bit = keep_cols + ['HN_Match', 'ZIP_Match', 'RAW_ZEST_STATEFP']
-
-        tmp_data = tmp_data.filter(red_bit)
-
-        geocd = tmp_data.copy()
-        nomatch = tmp_data.copy()
-
-        geocd = geocd[(geocd.HN_Match.astype(float) == 1) & (geocd.ZIP_Match.astype(float) == 1)]
-        geokeys = list(geocd['ZEST_KEY'].unique())
-
-        nomatch = nomatch[~nomatch['ZEST_KEY'].isin(geokeys)]
-        nomatch = nomatch.drop_duplicates('ZEST_KEY')
-
-        geocd['TRACTCE'] = geocd.groupby('ZEST_KEY')['TRACTCE'].transform(lambda x: x.mode()[0])
-        geocd['BLKGRPCE'] = geocd.groupby('ZEST_KEY')['BLKGRPCE'].transform(lambda x: x.mode()[0])
-        geocd['ZCTA5CE'] = geocd.groupby('ZEST_KEY')['ZCTA5CE'].transform(lambda x: x.mode()[0])
-        geocd['COUNTYFP'] = geocd.groupby('ZEST_KEY')['COUNTYFP'].transform(lambda x: x.mode()[0])
-
-        geocd = geocd.drop_duplicates('ZEST_KEY')
-        geocd["GEOID_CT"] = geocd[["RAW_ZEST_STATEFP", "COUNTYFP", "TRACTCE"]].apply(lambda x: "".join(x.dropna()), axis=1)
-        geocd["GEOID_BG"] = geocd[["GEOID_CT", "BLKGRPCE"]].apply(lambda x: "".join(x.dropna()), axis=1)
-        geocd = geocd.set_index('ZEST_KEY')
-
-        if len(nomatch) > 1:
-            nomatch[na_match_cols] = None
-            nomatch = nomatch.set_index('ZEST_KEY')
-            data_out = pd.concat([geocd, nomatch])
-            data_out["GEOID_ZIP"] = np.where(data_out["ZCTA5CE"].isna(), data_out[self.zip_code], data_out["ZCTA5CE"])
-
-            data_out = data_out.filter(keep_cols)
-        else:
-            data_out = geocd.filter(keep_cols)
-            data_out["GEOID_ZIP"] = np.where(data_out["ZCTA5CE"].isna(), data_out[self.zip_code], data_out["ZCTA5CE"])
-
-        data_out["GEOID"] = None
-        data_out["GEOID"].fillna(data_out["GEOID_BG"]).fillna(data_out["GEOID_CT"]).fillna(data_out["GEOID_ZIP"])
-        return(data_out)
-
-    def geo_match(self, geo_df):
+  
+    def __majority_vote_deduplication(self, data, key):
         """
-        Returns match indicators
-
+        When other deduplication methods fail we leave the most prevalent prediction
+        
         Parameters
         ----------
-        geo_df: pd.DataFrame
-            Dataframe with geo data
+        data: Dataframe
+            Data to deduplicate
+        key: string
+            Key used in deduplication
         """
-        geo_df["HN_Match"] = np.where(
-            (geo_df[self.house_number] <= geo_df.big) &
-            (geo_df[self.house_number] >= geo_df.small),
-            1,
-            0)
+        data.sort_values(['NEW_SUPER_ZIP', 'COUNTYFP', 'TRACTCE', 'TRACTCE', 'BLKGRPCE'])
+        data['TRACTCE'] = data.groupby(key)['TRACTCE'].transform(lambda x: x.mode()[0])
+        data['BLKGRPCE'] = data.groupby(key)['BLKGRPCE'].transform(lambda x: x.mode()[0])
+        data['NEW_SUPER_ZIP'] = data.groupby(key)['NEW_SUPER_ZIP'].transform(lambda x: x.mode()[0])
+        data['COUNTYFP'] = data.groupby(key)['COUNTYFP'].transform(lambda x: x.mode()[0])
+        data = data.drop_duplicates(keep = 'first', subset = [key])
+        return data
+    
+    def __is_odd(self, s):
+        """
+        Checks if a number is odd.
         
-        geo_df["ZIP_Match_1"] = np.where(geo_df.ZEST_ZIP == geo_df[self.zip_code], 1, 0)
-        geo_df["ZIP_Match_2"] = np.where(geo_df.ZCTA5CE10 == geo_df[self.zip_code], 1, 0)   
-        geo_df["NEW_SUPER_ZIP"] = np.where(geo_df.ZIP_Match_1 == 1, geo_df.ZEST_ZIP, geo_df.ZCTA5CE10)
-        geo_df["ZIP_Match"] = np.where(geo_df.NEW_SUPER_ZIP == geo_df[self.zip_code], 1, 0)
-        
-        return(geo_df)    
+        Parameters
+        ----------
+        s: string
+            String with a number to be checked
+        """
+        try:
+            return((int(str(s)[-1]) % 2)) 
+        except:
+            return(0)
     
     def transform(self, input_data, geo, processed, replicate, save_table=True):
         """
@@ -206,49 +129,129 @@ class ZGeo(BaseZRP):
             
         prg = ProcessGeo(**self.params_dict)
         data = prg.transform(data, processed=processed, replicate=replicate)
-        print("   [Start] Mapping geo data")
-        state = most_common(list(data[self.state].unique()))
-        geoids = ["GEOID_ZIP", "GEOID_CT", "GEOID_BG"]
-        
+        print("   [Start] Mapping geo data")        
         if len(geo)>2:
             file_list = geo_search(out_geo_path, self.year, geo)
             aef = geo_read(file_list)
-            aef = aef.drop(geoids, axis=1)
         if len(geo) <= 2:
             aef = load_file(os.path.join(out_geo_path, f"Zest_Geo_Lookup_{self.year}_State_{geo}.parquet"))
-            aef = aef.drop(geoids, axis=1)
-
+                
         data["ZEST_FULLNAME"] = data[self.street_address]
+        data['ZEST_KEY_LONG'] = data[[self.key, 'replicate_flg']].apply(lambda x: "".join(x.dropna()), axis=1)
         print("      ...merge user input & lookup table")
-        
-        geo_df = aef.merge(data, on="ZEST_FULLNAME", how="right")
-        geo_df = geo_range(geo_df)
-        geo_df = self.geo_match(geo_df)
-        print("      ...mapping")
-        all_keys = list(geo_df[self.key].unique())
-        odf = geo_df.copy()
-        geo_df = geo_zoom(geo_df)
-        da_zoom = geo_df.copy()
-        
-        geocoded_keys = list(geo_df[self.key].unique())
-        add_na_keys = list(set(all_keys) - set(geocoded_keys))
-        odf = odf[odf[self.key].isin(add_na_keys)]
+        print(data.shape)
+        geo_df = data.merge(aef, on=["ZEST_FULLNAME"], how="left")
 
-        geo_df = pd.concat([geo_df, odf])
-        geo_df = self.get_reduced(geo_df)
+        ########
+        #Here non-numeric HN matching could be added
+        geo_df['FROMHN_numeric'] = geo_df.FROMHN.apply(lambda x: int(x) if str(x).isnumeric() else -1)
+        geo_df['TOHN_numeric'] = geo_df.TOHN.apply(lambda x: int(x) if str(x).isnumeric() else -1)
+        geo_df["house_numer_numeric"] = geo_df[self.house_number].apply(lambda x: int(x) if str(x).isnumeric() else -1)       
+        ########
         
+        geo_df["small"] = np.where(
+            (geo_df.FROMHN_numeric > geo_df.TOHN_numeric),
+            geo_df.TOHN_numeric,
+            geo_df.FROMHN_numeric)
+
+        geo_df["big"] = np.where(
+            (geo_df.FROMHN_numeric > geo_df.TOHN_numeric),
+            geo_df.FROMHN_numeric,
+            geo_df.TOHN_numeric)
+      
+        geo_df["HN_Match"] = np.where(
+            (geo_df.house_numer_numeric <= geo_df.big) &
+            (geo_df.house_numer_numeric >= geo_df.small),
+            1,
+            0)
+
+        geo_df["Parity_Match"] = np.where(
+            (geo_df.FROMHN_numeric.apply(self.__is_odd)) == (geo_df.house_numer_numeric.apply(self.__is_odd)) ,
+            1,
+            0)
+
+        geo_df["ZIP_Match_1"] = np.where(geo_df.ZEST_ZIP == geo_df[self.zip_code], 1, 0)
+        geo_df["ZIP_Match_2"] = np.where(geo_df.ZCTA5CE10 == geo_df[self.zip_code], 1, 0)   
+        geo_df["NEW_SUPER_ZIP"] = np.where(geo_df.ZIP_Match_1 == 1, geo_df.ZEST_ZIP, geo_df.ZCTA5CE10)
+        geo_df["ZIP_Match"] = np.where(geo_df.NEW_SUPER_ZIP == geo_df[self.zip_code], 1, 0)
+
+        print("      ...mapping")    
+        #ZIP not matched
+        all_keys = list(geo_df['ZEST_KEY_LONG'].unique())
+        odf = geo_df.copy()
+        
+        geo_df = geo_df[geo_df.ZIP_Match == 1]
+        zip_match_keys = list(geo_df['ZEST_KEY_LONG'].unique())
+        no_zip_match_keys = list(set(all_keys) - set(zip_match_keys))
+        
+        df_zip_only = odf[odf['ZEST_KEY_LONG'].isin(no_zip_match_keys)]
+        na_match_cols = ['BLKGRPCE', 'COUNTYFP', 'FROMHN', 'TOHN', 'TRACTCE', 'ZCTA5CE',
+                         'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_ZIP', 'small', 'big','HN_Match', 
+                         'Parity_Match', 'ZIP_Match_1', 'ZIP_Match_2','NEW_SUPER_ZIP', 'ZIP_Match',
+                         'FROMHN_numeric', 'TOHN_numeric', 'house_numer_numeric']
+        df_zip_only[na_match_cols] = None
+
+        df_zip_only = df_zip_only.drop_duplicates(subset = ['ZEST_KEY_LONG'])
+        
+        #ZIP matched, HN not match
+        all_keys = list(geo_df['ZEST_KEY_LONG'].unique())
+        odf = geo_df.copy()
+        
+        geo_df = geo_df[geo_df.HN_Match == 1]
+        HN_match_keys = list(geo_df['ZEST_KEY_LONG'].unique())
+        no_HN_match_keys = list(set(all_keys) - set(HN_match_keys))
+        
+        df_no_HN = odf[odf['ZEST_KEY_LONG'].isin(no_HN_match_keys)]       
+        df_no_HN = self.__majority_vote_deduplication(df_no_HN, 'ZEST_KEY_LONG')
+              
+        #ZIP matched, HN matched, Parity not matched
+
+        all_keys = list(geo_df['ZEST_KEY_LONG'].unique())
+        odf = geo_df.copy()
+        
+        geo_df = geo_df[geo_df.Parity_Match == 1]
+        parity_match_keys = list(geo_df['ZEST_KEY_LONG'].unique())
+        no_parity_match_keys = list(set(all_keys) - set(parity_match_keys))
+        
+        df_no_parity = odf[odf['ZEST_KEY_LONG'].isin(no_parity_match_keys)]
+        df_no_parity = self.__majority_vote_deduplication(df_no_parity, 'ZEST_KEY_LONG')
+
+        #ZIP matched, HN matched, Parity matched
+        df_parity = geo_df.copy()
+        df_parity = self.__majority_vote_deduplication(df_parity, 'ZEST_KEY_LONG')
+        
+        #Merge all results
+        geo_df_merged = pd.concat([df_zip_only, df_no_HN, df_no_parity, df_parity])
+               
+        # Create GEOIDs
+        geo_df_merged['GEOID_ZIP'] = geo_df_merged['NEW_SUPER_ZIP']
+        geo_df_merged["GEOID_CT"] = geo_df_merged[["STATEFP", "COUNTYFP", "TRACTCE"]].apply(lambda x: "".join(x.dropna()) if "".join(x.dropna()) != "" else None, axis=1)
+        geo_df_merged["GEOID_BG"] = geo_df_merged[["GEOID_CT", "BLKGRPCE"]].apply(lambda x: "".join(x.dropna()) if "".join(x.dropna()) != "" else None, axis=1)
+        
+        # Choose one entry from 'replicate_flg'
+        if replicate:
+            geo_df_no_duplicates = geo_df_merged.sort_values(['ZEST_KEY_LONG']).groupby('ZEST_KEY').first()
+
         geo_validate = ValidateGeo()
         geo_validate.fit()
-        geo_validators_in = geo_validate.transform(geo_df)
+        geo_validators_in = geo_validate.transform(geo_df_no_duplicates)
         save_json(geo_validators_in, self.out_path, "input_geo_validator.json") 
         print("   [Completed] Validating input geo data")        
 
+        cols_to_drop = ['BLKGRPCE', 'COUNTYFP', 'FROMHN', 'TOHN', 'TRACTCE', 'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 
+                        'ZEST_ZIP', 'ZEST_KEY_LONG', 'replicate_flg', 'FROMHN_numeric', 'TOHN_numeric', 'house_numer_numeric']
+        geo_df_no_duplicates = geo_df_no_duplicates.drop(cols_to_drop, axis = 1)
+        geo_df_no_duplicates["GEOID"] = None
+        geo_df_no_duplicates["GEOID"].fillna(geo_df_no_duplicates["GEOID_BG"])\
+                                     .fillna(geo_df_no_duplicates["GEOID_CT"])\
+                                     .fillna(geo_df_no_duplicates["GEOID_ZIP"])
+        
         if save_table:
             make_directory(self.out_path)
             if self.runname is not None:
                 file_name = f"Zest_Geocoded_{self.runname}_{self.year}__{geo}.parquet"
             else:
                 file_name = f"Zest_Geocoded__{self.year}__{geo}.parquet"
-            save_dataframe(geo_df, self.out_path, file_name)
+            save_dataframe(geo_df_no_duplicates, self.out_path, file_name)
         print("   [Completed] Mapping geo data")
-        return (geo_df)
+        return (geo_df_no_duplicates)
