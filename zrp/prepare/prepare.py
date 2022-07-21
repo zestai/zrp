@@ -5,7 +5,6 @@ from .geo_geocoder import *
 from .acs_mapper import *
 from .base import BaseZRP
 from .utils import *
-from os import path as op
 import pandas as pd
 import numpy as np
 import warnings
@@ -32,6 +31,7 @@ class ZRP_Prepare(BaseZRP):
     def __init__(self, file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.params_dict =  kwargs
+
         
     def fit(self, data):
         if self.census_tract:
@@ -40,12 +40,14 @@ class ZRP_Prepare(BaseZRP):
             if not (data[self.census_tract].apply(lambda x: str(x).isalnum()).any()):
                 raise ValueError("Cannot provide non-numeric Census Tract code, please remove non-numeric census tract records.")
             if tract_len != 11:
-                raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '01001020201')")
+                raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '06037311600')")
+
         if self.block_group:
             bg_lengths =  data[self.block_group].str.len()
             bg_len  = most_common(bg_lengths)
             if bg_len != 12:  
-                raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '010010202001')")
+                raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '060373116003')")
+
     
     def transform(self, input_data):
         """
@@ -66,9 +68,9 @@ class ZRP_Prepare(BaseZRP):
         data_path = join(curpath, f'../data/processed')
         lookup_tables_config = load_json(join(data_path, "lookup_tables_config.json"))
 
-        geo_folder = op.join(data_path, "geo", lookup_tables_config['geo_year'])
-        acs_folder = op.join(data_path, 'acs', lookup_tables_config['acs_year'], lookup_tables_config['acs_span'])
-        
+        geo_folder = os.path.join(data_path, "geo", lookup_tables_config['geo_year'])
+        acs_folder = os.path.join(data_path, 'acs', lookup_tables_config['acs_year'], lookup_tables_config['acs_span'])
+
         if not ((os.path.isdir(geo_folder)) &
                 (os.path.isdir(acs_folder ))
                ):
@@ -83,7 +85,7 @@ class ZRP_Prepare(BaseZRP):
         print("")
 
         print("[Start] Preparing geo data")
-        
+
         inv_state_map = load_json(join(data_path, "inv_state_mapping.json"))
         data['zest_in_state_fips'] = data[self.state].replace(inv_state_map)
         print("")
@@ -98,7 +100,7 @@ class ZRP_Prepare(BaseZRP):
         print("  The following states are included in the data:", gdkys)
               
         if not set(gdkys) <= set(list(inv_state_map.keys())):
-            raise ValueError("Provided non-standard state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina")
+            raise ValueError("Provided unrecognizable state codes. Please use standard 2-letter abbreviation to indicate states to geocode, ex:'CA' for Californina")
 
         geo_out = [] 
         for s in tqdm(gdkys):

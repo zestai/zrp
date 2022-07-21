@@ -1,4 +1,4 @@
-Why Is ZRP Breaking or Not Returning Proxies?
+Common Zest Race Predictor Troubleshooting
 ______________________________________________
 
 In this document, we seek to provide insight for troubleshooting issues you may encounter while running the ZRP. We plan to address these issues in future ZRP updates. Contributions are encouraged! For small bug fixes and minor improvements, feel free to just open a PR. For larger changes, please open an issue first so that other contributors can discuss your plan, avoid duplicated work, and ensure it aligns with the goals of the project. Be sure to also follow the `Code of Conduct <https://github.com/zestai/zrp/blob/main/CODE_OF_CONDUCT.md>`_. Thanks!
