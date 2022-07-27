@@ -198,7 +198,7 @@ def replicate_house_number(data, house_number, add_to_flg):
     print(f"         House number dataframe expansion is complete! (n={len(dataout)})")
     return(dataout)
     
-def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg):
+def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg = 0, replicate_with_flg = 1):
     """
     Replicate street addresses 
     
@@ -216,7 +216,8 @@ def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg)
 
     print("         ...Base")
     df_base =  data.copy()
-    data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
+    if replicate_with_flg ==1:
+        data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
     print("         ...Map street suffixes...")
     data[street_address] = data[street_address].replace(street_suffix_mapping, regex=True) # this mapping takes the longest but is ok for 10K records
     data[street_address] = np.where(data[street_address]=='nan', None, data[street_address])
@@ -233,6 +234,7 @@ def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg)
     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
     print(f"         Address dataframe expansion is complete! (n={len(dataout)})")
     return(dataout)
+        
 
 # def replicate_address_3(data, street_address, mapping, add_to_flg):
 #     df_base =  data.copy()
@@ -242,7 +244,7 @@ def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg)
 #     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
 #     return dataout
 
-def replicate_north_n(data, street_address, add_to_flg):
+def replicate_north_n(data, street_address, add_to_flg = 0, replicate_with_flg = 1):
     """
     Replicate street address by simplify cardinal directions. 
     
@@ -273,7 +275,9 @@ def replicate_north_n(data, street_address, add_to_flg):
                         '\\bSUDOESTE\\b' : 'SO'}
 
     df_base =  data.copy()
-    data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
+    data[street_address] = data[street_address].replace(north_n_mapping, regex=True)
+    if replicate_with_flg == 1:
+        data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
     data[street_address] = data[street_address].replace(north_n_mapping, regex=True)
     dataout = pd.concat([df_base, data], axis=0)
     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
@@ -318,12 +322,12 @@ def split_char_position(a_string):
     position = [i for i, s in enumerate(a_string) if not s.isdigit()][-1] + 1
     return position
 
-def split_HN(df):
-    numeric_map = (df['FROMHN'].str.isnumeric()) | (df['FROMHN'].isna()) | (df['FROMHN'] == '')
+def split_HN(df, cols_to_split):
+    numeric_map = (df[cols_to_split[0]].str.isnumeric()) | (df[cols_to_split[0]].isna()) | (df[cols_to_split[0]] == '')
     df_numeric = df[numeric_map]
     df_non_numeric = df[~numeric_map]
     
-    for col in ['FROMHN', 'TOHN']:  
+    for col in cols_to_split:  
         df_numeric[f'{col}_LEFT'] = ''
         df_numeric[f'{col}_RIGHT'] = df_numeric[col]
         
@@ -475,11 +479,6 @@ class ProcessStrings(BaseZRP):
         data_cols =  data.columns
         data = set_id(data, self.key)
         
-        numeric_cols =  list(set([self.zip_code,
-                                  self.census_tract,
-                                  self.house_number
-                                 ]).intersection(set(data_cols)))
-
         # Convert to uppercase & trim whitespace
         print("   Formatting P1")
         data = data.astype(str)
@@ -490,6 +489,12 @@ class ProcessStrings(BaseZRP):
                     "^NAN$": None,
                     "^NONE$": None}
         data = data.replace(na_dict, regex=True)     
+        data[self.house_number] = data[self.house_number].apply(lambda x: re.sub("[^0-9]$", "", str(x)))
+        data = split_HN(data, [self.house_number])
+        
+        numeric_cols =  list(set([self.zip_code,
+                                  self.census_tract,
+                                 ]).intersection(set(data_cols)))
         
         # Remove/replace special characters
         for col in numeric_cols:
@@ -706,8 +711,8 @@ class  ProcessGeo(BaseZRP):
         if replicate:
             print("      ...replicating address")
             data = replicate_house_number(data, self.house_number, 1)
-            data = replicate_address_2(data, self.street_address, street_suffix_mapping, 10)
-            data = replicate_north_n(data, self.street_address, 100)
+            data = replicate_address_2(data, self.street_address, street_suffix_mapping, 10, 1)
+            data = replicate_north_n(data, self.street_address, 100, 1)
 #             data = replicate_address_3(data, self.street_address, street_suffix_mapping_new_only, 1000)
 #             data = replicate_n_north(data, self.street_address, 1000)
 #             data = replicate_n_norte(data, self.street_address, 2000)
@@ -718,7 +723,7 @@ class  ProcessGeo(BaseZRP):
 
         data = reduce_whitespace(data)
         print("   [Completed] Processing geo data")
-        return(data)
+        return data
 
     
 class  ProcessGLookUp(BaseZRP):
@@ -835,8 +840,14 @@ class  ProcessGLookUp(BaseZRP):
         spec_cols = list(set(list(data_cols)).intersection(set([self.zip_code, self.block_group, self.county, self.state, self.census_tract])))
         data[spec_cols] = norm_na(data[spec_cols], self.na_values)
         data = reduce_whitespace(data)
-        data = split_HN(data)
+        data = split_HN(data, ['FROMHN', 'TOHN'])
         data = sort_HN_columns(data)
+        
+        curpath = dirname(__file__)
+        data_path = join(curpath, '../data/processed')
+        _, street_suffix_mapping, _, _ = load_mappings(data_path)
+        data = replicate_address_2(data, self.street_address, street_suffix_mapping, replicate_with_flg = 0)
+        data = replicate_north_n(data, self.street_address, replicate_with_flg = 0)
         
         print("   [Completed] Processing lookup data")
         
