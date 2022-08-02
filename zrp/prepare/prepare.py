@@ -108,12 +108,20 @@ class ZRP_Prepare(BaseZRP):
             geo = inv_state_map[s].zfill(2)
             output = geocode.transform(geo_dict[s], geo, processed = True, replicate = True, save_table = True)
             geocode_out.append(output)
-        geo_coded = pd.concat(geocode_out)
+        if len(geocode_out) > 0:
+            geo_coded = pd.concat(geocode_out)
 
-        # append data unable to enter geo mapping
-        geo_coded_keys = list(geo_coded.ZEST_KEY_COL.values)
-        data_not_geo_coded = data[~data.index.isin(geo_coded_keys)]
-        geo_coded = pd.concat([geo_coded, data_not_geo_coded])
+            # append data unable to enter geo mapping
+            geo_coded_keys = list(geo_coded.ZEST_KEY_COL.values)
+            data_not_geo_coded = data[~data.index.isin(geo_coded_keys)]
+            geo_coded = pd.concat([geo_coded, data_not_geo_coded])
+        else:
+            geo_coded = data
+            geo_coded['GEOID'] = None
+            geo_coded['GEOID_BG'] = None
+            geo_coded['GEOID_CT'] = None
+            geo_coded['GEOID_ZIP'] = None
+            geo_coded["ZEST_KEY_COL"] = geo_coded.index 
         # replace GEOIDs with user-defined values where avaliable
         if self.block_group is not None and self.census_tract is not None:
             geo_coded = geo_coded.drop([self.block_group, self.census_tract], axis = 1)

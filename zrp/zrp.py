@@ -96,7 +96,7 @@ class ZRP(BaseZRP):
         # self.params_dict = {}
         return data
     
-    def transform(self, input_data):
+    def transform(self, input_data, chunk_size = 25000):
         """
         Processes input data and generates ZRP predictions. Generates BISG predictions additionally if specified.
 
@@ -115,23 +115,39 @@ class ZRP(BaseZRP):
         self.reset_column_names()
         
         make_directory(self.out_path)
-
-        z_prepare = ZRP_Prepare(file_path=self.file_path, **self.params_dict)
-        z_prepare.fit(data)
-        prepared_data = z_prepare.transform(data)
-
         curpath = dirname(__file__)
         if self.pipe_path is None:
             self.pipe_path = join(curpath, "modeling/models")
 
-        z_predict = ZRP_Predict(file_path=self.file_path, pipe_path=self.pipe_path, **self.params_dict)
-        z_predict.fit(prepared_data)
-        predict_out = z_predict.transform(prepared_data)
+        data = data.sort_values('state')
+        chunk_max = int((len(data)-1)/chunk_size) + 1
+        predict_out_list = list()
+        full_bisg_proxies_list = list()
+        for chunk in range(chunk_max):
+            print("####################################")
+            print(f'Processing rows: {chunk*chunk_size}:{(chunk+1)*chunk_size}')
+            print("####################################")
+            data_chunk = data[chunk*chunk_size:(chunk+1)*chunk_size]
+#             if data_chunk[self.state].notna().sum() > 0:
+            z_prepare = ZRP_Prepare(file_path=self.file_path, **self.params_dict)
+            z_prepare.fit(data_chunk)
+            prepared_data_chunk = z_prepare.transform(data_chunk)
 
+            z_predict = ZRP_Predict(file_path=self.file_path, pipe_path=self.pipe_path, **self.params_dict)
+            z_predict.fit(prepared_data_chunk)
+            predict_out_chunk = z_predict.transform(prepared_data_chunk)
+            predict_out_list.append(predict_out_chunk)
+            
+            if self.bisg:
+                bisgw = BISGWrapper(**self.params_dict)
+                bisg_proxies_chunk = bisgw.transform(prepared_data_chunk[~prepared_data_chunk.index.duplicated(keep='first')])
+                full_bisg_proxies_list.append(bisg_proxies_chunk)
+           
+        predict_out = pd.concat(predict_out_list)
+        
         if self.bisg:
-            bisgw = BISGWrapper(**self.params_dict)
-            full_bisg_proxies = bisgw.transform(prepared_data[~prepared_data.index.duplicated(keep='first')])
-            save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_output.feather")
+            full_bisg_proxies = pd.concat(full_bisg_proxies_list)
+            save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_output.feather") 
 
         try:
             predict_out = input_data.merge(predict_out.reset_index(drop=False), on=self.key)
