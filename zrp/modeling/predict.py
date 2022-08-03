@@ -609,10 +609,11 @@ class ZRP_Predict(BaseZRP):
         
         if save_table:
             make_directory(self.out_path)
-            file_name = f"proxy_output.feather"
-            save_feather(proxies_out,
-                         self.out_path,
-                         file_name)      
+            if self.runname is not None:
+                file_name = f'proxy_output_{self.runname}.feather'
+            else:
+                file_name = 'proxy_output.feather'
+            save_feather(proxies_out, self.out_path, file_name)      
         
         return(proxies_out)
 
@@ -669,10 +670,11 @@ class FEtoPredict(BaseZRP):
         
         if save_table:
             make_directory(self.out_path)
-            file_name = f"{self.pipe_type}_proxy_output.feather"
-            save_feather(proxies,
-                         self.out_path,
-                         file_name)
+            if self.runname is not None:
+                file_name = f'proxy_output_{self.runname}.feather'
+            else:
+                file_name = 'proxy_output.feather'
+            save_feather(proxies_out, self.out_path, file_name) 
             
         return(proxies)
     

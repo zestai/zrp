@@ -65,8 +65,7 @@ class ZGeo(BaseZRP):
     def __init__(self, file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.key = 'ZEST_KEY'
-        self.params_dict =  kwargs
-    
+        self.params_dict =  kwargs    
 
     def fit(self):
         return self
@@ -100,9 +99,9 @@ class ZGeo(BaseZRP):
             String with a number to be checked
         """
         try:
-            return((int(str(s)[-1]) % 2)) 
+            return (int(str(s)[-1]) % 2)
         except:
-            return(0)
+            return 0
     
     def transform(self, input_data, geo, processed, replicate, save_table=True):
         """
@@ -240,10 +239,19 @@ class ZGeo(BaseZRP):
         
         if save_table:
             make_directory(self.out_path)
+            #Finding next name
             if self.runname is not None:
-                file_name = f"Zest_Geocoded_{self.runname}_{self.year}__{geo}.parquet"
+                file_like = f"Zest_Geocoded_{self.runname}__{self.year}__{geo}"
             else:
-                file_name = f"Zest_Geocoded__{self.year}__{geo}.parquet"
+                file_like = f"Zest_Geocoded__{self.year}__{geo}"
+            i = 1
+            for file in os.listdir(self.out_path):
+                if file_like in file:
+                    number = int(file[len(file_like)+1:-8])
+                    if number >= i:
+                        i = number + 1
+            file_name = f'{file_like}_{i}.parquet'
+            
             save_dataframe(geo_df_no_duplicates, self.out_path, file_name)
         print("   [Completed] Mapping geo data")
-        return (geo_df_no_duplicates)
+        return geo_df_no_duplicates
