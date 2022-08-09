@@ -57,7 +57,12 @@ class BaseZRP():
         ACS year to use.
     span: str, default '5'
         Year span of ACS data to use.
-    runname: str, default 'test'
+    runname: str, default None
+        Name of the run.
+    geocoding_type: str, default 'zrp'
+        How to geocode the data. Possible methods: 'zrp', 'api', 'zrp->api', 'api->zrp'.
+    censusapi_vintage: str, optional
+        Edition of Census or Survey to be used while geocoding with Census API.
     """
 
     def __init__(self, support_files_path="data/processed", key="ZEST_KEY", first_name="first_name",
@@ -65,7 +70,7 @@ class BaseZRP():
                  street_address="street_address", city="city", state="state", zip_code="zip_code", race='race',
                  census_tract=None, block_group=None, street_address_2=None, name_prefix=None, name_suffix=None,
                  na_values=None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=-1, year="2019",
-                 span="5", runname=None):
+                 span="5", runname=None, geocoding_type='zrp', censusapi_vintage=None):
         self.key = key
         self.first_name = first_name
         self.middle_name = middle_name
@@ -90,12 +95,18 @@ class BaseZRP():
         self.year = year
         self.span = span
         self.runname = runname
+        self.geocoding_type = geocoding_type
         if file_path:
             self.out_path = os.path.join(self.file_path, "artifacts")
         else:
             self.out_path = "artifacts"
-
-        super().__init__()
+        if censusapi_vintage is None:
+            if int(self.year) >= 2020:
+                self.censusapi_vintage = 'Census2020_Current'
+            else:
+                self.censusapi_vintage = 'ACS2019_Current'
+        else:
+            self.censusapi_vintage = censusapi_vintage
 
     def fit(self):
         pass

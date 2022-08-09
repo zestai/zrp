@@ -62,7 +62,7 @@ def norm_na(data, na_values):
         na_dict[key] = None
 
     data = data.replace(na_dict, regex=True)
-    return(data)
+    return data
 
 
 def set_id(data, key):
@@ -93,7 +93,7 @@ def set_id(data, key):
             data = data.sort_values("tmp_key")
             data[key] = data["tmp_key"] + data.index.astype(str)
             data = data.set_index(key)
-    return(data)
+    return data
 
 
 def reduce_whitespace(data):
@@ -558,7 +558,7 @@ class  ProcessACS(BaseZRP):
         return(data)
     
     
-class  ProcessGeo(BaseZRP):
+class ProcessGeo(BaseZRP):
     """
     All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
 

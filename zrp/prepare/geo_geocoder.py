@@ -143,7 +143,7 @@ class ZGeo(BaseZRP):
         geo_df['FROMHN_RIGHT'] = geo_df['FROMHN_RIGHT'].fillna(-2).astype(float).astype(int)
         geo_df['TOHN_RIGHT'] = geo_df['TOHN_RIGHT'].fillna(-2).astype(float).astype(int)
         geo_df["house_number_RIGHT"] = geo_df[self.house_number+'_RIGHT'].replace("", np.nan).fillna(-1).astype(float).astype(int)
-            
+
         geo_df["HN_Match"] = np.where(
             (geo_df.house_number_LEFT == geo_df.FROMHN_LEFT) &
             (geo_df.house_number_RIGHT >= geo_df.FROMHN_RIGHT) &
@@ -172,9 +172,8 @@ class ZGeo(BaseZRP):
         
         df_zip_only = odf[odf['ZEST_KEY_LONG'].isin(no_zip_match_keys)]
         na_match_cols = ['BLKGRPCE', 'COUNTYFP', 'FROMHN', 'TOHN', 'TRACTCE', 'ZCTA5CE',
-                         'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_ZIP', 'small', 'big','HN_Match', 
-                         'Parity_Match', 'ZIP_Match_1', 'ZIP_Match_2','NEW_SUPER_ZIP', 'ZIP_Match',
-                         'FROMHN_numeric', 'TOHN_numeric', 'house_numer_numeric']
+                         'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_ZIP','HN_Match', 
+                         'Parity_Match', 'ZIP_Match_1', 'ZIP_Match_2','NEW_SUPER_ZIP', 'ZIP_Match']
         df_zip_only[na_match_cols] = None
 
         df_zip_only = df_zip_only.drop_duplicates(subset = ['ZEST_KEY_LONG'])
@@ -188,7 +187,7 @@ class ZGeo(BaseZRP):
         no_HN_match_keys = list(set(all_keys) - set(HN_match_keys))
         
         df_no_HN = odf[odf['ZEST_KEY_LONG'].isin(no_HN_match_keys)]
-        na_match_cols = ['BLKGRPCE', 'FROMHN', 'TOHN', 'small', 'big', 'ZIP_Match_1', 'ZIP_Match_2','NEW_SUPER_ZIP', 'ZIP_Match']      
+        na_match_cols = ['BLKGRPCE', 'FROMHN', 'TOHN', 'ZIP_Match_1', 'ZIP_Match_2','NEW_SUPER_ZIP', 'ZIP_Match']      
         df_no_HN = self.__majority_vote_deduplication(df_no_HN, 'ZEST_KEY_LONG')
         df_no_HN[na_match_cols] = None    
             
@@ -209,33 +208,28 @@ class ZGeo(BaseZRP):
         df_parity = self.__majority_vote_deduplication(df_parity, 'ZEST_KEY_LONG')
         
         #Merge all results
-        geo_df_merged = pd.concat([df_zip_only, df_no_HN, df_no_parity, df_parity])
-               
+        geo_df_merged = pd.concat([df_zip_only, df_no_HN, df_no_parity, df_parity])       
         # Create GEOIDs
-        geo_df_merged['GEOID_ZIP'] = geo_df_merged['NEW_SUPER_ZIP']
         geo_df_merged["GEOID_CT"] = geo_df_merged[["STATEFP", "COUNTYFP", "TRACTCE"]].apply(lambda x: "".join(x.dropna()) if "".join(x.dropna()) != "" else None, axis=1)
+        geo_df_merged["GEOID_CT"] = geo_df_merged["GEOID_CT"].apply(lambda x: x if x is None or len(x) == 11 else None)
         geo_df_merged["GEOID_BG"] = geo_df_merged[["GEOID_CT", "BLKGRPCE"]].apply(lambda x: "".join(x.dropna()) if "".join(x.dropna()) != "" else None, axis=1)
+        geo_df_merged["GEOID_BG"] = geo_df_merged["GEOID_BG"].apply(lambda x: x if x is None or len(x) == 12 else None)
         
         # Choose one entry from 'replicate_flg'
         if replicate:
             geo_df_no_duplicates = geo_df_merged.sort_values(['ZEST_KEY_LONG']).groupby('ZEST_KEY').first()
-
         geo_validate = ValidateGeo()
         geo_validate.fit()
         geo_validators_in = geo_validate.transform(geo_df_no_duplicates)
-        save_json(geo_validators_in, self.out_path, "input_geo_validator.json") 
-        print("   [Completed] Validating input geo data")        
+        save_json(geo_validators_in, self.out_path, "input_geo_validator.json")
+        print("   [Completed] Validating input geo data")
 
         cols_to_drop = ['BLKGRPCE', 'COUNTYFP', 'FROMHN', 'TOHN', 'TRACTCE', 'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 
                         'ZEST_ZIP', 'ZEST_KEY_LONG', 'replicate_flg', 'FROMHN_LEFT', "FROMHN_RIGHT", 'TOHN_LEFT', 
-                        'TOHN_RIGHT', "house_number_LEFT", "house_number_RIGHT"]
-
+                        'TOHN_RIGHT', 'HN_Match', 'NEW_SUPER_ZIP', 'PARITY',
+                        'Parity_Match', 'STATEFP', 'ZIP_Match', 'ZIP_Match_1', 'ZIP_Match_2']
 
         geo_df_no_duplicates = geo_df_no_duplicates.drop(cols_to_drop, axis = 1)
-        geo_df_no_duplicates["GEOID"] = None
-        geo_df_no_duplicates["GEOID"].fillna(geo_df_no_duplicates["GEOID_BG"])\
-                                     .fillna(geo_df_no_duplicates["GEOID_CT"])\
-                                     .fillna(geo_df_no_duplicates["GEOID_ZIP"])
         
         if save_table:
             make_directory(self.out_path)
