@@ -156,9 +156,7 @@ class ZGeo(BaseZRP):
             1,
             0)
 
-        geo_df["ZIP_Match_1"] = np.where(geo_df.ZEST_ZIP == geo_df[self.zip_code], 1, 0)
-        geo_df["ZIP_Match_2"] = np.where(geo_df.ZCTA5CE10 == geo_df[self.zip_code], 1, 0)   
-        geo_df["NEW_SUPER_ZIP"] = np.where(geo_df.ZIP_Match_1 == 1, geo_df.ZEST_ZIP, geo_df.ZCTA5CE10)
+        geo_df["NEW_SUPER_ZIP"] = np.where(geo_df.ZCTA5CE10 == geo_df[self.zip_code], geo_df.ZCTA5CE10, geo_df.ZEST_ZIP)
         geo_df["ZIP_Match"] = np.where(geo_df.NEW_SUPER_ZIP == geo_df[self.zip_code], 1, 0)
 
         print("      ...mapping")    
@@ -170,13 +168,13 @@ class ZGeo(BaseZRP):
         zip_match_keys = list(geo_df['ZEST_KEY_LONG'].unique())
         no_zip_match_keys = list(set(all_keys) - set(zip_match_keys))
         
-        df_zip_only = odf[odf['ZEST_KEY_LONG'].isin(no_zip_match_keys)]
+        df_no_zip_match = odf[odf['ZEST_KEY_LONG'].isin(no_zip_match_keys)]
         na_match_cols = ['BLKGRPCE', 'COUNTYFP', 'FROMHN', 'TOHN', 'TRACTCE', 'ZCTA5CE',
                          'ZCTA5CE10', 'ZEST_FULLNAME', 'ZEST_ZIP','HN_Match', 
-                         'Parity_Match', 'ZIP_Match_1', 'ZIP_Match_2','NEW_SUPER_ZIP', 'ZIP_Match']
-        df_zip_only[na_match_cols] = None
+                         'Parity_Match', 'NEW_SUPER_ZIP', 'ZIP_Match']
+        df_no_zip_match[na_match_cols] = None
 
-        df_zip_only = df_zip_only.drop_duplicates(subset = ['ZEST_KEY_LONG'])
+        df_no_zip_match = df_no_zip_match.drop_duplicates(subset = ['ZEST_KEY_LONG'])
         
         #ZIP matched, HN not match
         all_keys = list(geo_df['ZEST_KEY_LONG'].unique())
@@ -187,7 +185,7 @@ class ZGeo(BaseZRP):
         no_HN_match_keys = list(set(all_keys) - set(HN_match_keys))
         
         df_no_HN = odf[odf['ZEST_KEY_LONG'].isin(no_HN_match_keys)]
-        na_match_cols = ['BLKGRPCE', 'FROMHN', 'TOHN', 'ZIP_Match_1', 'ZIP_Match_2','NEW_SUPER_ZIP', 'ZIP_Match']      
+        na_match_cols = ['BLKGRPCE', 'FROMHN', 'TOHN', 'NEW_SUPER_ZIP', 'ZIP_Match']      
         df_no_HN = self.__majority_vote_deduplication(df_no_HN, 'ZEST_KEY_LONG')
         df_no_HN[na_match_cols] = None    
             
@@ -208,12 +206,13 @@ class ZGeo(BaseZRP):
         df_parity = self.__majority_vote_deduplication(df_parity, 'ZEST_KEY_LONG')
         
         #Merge all results
-        geo_df_merged = pd.concat([df_zip_only, df_no_HN, df_no_parity, df_parity])       
+        geo_df_merged = pd.concat([df_no_zip_match, df_no_HN, df_no_parity, df_parity])       
         # Create GEOIDs
         geo_df_merged["GEOID_CT"] = geo_df_merged[["STATEFP", "COUNTYFP", "TRACTCE"]].apply(lambda x: "".join(x.dropna()) if "".join(x.dropna()) != "" else None, axis=1)
         geo_df_merged["GEOID_CT"] = geo_df_merged["GEOID_CT"].apply(lambda x: x if x is None or len(x) == 11 else None)
         geo_df_merged["GEOID_BG"] = geo_df_merged[["GEOID_CT", "BLKGRPCE"]].apply(lambda x: "".join(x.dropna()) if "".join(x.dropna()) != "" else None, axis=1)
         geo_df_merged["GEOID_BG"] = geo_df_merged["GEOID_BG"].apply(lambda x: x if x is None or len(x) == 12 else None)
+        geo_df_merged["GEOID_ZIP"] = np.where(geo_df_merged["ZCTA5CE"].notna(), geo_df_merged["ZCTA5CE"], geo_df_merged[self.zip_code])
         
         # Choose one entry from 'replicate_flg'
         if replicate:
@@ -227,7 +226,7 @@ class ZGeo(BaseZRP):
         cols_to_drop = ['BLKGRPCE', 'COUNTYFP', 'FROMHN', 'TOHN', 'TRACTCE', 'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 
                         'ZEST_ZIP', 'ZEST_KEY_LONG', 'replicate_flg', 'FROMHN_LEFT', "FROMHN_RIGHT", 'TOHN_LEFT', 
                         'TOHN_RIGHT', 'HN_Match', 'NEW_SUPER_ZIP', 'PARITY',
-                        'Parity_Match', 'STATEFP', 'ZIP_Match', 'ZIP_Match_1', 'ZIP_Match_2']
+                        'Parity_Match', 'STATEFP', 'ZIP_Match']
 
         geo_df_no_duplicates = geo_df_no_duplicates.drop(cols_to_drop, axis = 1)
         

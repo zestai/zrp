@@ -90,7 +90,7 @@ class ZRP_Prepare(BaseZRP):
         cg = CensusGeocode(benchmark='Public_AR_Current', vintage=self.censusapi_vintage)
 
         for i in range(num_of_chunks):
-            chunk = df_in[['street_address','state', 'city', 'house_number', 'zip_code']][i*1000:(i+1)*1000]
+            chunk = df_in[[self.street_address,self.state, self.city, self.house_number, self.zip_code]][i*1000:(i+1)*1000]
             with ThreadPoolExecutor() as tpe:
                 data = list(tqdm(tpe.map(geocode, chunk.itertuples()), total=len(chunk)))
             if i == 0:
@@ -109,8 +109,8 @@ class ZRP_Prepare(BaseZRP):
             df['GEOID_CT'] = df['GEOID_CT'].fillna(df['GEOID_BG'].str[:11])
         else:
             df['GEOID_BG'] = None
-        
         df = pd.concat([df_in, df], axis = 1)
+        df['GEOID_ZIP'] = df[self.zip_code]
         df = df.set_index(self.key)
         return df       
         
@@ -190,11 +190,9 @@ class ZRP_Prepare(BaseZRP):
                 geo_coded = pd.concat([geo_coded, data_not_geo_coded])
             else:
                 geo_coded = data
-#                 geo_coded['GEOID'] = None
                 geo_coded['GEOID_BG'] = None
                 geo_coded['GEOID_CT'] = None
-#                 geo_coded['GEOID_ZIP'] = geo_coded[self.zip]
-#                 data["ZEST_KEY_COL"] = None
+                geo_coded['GEOID_ZIP'] = geo_coded[self.zip_code]
         # Census API geocoding
         if self.geocoding_type == 'zrp->api':
             mask = (geo_coded['GEOID_CT'].isna()) & (geo_coded['GEOID_BG'].isna())
@@ -208,15 +206,7 @@ class ZRP_Prepare(BaseZRP):
         elif self.geocoding_type == 'api->zrp' or self.geocoding_type == 'zrp->api':
             geo_coded = pd.concat([geo_coded, data_api])
          
-        geo_coded['GEOID_ZIP'] = geo_coded[self.zip_code]
-        geo_coded["GEOID"] = None
-        geo_coded["GEOID"] = geo_coded["GEOID"].fillna(geo_coded["GEOID_BG"])\
-                                               .fillna(geo_coded["GEOID_CT"])\
-                                               .fillna(geo_coded["GEOID_ZIP"])
-      
-        # replace GEOIDs with user-defined values where avaliable
-        print(sorted(geo_coded.columns))
-                
+        # replace GEOIDs with user-defined values where avaliable               
         if self.block_group is not None and self.census_tract is not None:
             geo_coded = geo_coded.drop([self.block_group, self.census_tract], axis = 1)
             geo_coded = geo_coded.merge(data[[self.block_group, self.census_tract]], right_index = True, left_index = True, how = 'left')
@@ -243,7 +233,11 @@ class ZRP_Prepare(BaseZRP):
                                              ,geo_coded['GEOID_CT']
                                              ,geo_coded[self.census_tract])
             geo_coded = geo_coded.drop(self.census_tract, axis = 1)
-                                                   
+            
+        geo_coded["GEOID"] = None
+        geo_coded["GEOID"] = geo_coded["GEOID"].fillna(geo_coded["GEOID_BG"])\
+                                               .fillna(geo_coded["GEOID_CT"])\
+                                               .fillna(geo_coded["GEOID_ZIP"])                                           
         print("")
         
         print("[Completed] Preparing geo data")
@@ -263,4 +257,4 @@ class ZRP_Prepare(BaseZRP):
         print("[Complete] Preparing ACS data")
         print("")
         
-        return(data_out)
+        return data_out
