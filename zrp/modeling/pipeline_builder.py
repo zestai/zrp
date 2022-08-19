@@ -185,6 +185,8 @@ class ZRP_DataSampling(BaseZRP):
         Name of zrp_model
     zrp_model_source: str
         Indicates the source of zrp_modeling data to use. There are three optional sources 'block_group', 'census_tract', and 'zip_code'. By default 'census_tract' is inferred.
+    population_weights_dict: dict
+        Prevalence of target classes within the USA population as provided by the end-user. Sum of the values provided in the dictionary must be equal to one. Example: {'class1': 0.7, 'class2': 0.3}
     """
 
     def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', population_weights_dict=None, *args, **kwargs):
@@ -283,7 +285,7 @@ class ZRP_Build(BaseZRP):
             A pandas data frame of user input data.
         population_weights_dict: dict
             Prevalence of target classes within the USA population as provided by the end-user
-        population_weights_dicts: list
+        standard_population_weights_dicts: list
             List of available dictionaries containing standard population weights
         """
         user_target_classes = set(data[self.race].unique())
