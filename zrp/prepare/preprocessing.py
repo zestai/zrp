@@ -108,51 +108,6 @@ def reduce_whitespace(data):
     return data.apply(lambda x: x.str.strip().str.replace(" +", " ", regex=True))
 
 
-# def replicate_address(data, i, street_suffix_mapping, unit_mapping):
-#     """
-#     Replicate street addresses 
-    
-#     Parameters
-#     ----------
-#     data: pd.DataFrame
-#        ACS dataFrame to make changes to 
-#     street_address: str
-#        Name of street address column 
-#     street_suffix_mapping: dict
-#        Dictionary with street mappings
-#     unit_mapping: dict
-#        Dictionary with building unit mapping   
-#     """
-#     df_base =  data[i]     # base is complete, containing the original record (1)
-
-#     data[i] = pd.DataFrame([{i: data[i]}]).replace(unit_mapping, regex=True).loc[0, i]
-#     df_u = data[i].strip()
-#     data[i] = pd.DataFrame([{i: data[i]}]).replace(street_suffix_mapping, regex=True).loc[0, i] # Second Unit & Street Suffix abbreviation mapping
-    
-#     df_sus =  data[i]     # street & unit mapping + split after suffix (2)
-#     df_suu =  data[i]     # street & unit mapping + split before unit (3)
-#     df_sus = df_sus.split("-", 1)[0].strip()
-#     df_u = df_u.split("-", 1)[0]
-#     df_suu = df_suu.split("-", 1)[0].strip()
-#     data[i] = data[i].replace("-", "").strip()
- 
-#     df_su =  data[i]      # suffix & unit mapped to abbreviations (4) 
-#     df_no =  data[i]      # remove all numbers not-attached to str (5)
-
-#     df_no = re.sub("^([0-9]{1,6}[A-Z]{1,3})", "", df_no)
-#     df_no = re.sub(" [0-9]{4,7} ", "", df_no)
-
-#     dataout = pd.DataFrame([df_base,
-#                            df_u,
-#                            df_su,
-#                            df_sus,
-#                            df_suu,
-#                            df_no
-#                           ])
-#     dataout.index = [i, f"{i}_u", f"{i}_su", f"{i}_sus", f"{i}_suu",f"{i}_no" ]
-#     dataout = dataout.drop_duplicates()
-#     return(dataout)
-
 
 def address_mining(data, i):
     """
@@ -172,7 +127,6 @@ def address_mining(data, i):
                                           str(data[i])))
     return(data[i])
 
-
 class HandleTracts():
     """
     HandleTracts parses the American Community Survey response format into state, county, and tracts.
@@ -186,6 +140,8 @@ class HandleTracts():
     
     def transform(self, data):
         """
+        Transforms the data
+        
         Parameters
         ----------
         data: pd.DataFrame
@@ -214,8 +170,8 @@ def replicate_house_number(data, house_number, add_to_flg):
         DataFrame to make changes to 
     house_number: str
         Name of street address column
-    add_to_flg: str
-        Modification to replicate_flg
+    add_to_flg: int
+        'replicate_flg' column indicates the order of preference of replicated rows. The smaller the flag the higher the preference. 'add_to_flg' value is added to the flag of replicated rows.
     """
     print("         ...Base")
     df_base =  data.copy()# base is complete, containing the original record (1)
@@ -239,8 +195,8 @@ def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg)
        Name of street address column 
     street_suffix_mapping: dict
        Dictionary with street mappings
-    add_to_flg: str
-        Modification to replicate_flg
+    add_to_flg: int
+        'replicate_flg' column indicates the order of preference of replicated rows. The smaller the flag the higher the preference. 'add_to_flg' value is added to the flag of replicated rows.
     """
 
     print("         ...Base")
@@ -263,14 +219,6 @@ def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg)
     print(f"         Address dataframe expansion is complete! (n={len(dataout)})")
     return(dataout)
 
-# def replicate_address_3(data, street_address, mapping, add_to_flg):
-#     df_base =  data.copy()
-#     data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
-#     data[street_address] = data[street_address].replace(mapping, regex=True)
-#     dataout = pd.concat([df_base, data], axis=0)
-#     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
-#     return dataout
-
 def replicate_north_n(data, street_address, add_to_flg):
     """
     Replicate street address by simplify cardinal directions. 
@@ -281,8 +229,8 @@ def replicate_north_n(data, street_address, add_to_flg):
         DataFrame to make changes to 
     street_address: str
        Name of street address column 
-    add_to_flg: str
-        Modification to replicate_flg
+    add_to_flg: int
+        'replicate_flg' column indicates the order of preference of replicated rows. The smaller the flag the higher the preference. 'add_to_flg' value is added to the flag of replicated rows.
     """
     north_n_mapping = { '\\bNORTH\\b' : 'N',
                         '\\bSOUTH\\b' : 'S',
@@ -307,41 +255,6 @@ def replicate_north_n(data, street_address, add_to_flg):
     dataout = pd.concat([df_base, data], axis=0)
     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
     return dataout
-
-# def replicate_n_north(data, street_address, add_to_flg):
-#     north_n_mapping = {  '\\bN\\b' : 'NORTH',
-#                          '\\bS\\b' : 'SOUTH',
-#                          '\\bE\\b' : 'EAST',
-#                          '\\bW\\b' : 'WEST',
-#                          '\\bNE\\b' : 'NORTHEAST',
-#                          '\\bNW\\b' : 'NORTHWEST',
-#                          '\\bSE\\b' : 'SOUTHEAST',
-#                          '\\bSW\\b' : 'SOUTHWEST',
-#                         }
-
-#     df_base =  data.copy()
-#     data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
-#     data[street_address] = data[street_address].replace(north_n_mapping, regex=True)
-#     dataout = pd.concat([df_base, data], axis=0)
-#     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
-#     return dataout
-
-# def replicate_n_norte(data, street_address, add_to_flg):
-#     north_n_mapping = {  '\\bN\\b' : 'NORTE',
-#                          '\\bS\\b'  : 'SUR',
-#                          '\\bE\\b' : 'ESTE',
-#                          '\\bO\\b' : 'OESTE',
-#                          '\\bNE\\b' : 'NORESTE',
-#                          '\\bNO\\b' : 'NOROESTE',
-#                          '\\bSE\\b' : 'SUDESTE',
-#                          '\\bSO\\b' : 'SUDOESTE'
-#                         }
-#     df_base =  data.copy()
-#     data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
-#     data[street_address] = data[street_address].replace(north_n_mapping, regex=True)
-#     dataout = pd.concat([df_base, data], axis=0)
-#     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
-#     return dataout
        
 class ProcessStrings(BaseZRP):
     """
