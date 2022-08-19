@@ -284,7 +284,7 @@ class ZRP_Build(BaseZRP):
         data: DataFrame
             A pandas data frame of user input data.
         population_weights_dict: dict
-            Prevalence of target classes within the USA population as provided by the end-user
+            Prevalence of target classes within the USA population as provided by the end-user. Sum of the values provided in the dictionary must be equal to one. Example: {'class1': 0.7, 'class2': 0.3}
         standard_population_weights_dicts: list
             List of available dictionaries containing standard population weights
         """
@@ -317,7 +317,7 @@ class ZRP_Build(BaseZRP):
         
         data: DataFrame
             A pandas data frame of user input data.
-        population_weights_dicts: list
+        standard_population_weights_dicts: list
             List of available dictionaries containing standard population weights
         """
         user_target_classes = set(data[self.race].unique())
@@ -329,6 +329,17 @@ class ZRP_Build(BaseZRP):
         return self
 
     def transform(self, data, population_weights_dict = None):
+        """
+        Transforms the data
+        
+        Parameters
+        -----------
+        data: DataFrame
+            A pandas data frame of user input data.
+        population_weights_dict: dict
+            Prevalence of target classes within the USA population as provided by the end-user. Sum of the values provided in the dictionary must be equal to one. Example: {'class1': 0.7, 'class2': 0.3}
+        """    
+        
         cur_path = dirname(__file__)
         self.validate_input_columns(data)
         
