@@ -24,11 +24,11 @@ def acs_search(year, span):
     data_path = join(curpath, f'../data/processed/acs/{year}/{span}yr')
     for root, dirs, files in os.walk(os.path.join(data_path)):
         for file in files:
-            if (f"_zip" in file) & ("processed" in file):
+            if f"_zip" in file:
                 file_list_z.append(os.path.join(root, file))
-            if (f"tract" in file) & ("processed" in file):
+            if f"tract" in file:
                 file_list_c.append(os.path.join(root, file))
-            if (f"blockgroup" in file) & ("processed" in file):
+            if f"blockgroup" in file:
                 file_list_b.append(os.path.join(root, file))
     return (file_list_z, file_list_c, file_list_b)
 

@@ -115,7 +115,7 @@ class ZGeo(BaseZRP):
         :return: A DataFrame
         """
         curpath = dirname(__file__)
-        out_geo_path = os.path.join(curpath, '../data/processed/geo/2019')
+        out_geo_path = os.path.join(curpath, f'../data/processed/geo/{self.year}')
 
         print("")
         # Load Data

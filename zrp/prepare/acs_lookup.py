@@ -166,6 +166,7 @@ class ACS_Parser():
         try:
             tmp_data_1 = pd.read_csv(dat_file_1, sep=",", header=None, dtype=str)
             tmp_data_2 = pd.read_csv(dat_file_2, sep=",", header=None, dtype=str)
+            
 
             seq_file = os.path.join(self.raw_acs_path,
                                     sequence_dict[str(i)]['sequence'])
@@ -179,6 +180,7 @@ class ACS_Parser():
             new_col_names = list(tmp_headers.columns)
             tmp_data_1.columns = new_col_names
             tmp_data_2.columns = new_col_names
+            tmp_data = pd.concat([tmp_data_1, tmp_data_2], axis=0)
 
         except pd.errors.EmptyDataError:
             print(f'   Note: {dat_file_1} was empty.')
@@ -206,7 +208,7 @@ class ACS_Parser():
                                  str(i), "_", self.year, '_', self.span,
                                  'yr.parquet'])
             save_dataframe(tmp_data, self.out_acs_path, file_name)
-        return (sequence_dict[str(i)])
+        return sequence_dict[str(i)]
 
     def acs_parse_1yr(self, sequence_dict, i, save_table):
         """
@@ -247,9 +249,8 @@ class ACS_Parser():
         if save_table:
             file_name = "".join(["Zest_ACS_", self.state_level, "_seq", str(i),
                                  "_", self.year, '_', self.span, 'yr.parquet'])
-
             save_dataframe(tmp_data, self.out_acs_path, file_name)
-        return (sequence_dict[str(i)])
+        return sequence_dict[str(i)]
 
     def transform(self, save_table=True):
         """
@@ -274,11 +275,8 @@ class ACS_Parser():
                         sequence = str(int(sequence))
                         seq_str = "".join([self.fol_acs_tmp, "seq", sequence, ".xlsx"])
                         sequence_dict[sequence]["sequence"] = seq_str
-
-
             results = Parallel(n_jobs=self.n_jobs, verbose=1)(
-                delayed((self.acs_parse_5yr))(sequence_dict, sni, save_table) for sni in
-                tqdm(list(sequence_dict.keys())))
+                delayed((self.acs_parse_5yr))(sequence_dict, sni, save_table) for sni in tqdm(list(sequence_dict.keys())))
 
         elif self.span == '1':
             sequence_dict = self.acs_track_1yr()
@@ -293,8 +291,7 @@ class ACS_Parser():
 
 
             results = Parallel(n_jobs=self.n_jobs, verbose=1)(
-                delayed((self.acs_parse_1yr))(sequence_dict, sni, save_table) for sni in
-                tqdm(list(sequence_dict.keys())))
+            delayed((self.acs_parse_1yr))(sequence_dict, sni, save_table) for sni in tqdm(list(sequence_dict.keys())))
         else:
             raise ValueError('Improper ACS span provided. The only accepted values are 1 & 5')
         results_out = {}
@@ -405,8 +402,8 @@ class ACS_LookupBuilder():
         self.n_jobs = n_jobs
         self.support_files_path = support_files_path
         curpath = dirname(__file__)
-        parsed_path = join(support_files_path, f'../data/parsed/acs/{self.year}/{self.span}yr')
-        processed_path = join(curpath, f'../data/processed/acs/{self.year}/{self.span}yr')
+        parsed_path = join(support_files_path, f'parsed/acs/{self.year}/{self.span}yr')
+        processed_path = join(support_files_path, f'processed/acs/{self.year}/{self.span}yr')
         self.raw_acs_path = parsed_path
         self.out_acs_path = processed_path
         self.required_tables = required_tables
@@ -456,13 +453,13 @@ class ACS_LookupBuilder():
         na_cols = list(tmp_data.columns[tmp_data.isnull().all()])
         tmp_data = tmp_data.drop(drop_cols + na_cols,
                                  axis=1)
-
         tmp_data['GEOID'] = None
         tmp_data['GEOID'] = tmp_data[long_id].apply(lambda x: x.split('US')[1]).astype(str)
-
+        
         if tmp_data.shape[1] < 4:
             tmp_data = pd.DataFrame()
         else:
+
             tmp_data = tmp_data.set_index(['GEOID',
                                            'GEO_NAME',
                                            'EXT_GEOID']
@@ -481,7 +478,10 @@ class ACS_LookupBuilder():
         output = []
 
         if self.geo == 'zip':
-            geo_pattern = '^ZCTA5'
+            if self.year == '2019':
+                geo_pattern = '^ZCTA5'
+            else:
+                geo_pattern = '^ZCTA'
 
             parsed_file_list = [file for file in os.listdir(self.raw_acs_path) if 'ACS_us_seq' in file]
 
@@ -545,6 +545,7 @@ class ACS_LookupBuilder():
             print("")
 
         df_out = pd.concat(output, axis=1)
+        df_out = df_out.reset_index()        
 
         # optional save 
         if save_table:
