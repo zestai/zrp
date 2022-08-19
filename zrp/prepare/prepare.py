@@ -33,17 +33,17 @@ class ZRP_Prepare(BaseZRP):
         self.params_dict =  kwargs
 
         
-    def fit(self, data):
+    def fit(self, input_data):
         if self.census_tract:
-            tract_lengths =  data[self.census_tract].str.len()
+            tract_lengths =  input_data[self.census_tract].str.len()
             tract_len  = most_common(tract_lengths)
-            if not (data[self.census_tract].apply(lambda x: str(x).isalnum()).any()):
+            if not (input_data[self.census_tract].apply(lambda x: str(x).isalnum()).any()):
                 raise ValueError("Cannot provide non-numeric Census Tract code, please remove non-numeric census tract records.")
             if tract_len != 11:
                 raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '06037311600')")
 
         if self.block_group:
-            bg_lengths =  data[self.block_group].str.len()
+            bg_lengths =  input_data[self.block_group].str.len()
             bg_len  = most_common(bg_lengths)
             if bg_len != 12:  
                 raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '060373116003')")
@@ -51,13 +51,14 @@ class ZRP_Prepare(BaseZRP):
     
     def transform(self, input_data):
         """
+        Transforms the data
+        
         Parameters
         ----------
         input_data: pd.Dataframe
             Dataframe to be transformed
         """  
         curpath = dirname(__file__)
-        
         # Load Data
         try:
             data = input_data.copy()
@@ -83,8 +84,6 @@ class ZRP_Prepare(BaseZRP):
         gen_process.fit(data)
         data = gen_process.transform(data)
         
-        processed = True
-        replicate = True
         print("")
 
         print("[Start] Preparing geo data")
@@ -109,12 +108,10 @@ class ZRP_Prepare(BaseZRP):
         for s in tqdm(gdkys):
             print("   ... on state:", str(s))
             geo = inv_state_map[s].zfill(2)
-            output = geocode.transform(geo_dict[s], geo, processed, replicate, True)
+            output = geocode.transform(geo_dict[s], geo, processed = True, replicate = True, save_table = True)
             geocode_out.append(output)
         geo_coded = pd.concat(geocode_out)
-        cols_to_drop = [col for col in geo_coded.columns if col not in data.columns and col not in ['GEOID_ZIP', 'GEOID_CT', 'GEOID_BG', 'GEOID','ZEST_KEY_COL', self.census_tract, self.block_group]]
-        geo_coded = geo_coded.drop(cols_to_drop, axis = 1)
-        
+
         # append data unable to enter geo mapping
         geo_coded_keys = list(geo_coded.ZEST_KEY_COL.values)
         data_not_geo_coded = data[~data.index.isin(geo_coded_keys)]
