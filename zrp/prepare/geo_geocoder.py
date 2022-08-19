@@ -140,8 +140,8 @@ class ZGeo(BaseZRP):
         print("      ...merge user input & lookup table")
         geo_df = data.merge(aef, on=["ZEST_FULLNAME"], how="left")
 
-        geo_df['FROMHN_RIGHT'] = geo_df['FROMHN_RIGHT'].fillna(-2).astype(float).astype(int)
-        geo_df['TOHN_RIGHT'] = geo_df['TOHN_RIGHT'].fillna(-2).astype(float).astype(int)
+        geo_df['FROMHN_RIGHT'] = geo_df['FROMHN_RIGHT'].replace('nan', np.nan).fillna(-2).astype(float).astype(int)
+        geo_df['TOHN_RIGHT'] = geo_df['TOHN_RIGHT'].replace('nan', np.nan).fillna(-2).astype(float).astype(int)
         geo_df["house_number_RIGHT"] = geo_df[self.house_number+'_RIGHT'].replace("", np.nan).fillna(-1).astype(float).astype(int)
 
         geo_df["HN_Match"] = np.where(
