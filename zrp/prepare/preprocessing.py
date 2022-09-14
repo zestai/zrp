@@ -205,7 +205,6 @@ def replicate_north_n(data, street_address, add_to_flg = 0, replicate_with_flg =
         'replicate_flg' column indicates the order of preference of replicated rows. The smaller the flag the higher the preference. 'add_to_flg' value is added to the flag of replicated rows.
     replicate_with_flg: bool
         Flag indicating whether "replicate_flg" column needs to be edited  
-
     """
     north_n_mapping = { '\\bNORTH\\b' : 'N',
                         '\\bSOUTH\\b' : 'S',
@@ -234,10 +233,28 @@ def replicate_north_n(data, street_address, add_to_flg = 0, replicate_with_flg =
     return dataout
        
 def split_char_position(a_string):
+    """
+    Returns position used to split a non-numeric house number 
+    
+    Parameters
+    ----------
+    a_string: str
+        String to be investigated 
+    """
     position = [i for i, s in enumerate(a_string) if not s.isdigit()][-1] + 1
     return position
 
 def split_HN(df, cols_to_split):
+    """
+    Returns DataFrame where non-numeric house numbers are split into two columns. One numeric and one non-numeric. 
+    
+    Parameters
+    ----------
+    df: pd.DataFrame
+        DataFrame to be modified
+    cols_to_split: list
+        List of columns containing house numbers
+    """
     numeric_map = (df[cols_to_split[0]].str.isnumeric()) | (df[cols_to_split[0]].isna()) | (df[cols_to_split[0]] == '')
     df_numeric = df[numeric_map]
     df_non_numeric = df[~numeric_map]
@@ -252,6 +269,16 @@ def split_HN(df, cols_to_split):
     return pd.concat([df_numeric, df_non_numeric])
 
 def sort_HN_columns(df):
+    """
+    Returns DataFrame where non-numeric house numbers are split into two columns. One numeric and one non-numeric. 
+    
+    Parameters
+    ----------
+    df: pd.DataFrame
+        DataFrame to be modified
+    cols_to_split: list
+        List of columns containing house numbers
+    """
     df['FROMHN_RIGHT'] = pd.to_numeric(df['FROMHN_RIGHT'])
     df['TOHN_RIGHT']   = pd.to_numeric(df['TOHN_RIGHT'])
     from_hn = np.where(df['FROMHN_RIGHT'] <= df['TOHN_RIGHT'], df['FROMHN_RIGHT'], df['TOHN_RIGHT'])
