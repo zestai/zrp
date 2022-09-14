@@ -96,13 +96,14 @@ class ZRP(BaseZRP):
         # self.params_dict = {}
         return data
     
-    def delete_old_files(self):
+    def check_for_old_files(self):
         """
-        Deletes files created in previous runs.
+        Checks if there are no files created in previous runs.
 
         Parameters
         -----------
         """
+        old_files = []
         if self.runname is not None:
             file_like_geo = f'Zest_Geocoded_{self.runname}__{self.year}__'
             file_like_zrp_proxy = f'proxy_output_{self.runname}.feather'
@@ -114,15 +115,19 @@ class ZRP(BaseZRP):
         
         for file in os.listdir(self.out_path):
             if file_like_geo in file:
-                os.remove(os.path.join(self.out_path,file))
+                old_files.append(os.path.join(self.out_path,file))
            
         file = os.path.join(self.out_path,file_like_zrp_proxy)
         if os.path.exists(file):
-            os.remove(file)
+            old_files.append(file)
         
         file = os.path.join(self.out_path,file_like_bisg_proxy)
         if os.path.exists(file):
-            os.remove(file)
+            old_files.append(file)
+        
+        if len(old_files) > 0:
+            raise Exception(f"New value of 'runname' parameter needs to be specified or the following files need to be moved or deleted: {old_files}")
+        
                   
     
     def transform(self, input_data, chunk_size = 25000):
@@ -146,7 +151,7 @@ class ZRP(BaseZRP):
         self.reset_column_names()
         
         make_directory(self.out_path)
-        self.delete_old_files()
+        self.check_for_old_files()
         curpath = dirname(__file__)
         if self.pipe_path is None:
             self.pipe_path = join(curpath, "modeling/models")

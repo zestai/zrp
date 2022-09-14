@@ -185,7 +185,7 @@ def replicate_house_number(data, house_number, add_to_flg):
         DataFrame to make changes to 
     house_number: str
         Name of street address column
-    add_to_flg: str
+    add_to_flg: int
         Modification to replicate_flg
     """
     print("         ...Base")
@@ -210,8 +210,10 @@ def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg 
        Name of street address column 
     street_suffix_mapping: dict
        Dictionary with street mappings
-    add_to_flg: str
+    add_to_flg: int
         Modification to replicate_flg
+    replicate_with_flg: bool
+        Flag indicating whether "replicate_flg" column needs to be edited  
     """
 
     print("         ...Base")
@@ -254,8 +256,10 @@ def replicate_north_n(data, street_address, add_to_flg = 0, replicate_with_flg =
         DataFrame to make changes to 
     street_address: str
        Name of street address column 
-    add_to_flg: str
+    add_to_flg: int
         Modification to replicate_flg
+    replicate_with_flg: bool
+        Flag indicating whether "replicate_flg" column needs to be edited  
     """
     north_n_mapping = { '\\bNORTH\\b' : 'N',
                         '\\bSOUTH\\b' : 'S',
@@ -560,7 +564,7 @@ class  ProcessACS(BaseZRP):
     
 class  ProcessGeo(BaseZRP):
     """
-    All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
+    All user data is processed with additional processing operations for geo-specific and American Community Survey data.
 
     Parameters
     ----------
@@ -728,7 +732,7 @@ class  ProcessGeo(BaseZRP):
     
 class  ProcessGLookUp(BaseZRP):
     """
-    All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
+    All user data is processed with additional processing operations for geo-specific and American Community Survey data.
     Parameters
     ----------
     key: str 
