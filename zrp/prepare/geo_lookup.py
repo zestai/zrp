@@ -334,7 +334,6 @@ class GeoLookUpLooper(GeoLookUpBuilder):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.st_dict = dict()
 
     def fit(self):
         """
@@ -383,6 +382,8 @@ class GeoLookUpLooper(GeoLookUpBuilder):
             Indicator to save state-county level tables
         save_st_tables: bool
             Indicator to save state level tables
+        n_jobs: int (default -1)
+            Number of jobs in parallel
         """        
 
         if st_list is None:
