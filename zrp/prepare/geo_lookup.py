@@ -111,7 +111,9 @@ class GeoLookUpBuilder():
     support_files_path: str
         Path to support files
     year: str (default 2019)
-        Year associated with ACS data. 
+        Year associated with ACS data
+    output_folder_suffix: str
+        Suffix attached to the output folder name.
     """
 
     def __init__(self, support_files_path, year, output_folder_suffix):
@@ -304,11 +306,13 @@ class GeoLookUpBuilder():
         data_path = join(curpath, '../data/processed/state_mapping.json')
         state_mapping = load_json(data_path)
 
-        aef = gps.transform(aef, state_mapping)
-
-        final_cols = ['STATEFP', 'COUNTYFP', 'TRACTCE', 'BLKGRPCE', 'ZEST_FULLNAME', 'FROMHN' , 'TOHN', 'ZEST_ZIP', 'ZCTA5CE', 'ZCTA5CE10']
-        aef = aef[final_cols]
+        aef = gps.transform(aef, state_mapping)    
+        aef = aef.sort_values(['PARITY', 'ZEST_ZIP', 'ZEST_FULLNAME', 'FROMHN_LEFT', 'FROMHN_RIGHT'])                    
+        aef = aef.reset_index(drop = True)
         
+        final_cols = ['STATEFP', 'COUNTYFP', 'TRACTCE', 'BLKGRPCE', 'ZEST_FULLNAME', 'FROMHN' , 'TOHN', 'ZEST_ZIP', 
+                      'ZCTA5CE', 'ZCTA5CE10', 'FROMHN_LEFT', 'FROMHN_RIGHT', 'TOHN_LEFT', 'TOHN_RIGHT', 'PARITY']
+        aef = aef[final_cols]                    
         # optional save 
         if save_table:
             make_directory(self.out_geo_path)
@@ -339,7 +343,11 @@ class GeoLookUpLooper(GeoLookUpBuilder):
         ----------
         """          
         self.st_dict = dict()
-        shp_list = [shp_file for shp_file in os.listdir(self.raw_geo_path) if '.shp' in shp_file and '.iso.xml' not in shp_file]
+        shp_list = [shp_file for shp_file in os.listdir(self.raw_geo_path) if ('_edges.shp' in shp_file
+                                                                                or '_faces.shp' in shp_file
+                                                                                or '_addrfeat.shp' in shp_file
+                                                                                    )
+                                                                                and '.iso.xml' not in shp_file]
         strings_count = pd.Series(shp_list).str[8:13].value_counts()
         st_cty_code_list = list(strings_count[strings_count == 3].sort_index().index)
 
@@ -371,9 +379,9 @@ class GeoLookUpLooper(GeoLookUpBuilder):
         st_list: list
             list of state codes to process
         save_st_cty_tables: bool
-            Indicator to save st_cty level tables
+            Indicator to save state-county level tables
         save_st_tables: bool
-            Indicator to save st level tables
+            Indicator to save state level tables
         n_jobs: int (default -1)
             Number of jobs in parallel
         """        

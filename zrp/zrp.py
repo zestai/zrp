@@ -96,7 +96,41 @@ class ZRP(BaseZRP):
         # self.params_dict = {}
         return data
     
-    def transform(self, input_data):
+    def check_for_old_files(self):
+        """
+        Checks if there are no files created in previous runs.
+
+        Parameters
+        -----------
+        """
+        old_files = []
+        if self.runname is not None:
+            file_like_geo = f'Zest_Geocoded_{self.runname}__{self.year}__'
+            file_like_zrp_proxy = f'proxy_output_{self.runname}.feather'
+            file_like_bisg_proxy = f'bisg_proxy_output__{self.runname}.feather'
+        else:
+            file_like_geo = f'Zest_Geocoded__{self.year}__'
+            file_like_zrp_proxy = 'proxy_output.feather'
+            file_like_bisg_proxy = 'bisg_proxy_output.feather'
+        
+        for file in os.listdir(self.out_path):
+            if file_like_geo in file:
+                old_files.append(os.path.join(self.out_path,file))
+           
+        file = os.path.join(self.out_path,file_like_zrp_proxy)
+        if os.path.exists(file):
+            old_files.append(file)
+        
+        file = os.path.join(self.out_path,file_like_bisg_proxy)
+        if os.path.exists(file):
+            old_files.append(file)
+        
+        if len(old_files) > 0:
+            raise Exception(f"New value of 'runname' parameter needs to be specified or the following files need to be moved or deleted: {old_files}")
+        
+                  
+    
+    def transform(self, input_data, chunk_size = 25000):
         """
         Processes input data and generates ZRP predictions. Generates BISG predictions additionally if specified.
 
@@ -104,6 +138,8 @@ class ZRP(BaseZRP):
         -----------
         input_data: pd.Dataframe
             Dataframe to be transformed
+        chunk_size: int
+            Numer of rows to be processed in each iteration. input_data processed all at once if None is provided.
         """
         # Load Data
         try:
@@ -115,23 +151,50 @@ class ZRP(BaseZRP):
         self.reset_column_names()
         
         make_directory(self.out_path)
-
-        z_prepare = ZRP_Prepare(file_path=self.file_path, **self.params_dict)
-        z_prepare.fit(data)
-        prepared_data = z_prepare.transform(data)
-
+        self.check_for_old_files()
         curpath = dirname(__file__)
         if self.pipe_path is None:
             self.pipe_path = join(curpath, "modeling/models")
 
-        z_predict = ZRP_Predict(file_path=self.file_path, pipe_path=self.pipe_path, **self.params_dict)
-        z_predict.fit(prepared_data)
-        predict_out = z_predict.transform(prepared_data)
+        data = data.sort_values('state')
+        if chunk_size is None:
+            chunk_size = len(data)
+        chunk_max = int((len(data)-1)/chunk_size) + 1
+        predict_out_list = list()
+        full_bisg_proxies_list = list()
+        for chunk in range(chunk_max):
+            print("####################################")
+            print(f'Processing rows: {chunk*chunk_size}:{(chunk+1)*chunk_size}')
+            print("####################################")
+            data_chunk = data[chunk*chunk_size:(chunk+1)*chunk_size]
+            z_prepare = ZRP_Prepare(file_path=self.file_path, **self.params_dict)
+            z_prepare.fit(data_chunk)
+            prepared_data_chunk = z_prepare.transform(data_chunk)
 
+            z_predict = ZRP_Predict(file_path=self.file_path, pipe_path=self.pipe_path, **self.params_dict)
+            z_predict.fit(prepared_data_chunk)
+            predict_out_chunk = z_predict.transform(prepared_data_chunk, save_table = False)
+            predict_out_list.append(predict_out_chunk)
+            
+            if self.bisg:
+                bisgw = BISGWrapper(**self.params_dict)
+                bisg_proxies_chunk = bisgw.transform(prepared_data_chunk[~prepared_data_chunk.index.duplicated(keep='first')])
+                full_bisg_proxies_list.append(bisg_proxies_chunk)
+           
+        predict_out = pd.concat(predict_out_list)
+        
+        if self.runname is not None:
+            file_name = f'proxy_output_{self.runname}.feather'
+        else:
+            file_name = 'proxy_output.feather'
+        save_feather(predict_out, self.out_path, file_name)    
         if self.bisg:
-            bisgw = BISGWrapper(**self.params_dict)
-            full_bisg_proxies = bisgw.transform(prepared_data[~prepared_data.index.duplicated(keep='first')])
-            save_feather(full_bisg_proxies, self.out_path, f"bisg_proxy_output.feather")
+            full_bisg_proxies = pd.concat(full_bisg_proxies_list)
+            if self.runname is not None:
+                file_name = f'bisg_proxy_output_{self.runname}.feather'
+            else:
+                file_name = 'bisg_proxy_output.feather'
+            save_feather(full_bisg_proxies, self.out_path, file_name) 
 
         try:
             predict_out = input_data.merge(predict_out.reset_index(drop=False), on=self.key)

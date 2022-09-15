@@ -65,8 +65,7 @@ class ZGeo(BaseZRP):
     def __init__(self, file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.key = 'ZEST_KEY'
-        self.params_dict =  kwargs
-    
+        self.params_dict =  kwargs    
 
     def fit(self):
         return self
@@ -100,9 +99,9 @@ class ZGeo(BaseZRP):
             String with a number to be checked
         """
         try:
-            return((int(str(s)[-1]) % 2)) 
+            return (int(str(s)[-1]) % 2)
         except:
-            return(0)
+            return 0
     
     def transform(self, input_data, geo, processed, replicate, save_table=True):
         """
@@ -139,34 +138,21 @@ class ZGeo(BaseZRP):
         data["ZEST_FULLNAME"] = data[self.street_address]
         data['ZEST_KEY_LONG'] = data[[self.key, 'replicate_flg']].apply(lambda x: "".join(x.dropna()), axis=1)
         print("      ...merge user input & lookup table")
-        print(data.shape)
         geo_df = data.merge(aef, on=["ZEST_FULLNAME"], how="left")
 
-        ########
-        #Here non-numeric HN matching could be added
-        geo_df['FROMHN_numeric'] = geo_df.FROMHN.apply(lambda x: int(x) if str(x).isnumeric() else -1)
-        geo_df['TOHN_numeric'] = geo_df.TOHN.apply(lambda x: int(x) if str(x).isnumeric() else -1)
-        geo_df["house_numer_numeric"] = geo_df[self.house_number].apply(lambda x: int(x) if str(x).isnumeric() else -1)       
-        ########
-        
-        geo_df["small"] = np.where(
-            (geo_df.FROMHN_numeric > geo_df.TOHN_numeric),
-            geo_df.TOHN_numeric,
-            geo_df.FROMHN_numeric)
-
-        geo_df["big"] = np.where(
-            (geo_df.FROMHN_numeric > geo_df.TOHN_numeric),
-            geo_df.FROMHN_numeric,
-            geo_df.TOHN_numeric)
-      
+        geo_df['FROMHN_RIGHT'] = geo_df['FROMHN_RIGHT'].fillna(-2).astype(float).astype(int)
+        geo_df['TOHN_RIGHT'] = geo_df['TOHN_RIGHT'].fillna(-2).astype(float).astype(int)
+        geo_df["house_number_RIGHT"] = geo_df[self.house_number+'_RIGHT'].replace("", np.nan).fillna(-1).astype(float).astype(int)
+            
         geo_df["HN_Match"] = np.where(
-            (geo_df.house_numer_numeric <= geo_df.big) &
-            (geo_df.house_numer_numeric >= geo_df.small),
+            (geo_df.house_number_LEFT == geo_df.FROMHN_LEFT) &
+            (geo_df.house_number_RIGHT >= geo_df.FROMHN_RIGHT) &
+            (geo_df.house_number_RIGHT <= geo_df.TOHN_RIGHT),
             1,
             0)
 
         geo_df["Parity_Match"] = np.where(
-            (geo_df.FROMHN_numeric.apply(self.__is_odd)) == (geo_df.house_numer_numeric.apply(self.__is_odd)) ,
+            (geo_df.FROMHN_RIGHT.apply(self.__is_odd)) == (geo_df.house_number_RIGHT.apply(self.__is_odd)) ,
             1,
             0)
 
@@ -201,9 +187,11 @@ class ZGeo(BaseZRP):
         HN_match_keys = list(geo_df['ZEST_KEY_LONG'].unique())
         no_HN_match_keys = list(set(all_keys) - set(HN_match_keys))
         
-        df_no_HN = odf[odf['ZEST_KEY_LONG'].isin(no_HN_match_keys)]       
+        df_no_HN = odf[odf['ZEST_KEY_LONG'].isin(no_HN_match_keys)]
+        na_match_cols = ['BLKGRPCE', 'FROMHN', 'TOHN', 'small', 'big', 'ZIP_Match_1', 'ZIP_Match_2','NEW_SUPER_ZIP', 'ZIP_Match']      
         df_no_HN = self.__majority_vote_deduplication(df_no_HN, 'ZEST_KEY_LONG')
-              
+        df_no_HN[na_match_cols] = None    
+            
         #ZIP matched, HN matched, Parity not matched
 
         all_keys = list(geo_df['ZEST_KEY_LONG'].unique())
@@ -239,7 +227,10 @@ class ZGeo(BaseZRP):
         print("   [Completed] Validating input geo data")        
 
         cols_to_drop = ['BLKGRPCE', 'COUNTYFP', 'FROMHN', 'TOHN', 'TRACTCE', 'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 
-                        'ZEST_ZIP', 'ZEST_KEY_LONG', 'replicate_flg', 'FROMHN_numeric', 'TOHN_numeric', 'house_numer_numeric']
+                        'ZEST_ZIP', 'ZEST_KEY_LONG', 'replicate_flg', 'FROMHN_LEFT', "FROMHN_RIGHT", 'TOHN_LEFT', 
+                        'TOHN_RIGHT', "house_number_LEFT", "house_number_RIGHT"]
+
+
         geo_df_no_duplicates = geo_df_no_duplicates.drop(cols_to_drop, axis = 1)
         geo_df_no_duplicates["GEOID"] = None
         geo_df_no_duplicates["GEOID"].fillna(geo_df_no_duplicates["GEOID_BG"])\
@@ -248,10 +239,19 @@ class ZGeo(BaseZRP):
         
         if save_table:
             make_directory(self.out_path)
+            #Finding next name
             if self.runname is not None:
-                file_name = f"Zest_Geocoded_{self.runname}_{self.year}__{geo}.parquet"
+                file_like = f"Zest_Geocoded_{self.runname}__{self.year}__{geo}"
             else:
-                file_name = f"Zest_Geocoded__{self.year}__{geo}.parquet"
+                file_like = f"Zest_Geocoded__{self.year}__{geo}"
+            i = 1
+            for file in os.listdir(self.out_path):
+                if file_like in file:
+                    number = int(file[len(file_like)+1:-8])
+                    if number >= i:
+                        i = number + 1
+            file_name = f'{file_like}_{i}.parquet'
+            
             save_dataframe(geo_df_no_duplicates, self.out_path, file_name)
         print("   [Completed] Mapping geo data")
-        return (geo_df_no_duplicates)
+        return geo_df_no_duplicates

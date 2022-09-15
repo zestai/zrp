@@ -570,14 +570,16 @@ class ZRP_Predict(BaseZRP):
                     (records_failed_bisg_proxy['has_first_name'] == 1) |
                     (records_failed_bisg_proxy['has_middle_name'] == 1) |
                     (records_failed_bisg_proxy['has_last_name'] == 1)
-                ]
+                ]     
+                if not df_7.empty:
+                    zrp_names_only = ZRP_Predict_BlockGroup(self.pipe_path, **self.params_dict)
+                    out_7 = zrp_names_only.transform(df_7.filter(flb), name_only=True)
+                    out_list.append(out_7)  
 
-                zrp_names_only = ZRP_Predict_BlockGroup(self.pipe_path, **self.params_dict)
-                out_7 = zrp_names_only.transform(df_7.filter(flb), name_only=True)
-                out_list.append(out_7)  
-
-                record_indices_for_name_only_proxy = list(df_7.index.values)
-                cannot_proxy_records = records_failed_bisg_proxy[~(records_failed_bisg_proxy.index.isin(record_indices_for_name_only_proxy))]
+                    record_indices_for_name_only_proxy = list(df_7.index.values)
+                    cannot_proxy_records = records_failed_bisg_proxy[~(records_failed_bisg_proxy.index.isin(record_indices_for_name_only_proxy))]
+                else:
+                    cannot_proxy_records = records_failed_bisg_proxy
 
                 if not cannot_proxy_records.empty:
                     failed_proxies = out_6.loc[out_6.index.intersection(cannot_proxy_records.index.values)]
@@ -607,10 +609,11 @@ class ZRP_Predict(BaseZRP):
         
         if save_table:
             make_directory(self.out_path)
-            file_name = f"proxy_output.feather"
-            save_feather(proxies_out,
-                         self.out_path,
-                         file_name)      
+            if self.runname is not None:
+                file_name = f'proxy_output_{self.runname}.feather'
+            else:
+                file_name = 'proxy_output.feather'
+            save_feather(proxies_out, self.out_path, file_name)      
         
         return(proxies_out)
 
@@ -667,10 +670,11 @@ class FEtoPredict(BaseZRP):
         
         if save_table:
             make_directory(self.out_path)
-            file_name = f"{self.pipe_type}_proxy_output.feather"
-            save_feather(proxies,
-                         self.out_path,
-                         file_name)
+            if self.runname is not None:
+                file_name = f'proxy_output_{self.runname}.feather'
+            else:
+                file_name = 'proxy_output.feather'
+            save_feather(proxies_out, self.out_path, file_name) 
             
         return(proxies)
     

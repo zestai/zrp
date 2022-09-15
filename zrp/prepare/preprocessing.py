@@ -127,39 +127,6 @@ def address_mining(data, i):
                                           str(data[i])))
     return(data[i])
 
-class HandleTracts():
-    """
-    HandleTracts parses the American Community Survey response format into state, county, and tracts.
-    It will also create a GEO_KEY for merging with geocoded user data.
-    """
-    def __init__(self):
-        super().__init__()
-    
-    def fit(self, data):
-        pass
-    
-    def transform(self, data):
-        """
-        Transforms the data
-        
-        Parameters
-        ----------
-        data: pd.DataFrame
-           ACS dataFrame to make changes to 
-        """
-        if not isinstance(data, pd.DataFrame):
-            raise ValueError("Input must be a dataframe")
-        acs_ct = data.copy()
-        acs_zip = data.copy()
-        
-        acs_rename(acs_ct)
-        acs_rename(acs_zip)
-        
-        acs_trt_split(acs_ct, feature="result")
-        acs_zip_split(acs_zip, feature="result")
-        
-        return(acs_ct, acs_zip)
-
 def replicate_house_number(data, house_number, add_to_flg):
     """
     Replicate street addresses 
@@ -172,6 +139,7 @@ def replicate_house_number(data, house_number, add_to_flg):
         Name of street address column
     add_to_flg: int
         'replicate_flg' column indicates the order of preference of replicated rows. The smaller the flag the higher the preference. 'add_to_flg' value is added to the flag of replicated rows.
+
     """
     print("         ...Base")
     df_base =  data.copy()# base is complete, containing the original record (1)
@@ -183,7 +151,7 @@ def replicate_house_number(data, house_number, add_to_flg):
     print(f"         House number dataframe expansion is complete! (n={len(dataout)})")
     return(dataout)
     
-def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg):
+def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg = 0, replicate_with_flg = 1):
     """
     Replicate street addresses 
     
@@ -197,11 +165,14 @@ def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg)
        Dictionary with street mappings
     add_to_flg: int
         'replicate_flg' column indicates the order of preference of replicated rows. The smaller the flag the higher the preference. 'add_to_flg' value is added to the flag of replicated rows.
+    replicate_with_flg: bool
+        Flag indicating whether "replicate_flg" column needs to be edited
     """
 
     print("         ...Base")
     df_base =  data.copy()
-    data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
+    if replicate_with_flg ==1:
+        data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
     print("         ...Map street suffixes...")
     data[street_address] = data[street_address].replace(street_suffix_mapping, regex=True) # this mapping takes the longest but is ok for 10K records
     data[street_address] = np.where(data[street_address]=='nan', None, data[street_address])
@@ -218,8 +189,9 @@ def replicate_address_2(data, street_address, street_suffix_mapping, add_to_flg)
     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
     print(f"         Address dataframe expansion is complete! (n={len(dataout)})")
     return(dataout)
+        
 
-def replicate_north_n(data, street_address, add_to_flg):
+def replicate_north_n(data, street_address, add_to_flg = 0, replicate_with_flg = 1):
     """
     Replicate street address by simplify cardinal directions. 
     
@@ -231,6 +203,8 @@ def replicate_north_n(data, street_address, add_to_flg):
        Name of street address column 
     add_to_flg: int
         'replicate_flg' column indicates the order of preference of replicated rows. The smaller the flag the higher the preference. 'add_to_flg' value is added to the flag of replicated rows.
+    replicate_with_flg: bool
+        Flag indicating whether "replicate_flg" column needs to be edited  
     """
     north_n_mapping = { '\\bNORTH\\b' : 'N',
                         '\\bSOUTH\\b' : 'S',
@@ -250,12 +224,100 @@ def replicate_north_n(data, street_address, add_to_flg):
                         '\\bSUDOESTE\\b' : 'SO'}
 
     df_base =  data.copy()
-    data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
+    data[street_address] = data[street_address].replace(north_n_mapping, regex=True)
+    if replicate_with_flg == 1:
+        data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
     data[street_address] = data[street_address].replace(north_n_mapping, regex=True)
     dataout = pd.concat([df_base, data], axis=0)
     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
     return dataout
        
+def split_char_position(a_string):
+    """
+    Returns position used to split a non-numeric house number 
+    
+    Parameters
+    ----------
+    a_string: str
+        String to be investigated 
+    """
+    position = [i for i, s in enumerate(a_string) if not s.isdigit()][-1] + 1
+    return position
+
+def split_HN(df, cols_to_split):
+    """
+    Returns DataFrame where non-numeric house numbers are split into two columns. One numeric and one non-numeric. 
+    
+    Parameters
+    ----------
+    df: pd.DataFrame
+        DataFrame to be modified
+    cols_to_split: list
+        List of columns containing house numbers
+    """
+    numeric_map = (df[cols_to_split[0]].str.isnumeric()) | (df[cols_to_split[0]].isna()) | (df[cols_to_split[0]] == '')
+    df_numeric = df[numeric_map]
+    df_non_numeric = df[~numeric_map]
+    
+    for col in cols_to_split:  
+        df_numeric[f'{col}_LEFT'] = ''
+        df_numeric[f'{col}_RIGHT'] = df_numeric[col]
+        
+        df_non_numeric[f'{col}_LEFT']  = df_non_numeric[col].apply(lambda a_string: a_string[:split_char_position(a_string)])
+        df_non_numeric[f'{col}_RIGHT'] = df_non_numeric[col].apply(lambda a_string: a_string[split_char_position(a_string):])
+    
+    return pd.concat([df_numeric, df_non_numeric])
+
+def sort_HN_columns(df):
+    """
+    Returns DataFrame where non-numeric house numbers are split into two columns. One numeric and one non-numeric. 
+    
+    Parameters
+    ----------
+    df: pd.DataFrame
+        DataFrame to be modified
+    cols_to_split: list
+        List of columns containing house numbers
+    """
+    df['FROMHN_RIGHT'] = pd.to_numeric(df['FROMHN_RIGHT'])
+    df['TOHN_RIGHT']   = pd.to_numeric(df['TOHN_RIGHT'])
+    from_hn = np.where(df['FROMHN_RIGHT'] <= df['TOHN_RIGHT'], df['FROMHN_RIGHT'], df['TOHN_RIGHT'])
+    to_hn   = np.where(df['FROMHN_RIGHT'] <= df['TOHN_RIGHT'], df['TOHN_RIGHT'], df['FROMHN_RIGHT'])
+    df['FROMHN_RIGHT'] = from_hn
+    df['TOHN_RIGHT'] = to_hn
+    return(df)
+    
+class HandleTracts():
+    """
+    HandleTracts parses the American Community Survey response format into state, county, and tracts.
+    It will also create a GEO_KEY for merging with geocoded user data.
+    """
+    def __init__(self):
+        super().__init__()
+    
+    def fit(self, data):
+        pass
+    
+    def transform(self, data):
+        """
+        Parameters
+        ----------
+        data: pd.DataFrame
+           ACS dataFrame to make changes to 
+        """
+        if not isinstance(data, pd.DataFrame):
+            raise ValueError("Input must be a dataframe")
+        acs_ct = data.copy()
+        acs_zip = data.copy()
+        
+        acs_rename(acs_ct)
+        acs_rename(acs_zip)
+        
+        acs_trt_split(acs_ct, feature="result")
+        acs_zip_split(acs_zip, feature="result")
+        
+        return(acs_ct, acs_zip)
+    
 class ProcessStrings(BaseZRP):
     """
     ProcessStrings executes all ZRP preprocessing. All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
@@ -359,11 +421,6 @@ class ProcessStrings(BaseZRP):
         data_cols =  data.columns
         data = set_id(data, self.key)
         
-        numeric_cols =  list(set([self.zip_code,
-                                  self.census_tract,
-                                  self.house_number
-                                 ]).intersection(set(data_cols)))
-
         # Convert to uppercase & trim whitespace
         print("   Formatting P1")
         data = data.astype(str)
@@ -374,6 +431,12 @@ class ProcessStrings(BaseZRP):
                     "^NAN$": None,
                     "^NONE$": None}
         data = data.replace(na_dict, regex=True)     
+        data[self.house_number] = data[self.house_number].apply(lambda x: re.sub("[^0-9]$", "", str(x)))
+        data = split_HN(data, [self.house_number])
+        
+        numeric_cols =  list(set([self.zip_code,
+                                  self.census_tract,
+                                 ]).intersection(set(data_cols)))
         
         # Remove/replace special characters
         for col in numeric_cols:
@@ -439,7 +502,7 @@ class  ProcessACS(BaseZRP):
     
 class  ProcessGeo(BaseZRP):
     """
-    All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
+    All user data is processed with additional processing operations for geo-specific and American Community Survey data.
 
     Parameters
     ----------
@@ -590,8 +653,8 @@ class  ProcessGeo(BaseZRP):
         if replicate:
             print("      ...replicating address")
             data = replicate_house_number(data, self.house_number, 1)
-            data = replicate_address_2(data, self.street_address, street_suffix_mapping, 10)
-            data = replicate_north_n(data, self.street_address, 100)
+            data = replicate_address_2(data, self.street_address, street_suffix_mapping, 10, 1)
+            data = replicate_north_n(data, self.street_address, 100, 1)
 #             data = replicate_address_3(data, self.street_address, street_suffix_mapping_new_only, 1000)
 #             data = replicate_n_north(data, self.street_address, 1000)
 #             data = replicate_n_norte(data, self.street_address, 2000)
@@ -602,12 +665,12 @@ class  ProcessGeo(BaseZRP):
 
         data = reduce_whitespace(data)
         print("   [Completed] Processing geo data")
-        return(data)
+        return data
 
     
 class  ProcessGLookUp(BaseZRP):
     """
-    All user data is processed with additional  processing operations for geo-specific and American Community Survey data.
+    All user data is processed with additional processing operations for geo-specific and American Community Survey data.
     Parameters
     ----------
     key: str 
@@ -719,9 +782,17 @@ class  ProcessGLookUp(BaseZRP):
         spec_cols = list(set(list(data_cols)).intersection(set([self.zip_code, self.block_group, self.county, self.state, self.census_tract])))
         data[spec_cols] = norm_na(data[spec_cols], self.na_values)
         data = reduce_whitespace(data)
+        data = split_HN(data, ['FROMHN', 'TOHN'])
+        data = sort_HN_columns(data)
+        
+        curpath = dirname(__file__)
+        data_path = join(curpath, '../data/processed')
+        _, street_suffix_mapping, _, _ = load_mappings(data_path)
+        data = replicate_address_2(data, self.street_address, street_suffix_mapping, replicate_with_flg = 0)
+        data = replicate_north_n(data, self.street_address, replicate_with_flg = 0)
+        
         print("   [Completed] Processing lookup data")
         
-        data_cols = list(data.columns)
         validate = ValidateInput()
         validate.fit()
         validator_in = validate.transform(data) 
