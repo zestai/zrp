@@ -36,17 +36,17 @@ class ZRP_Prepare(BaseZRP):
         self.params_dict =  kwargs
 
         
-    def fit(self, data):
+    def fit(self, input_data):
         if self.census_tract:
-            tract_lengths =  data[self.census_tract].str.len()
+            tract_lengths =  input_data[self.census_tract].str.len()
             tract_len  = most_common(tract_lengths)
-            if not (data[self.census_tract].apply(lambda x: str(x).isalnum()).any()):
+            if not (input_data[self.census_tract].apply(lambda x: str(x).isalnum()).any()):
                 raise ValueError("Cannot provide non-numeric Census Tract code, please remove non-numeric census tract records.")
             if tract_len != 11:
                 raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '06037311600')")
 
         if self.block_group:
-            bg_lengths =  data[self.block_group].str.len()
+            bg_lengths =  input_data[self.block_group].str.len()
             bg_len  = most_common(bg_lengths)
             if bg_len != 12:  
                 raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '060373116003')")
@@ -117,6 +117,8 @@ class ZRP_Prepare(BaseZRP):
     
     def transform(self, input_data):
         """
+        Transforms the data
+        
         Parameters
         ----------
         input_data: pd.Dataframe
