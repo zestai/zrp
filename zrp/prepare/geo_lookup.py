@@ -111,7 +111,9 @@ class GeoLookUpBuilder():
     support_files_path: str
         Path to support files
     year: str (default 2019)
-        Year associated with ACS data. 
+        Year associated with ACS data
+    output_folder_suffix: str
+        Suffix attached to the output folder name.
     """
 
     def __init__(self, support_files_path, year, output_folder_suffix):
@@ -332,7 +334,6 @@ class GeoLookUpLooper(GeoLookUpBuilder):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.st_dict = dict()
 
     def fit(self):
         """
@@ -381,6 +382,8 @@ class GeoLookUpLooper(GeoLookUpBuilder):
             Indicator to save state-county level tables
         save_st_tables: bool
             Indicator to save state level tables
+        n_jobs: int (default -1)
+            Number of jobs in parallel
         """        
 
         if st_list is None:
