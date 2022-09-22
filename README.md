@@ -409,6 +409,7 @@ Authors
 > -   [Kasey
 >     Matthews](https://www.linkedin.com/in/kasey-matthews-datadriven/)
 >     (Zest AI Lead)
+> -   [Piotr Zak](https://www.linkedin.com/in/piotr-zak-datadriven/) (Algomine)
 > -   [Austin Li](https://www.linkedin.com/in/austinwli/) (Harvard T4SG)
 > -   [Christien
 >     Williams](https://www.linkedin.com/in/christienwilliams/) (Schmidt
