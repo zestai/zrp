@@ -155,8 +155,8 @@ class ZGeo(BaseZRP):
             (geo_df.FROMHN_RIGHT.apply(self.__is_odd)) == (geo_df.house_number_RIGHT.apply(self.__is_odd)) ,
             1,
             0)
-
-        geo_df["NEW_SUPER_ZIP"] = np.where(geo_df.ZCTA5CE10 == geo_df[self.zip_code], geo_df.ZCTA5CE10, geo_df.ZEST_ZIP)
+        geo_df['ZCTA5CE'] = geo_df['ZCTA5CE'].replace('None', np.nan)
+        geo_df["NEW_SUPER_ZIP"] = np.where(geo_df.ZCTA5CE == geo_df[self.zip_code], geo_df.ZCTA5CE, geo_df.ZEST_ZIP)
         geo_df["ZIP_Match"] = np.where(geo_df.NEW_SUPER_ZIP == geo_df[self.zip_code], 1, 0)
 
         print("      ...mapping")    
