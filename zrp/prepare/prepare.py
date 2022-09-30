@@ -134,10 +134,9 @@ class ZRP_Prepare(BaseZRP):
             print("Data file is loaded")
             
         data_path = join(curpath, f'../data/processed')
-        lookup_tables_config = load_json(join(data_path, "lookup_tables_config.json"))
 
-        geo_folder = os.path.join(data_path, "geo", lookup_tables_config['geo_year'])
-        acs_folder = os.path.join(data_path, 'acs', lookup_tables_config['acs_year'], lookup_tables_config['acs_span'])
+        geo_folder = os.path.join(data_path, "geo", self.year)
+        acs_folder = os.path.join(data_path, 'acs', self.year, self.span+'yr')
 
         if not ((os.path.isdir(geo_folder)) &
                 (os.path.isdir(acs_folder ))
