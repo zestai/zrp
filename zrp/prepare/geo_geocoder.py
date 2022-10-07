@@ -140,8 +140,8 @@ class ZGeo(BaseZRP):
         print("      ...merge user input & lookup table")
         geo_df = data.merge(aef, on=["ZEST_FULLNAME"], how="left")
 
-        geo_df['FROMHN_RIGHT'] = geo_df['FROMHN_RIGHT'].fillna(-2).astype(float).astype(int)
-        geo_df['TOHN_RIGHT'] = geo_df['TOHN_RIGHT'].fillna(-2).astype(float).astype(int)
+        geo_df['FROMHN_RIGHT'] = geo_df['FROMHN_RIGHT'].replace('nan', np.nan).fillna(-2).astype(float).astype(int)
+        geo_df['TOHN_RIGHT'] = geo_df['TOHN_RIGHT'].replace('nan', np.nan).fillna(-2).astype(float).astype(int)
         geo_df["house_number_RIGHT"] = geo_df[self.house_number+'_RIGHT'].replace("", np.nan).fillna(-1).astype(float).astype(int)
             
         geo_df["HN_Match"] = np.where(
@@ -156,9 +156,8 @@ class ZGeo(BaseZRP):
             1,
             0)
 
-        geo_df["ZIP_Match_1"] = np.where(geo_df.ZEST_ZIP == geo_df[self.zip_code], 1, 0)
-        geo_df["ZIP_Match_2"] = np.where(geo_df.ZCTA5CE10 == geo_df[self.zip_code], 1, 0)   
-        geo_df["NEW_SUPER_ZIP"] = np.where(geo_df.ZIP_Match_1 == 1, geo_df.ZEST_ZIP, geo_df.ZCTA5CE10)
+        geo_df['ZCTA5CE'] = geo_df['ZCTA5CE'].replace('None', np.nan)
+        geo_df["NEW_SUPER_ZIP"] = np.where(geo_df.ZCTA5CE == geo_df[self.zip_code], geo_df.ZCTA5CE, geo_df.ZEST_ZIP)
         geo_df["ZIP_Match"] = np.where(geo_df.NEW_SUPER_ZIP == geo_df[self.zip_code], 1, 0)
 
         print("      ...mapping")    
@@ -188,7 +187,8 @@ class ZGeo(BaseZRP):
         no_HN_match_keys = list(set(all_keys) - set(HN_match_keys))
         
         df_no_HN = odf[odf['ZEST_KEY_LONG'].isin(no_HN_match_keys)]
-        na_match_cols = ['BLKGRPCE', 'FROMHN', 'TOHN', 'small', 'big', 'ZIP_Match_1', 'ZIP_Match_2','NEW_SUPER_ZIP', 'ZIP_Match']      
+        na_match_cols = ['BLKGRPCE', 'FROMHN', 'TOHN', 'NEW_SUPER_ZIP', 'ZIP_Match']
+        
         df_no_HN = self.__majority_vote_deduplication(df_no_HN, 'ZEST_KEY_LONG')
         df_no_HN[na_match_cols] = None    
             
@@ -212,9 +212,11 @@ class ZGeo(BaseZRP):
         geo_df_merged = pd.concat([df_zip_only, df_no_HN, df_no_parity, df_parity])
                
         # Create GEOIDs
-        geo_df_merged['GEOID_ZIP'] = geo_df_merged['NEW_SUPER_ZIP']
         geo_df_merged["GEOID_CT"] = geo_df_merged[["STATEFP", "COUNTYFP", "TRACTCE"]].apply(lambda x: "".join(x.dropna()) if "".join(x.dropna()) != "" else None, axis=1)
+        geo_df_merged["GEOID_CT"] = geo_df_merged["GEOID_CT"].apply(lambda x: x if x is None or len(x) == 11 else None)
         geo_df_merged["GEOID_BG"] = geo_df_merged[["GEOID_CT", "BLKGRPCE"]].apply(lambda x: "".join(x.dropna()) if "".join(x.dropna()) != "" else None, axis=1)
+        geo_df_merged["GEOID_BG"] = geo_df_merged["GEOID_BG"].apply(lambda x: x if x is None or len(x) == 12 else None)
+        geo_df_merged["GEOID_ZIP"] = np.where(geo_df_merged["ZCTA5CE"].notna(), geo_df_merged["ZCTA5CE"], geo_df_merged[self.zip_code])
         
         # Choose one entry from 'replicate_flg'
         if replicate:
@@ -226,16 +228,13 @@ class ZGeo(BaseZRP):
         save_json(geo_validators_in, self.out_path, "input_geo_validator.json") 
         print("   [Completed] Validating input geo data")        
 
-        cols_to_drop = ['BLKGRPCE', 'COUNTYFP', 'FROMHN', 'TOHN', 'TRACTCE', 'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME', 
-                        'ZEST_ZIP', 'ZEST_KEY_LONG', 'replicate_flg', 'FROMHN_LEFT', "FROMHN_RIGHT", 'TOHN_LEFT', 
-                        'TOHN_RIGHT', "house_number_LEFT", "house_number_RIGHT"]
+        cols_to_drop = ['BLKGRPCE', 'COUNTYFP', 'FROMHN', 'TOHN', 'TRACTCE', 'ZCTA5CE', 'ZCTA5CE10', 'ZEST_FULLNAME',
+                        'ZEST_ZIP', 'ZEST_KEY_LONG', 'replicate_flg', 'FROMHN_LEFT', "FROMHN_RIGHT", 'TOHN_LEFT',
+                        'TOHN_RIGHT', 'HN_Match', 'NEW_SUPER_ZIP', 'PARITY', 'Parity_Match', 'STATEFP', 'ZIP_Match']
 
 
         geo_df_no_duplicates = geo_df_no_duplicates.drop(cols_to_drop, axis = 1)
         geo_df_no_duplicates["GEOID"] = None
-        geo_df_no_duplicates["GEOID"].fillna(geo_df_no_duplicates["GEOID_BG"])\
-                                     .fillna(geo_df_no_duplicates["GEOID_CT"])\
-                                     .fillna(geo_df_no_duplicates["GEOID_ZIP"])
         
         if save_table:
             make_directory(self.out_path)

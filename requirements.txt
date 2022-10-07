@@ -2,7 +2,7 @@ category_encoders==2.3.0
 CensusData==1.15
 feature_engine==1.2.0
 fastparquet
-joblib==0.15.1
+joblib==1.2.0
 numpy
 pandas==1.2.5
 plac==1.3.4
