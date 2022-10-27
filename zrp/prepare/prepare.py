@@ -34,7 +34,6 @@ class ZRP_Prepare(BaseZRP):
     def __init__(self, file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.params_dict =  kwargs
-
         
     def fit(self, input_data):
         if self.census_tract:

@@ -154,7 +154,7 @@ class ZRP(BaseZRP):
         self.check_for_old_files()
         curpath = dirname(__file__)
         if self.pipe_path is None:
-            self.pipe_path = join(curpath, "modeling/models")
+            self.pipe_path = join(curpath, f"modeling/models/{self.year}")
 
         data = data.sort_values('state')
         if chunk_size is None:
