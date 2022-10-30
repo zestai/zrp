@@ -43,8 +43,7 @@ def download_progress(url, fname):
     return fname
 
 
-def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tables_output_zip_fname, geo_yr="2019",
-                                     acs_yr="2019", acs_range="5yr"):
+def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tables_output_zip_fname):
     """
     Downloads look up tables and file them within the module.
     This downloads the zip file from the repository, extracts it, renames it, then moves the
@@ -75,34 +74,36 @@ def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tab
     # path_to_unzipped_src = os.path.join(cwd, unzipped_src_fname)
     path_to_lookup_tables = os.path.join(cwd, lookup_tables_output_fname)
     # os.rename(path_to_unzipped_src, path_to_lookup_tables)
+    years = ['2019' , '2020']
+    acs_range = '5yr'
+    for year in years:
+        # Clear old look up table directories
+        data_dir = os.path.join(cwd, 'data')
+        geo_data_dir = os.path.join(data_dir, f'processed/geo/{year}')
+        acs_data_dir = os.path.join(data_dir, f'processed/acs/{year}/{acs_range}')
 
-    # Clear old look up table directories
-    data_dir = os.path.join(cwd, 'data')
-    geo_data_dir = os.path.join(data_dir, f'processed/geo/{geo_yr}')
-    acs_data_dir = os.path.join(data_dir, f'processed/acs/{acs_yr}/{acs_range}')
+        if os.path.isdir(geo_data_dir):
+            shutil.rmtree(geo_data_dir)
+        if os.path.isdir(acs_data_dir):
+            shutil.rmtree(acs_data_dir)
 
-    if os.path.isdir(geo_data_dir):
-        shutil.rmtree(geo_data_dir)
-    if os.path.isdir(acs_data_dir):
-        shutil.rmtree(acs_data_dir)
+        print("Old geo lookup table data cleared out.")
 
-    print("Old geo lookup table data cleared out.")
+        # Migrate lookup tables
+        dl_geo_dir = os.path.join(cwd, lookup_tables_output_fname, f'geo/{year}')
+        dl_acs_dir = os.path.join(cwd, lookup_tables_output_fname, f'acs/{year}/{acs_range}')
 
-    # Migrate lookup tables
-    dl_geo_dir = os.path.join(cwd, lookup_tables_output_fname, f'geo/{geo_yr}')
-    dl_acs_dir = os.path.join(cwd, lookup_tables_output_fname, f'acs/{acs_yr}/{acs_range}')
-
-    if os.path.isdir(dl_geo_dir):
-        shutil.move(dl_geo_dir, geo_data_dir)
-        print("New geo lookup tables successfully migrated.")
-    else:
-        warnings.warn(f"The geo lookup data was not found in {dl_geo_dir}. Ensure you're requesting a valid year. "
-                      "Consult the lookup_tables release to troubleshoot.")
-    if os.path.isdir(dl_acs_dir):
-        shutil.move(dl_acs_dir, acs_data_dir)
-    else:
-        warnings.warn(f"The acs lookup data was not found in {dl_acs_dir}. Ensure you're requesting a valid year and"
-                      "year range. Consult the lookup_tables release to troubleshoot.")
+        if os.path.isdir(dl_geo_dir):
+            shutil.move(dl_geo_dir, geo_data_dir)
+            print("New geo lookup tables successfully migrated.")
+        else:
+            warnings.warn(f"The geo lookup data was not found in {dl_geo_dir}. Ensure you're requesting a valid year. "
+                          "Consult the lookup_tables release to troubleshoot.")
+        if os.path.isdir(dl_acs_dir):
+            shutil.move(dl_acs_dir, acs_data_dir)
+        else:
+            warnings.warn(f"The acs lookup data was not found in {dl_acs_dir}. Ensure you're requesting a valid year and"
+                          "year range. Consult the lookup_tables release to troubleshoot.")
 
     # Remove rest of lookup table folder
     shutil.rmtree(path_to_lookup_tables)
@@ -143,59 +144,60 @@ def download_and_clean_pipelines(url, pipelines_output_fname, pipelines_output_z
     # path_to_unzipped_src = os.path.join(cwd, unzipped_src_fname)
     path_to_pipelines = os.path.join(cwd, pipelines_output_fname)
     # os.rename(path_to_unzipped_src, path_to_pipelines)
+    years = ['2019', '2020']
+    for year in years:
+        # Clear old pipeline directories
+        model_dir = os.path.join(cwd, 'modeling/models', year)
+        block_group_dir = os.path.join(model_dir, 'block_group')
+        census_tract_dir = os.path.join(model_dir, 'census_tract')
+        zip_code_dir = os.path.join(model_dir, 'zip_code')
 
-    # Clear old look up table directories
-    model_dir = os.path.join(cwd, 'modeling/models')
-    block_group_dir = os.path.join(model_dir, 'block_group')
-    census_tract_dir = os.path.join(model_dir, 'census_tract')
-    zip_code_dir = os.path.join(model_dir, 'zip_code')
+        block_group_pipeline = os.path.join(block_group_dir, 'pipe.pkl')
+        census_tract_pipeline = os.path.join(census_tract_dir, 'pipe.pkl')
+        zip_code_pipeline = os.path.join(zip_code_dir, 'pipe.pkl')
 
-    block_group_pipeline = os.path.join(block_group_dir, 'pipe.pkl')
-    census_tract_pipeline = os.path.join(census_tract_dir, 'pipe.pkl')
-    zip_code_pipeline = os.path.join(zip_code_dir, 'pipe.pkl')
+        if os.path.isfile(block_group_pipeline):
+            os.remove(block_group_pipeline)
+        if os.path.isfile(census_tract_pipeline):
+            os.remove(census_tract_pipeline)
+        if os.path.isfile(zip_code_pipeline):
+            os.remove(zip_code_pipeline)
+        print("Old pipelines cleared out.")
 
-    if os.path.isfile(block_group_pipeline):
-        os.remove(block_group_pipeline)
-    if os.path.isfile(census_tract_pipeline):
-        os.remove(census_tract_pipeline)
-    if os.path.isfile(zip_code_pipeline):
-        os.remove(zip_code_pipeline)
-    print("Old pipelines cleared out.")
+        # Migrate pipelines
+        dl_bg_pipe_file = os.path.join(path_to_pipelines, year, 'block_group_pipe.pkl')
+        dl_ct_pipe_file = os.path.join(path_to_pipelines, year, 'census_tract_pipe.pkl')
+        dl_zp_pipe_file = os.path.join(path_to_pipelines, year, 'zip_code_pipe.pkl')
 
-    # Migrate pipelines
-    dl_bg_pipe_file = os.path.join(path_to_pipelines, 'block_group_pipe.pkl')
-    dl_ct_pipe_file = os.path.join(path_to_pipelines, 'census_tract_pipe.pkl')
-    dl_zp_pipe_file = os.path.join(path_to_pipelines, 'zip_code_pipe.pkl')
+        if os.path.isfile(dl_bg_pipe_file):
+            shutil.move(dl_bg_pipe_file, os.path.join(block_group_dir, 'pipe.pkl'))
+            print("Block group pipeline successfully migrated.")
+        else:
+            warnings.warn(f"The block group pipeline was not found in {dl_bg_pipe_file}."
+                          "Consult the pipelines release to troubleshoot.")
 
-    if os.path.isfile(dl_bg_pipe_file):
-        shutil.move(dl_bg_pipe_file, os.path.join(block_group_dir, 'pipe.pkl'))
-        print("Block group pipeline successfully migrated.")
-    else:
-        warnings.warn(f"The block group pipeline was not found in {dl_bg_pipe_file}."
-                      "Consult the pipelines release to troubleshoot.")
+        if os.path.isfile(dl_ct_pipe_file):
+            shutil.move(dl_ct_pipe_file, os.path.join(census_tract_dir, 'pipe.pkl'))
+            print("Census tract pipeline successfully migrated.")
+        else:
+            warnings.warn(f"The census tract pipeline was not found in {dl_ct_pipe_file}."
+                          "Consult the pipelines release to troubleshoot.")
 
-    if os.path.isfile(dl_ct_pipe_file):
-        shutil.move(dl_ct_pipe_file, os.path.join(census_tract_dir, 'pipe.pkl'))
-        print("Census tract pipeline successfully migrated.")
-    else:
-        warnings.warn(f"The census tract pipeline was not found in {dl_ct_pipe_file}."
-                      "Consult the pipelines release to troubleshoot.")
-
-    if os.path.isfile(dl_zp_pipe_file):
-        shutil.move(dl_zp_pipe_file, os.path.join(zip_code_dir, 'pipe.pkl'))
-        print("Zip code pipeline successfully migrated.")
-    else:
-        warnings.warn(f"The zip code pipeline was not found in {dl_zp_pipe_file}."
-                      "Consult the pipelines release to troubleshoot.")
+        if os.path.isfile(dl_zp_pipe_file):
+            shutil.move(dl_zp_pipe_file, os.path.join(zip_code_dir, 'pipe.pkl'))
+            print("Zip code pipeline successfully migrated.")
+        else:
+            warnings.warn(f"The zip code pipeline was not found in {dl_zp_pipe_file}."
+                          "Consult the pipelines release to troubleshoot.")
 
     # Remove rest of pipelines folder
     shutil.rmtree(path_to_pipelines)
 
     # save a version file so we can tell what it is
-    data_dir = os.path.join(cwd, 'data')
+    data_dir = os.path.join(cwd, 'modeling', 'models')
     vpath = os.path.join(data_dir, 'version')
     with open(vpath, 'w') as vfile:
-        vfile.write('zrp release --> {}'.format(pipelines_output_fname))
+        vfile.write('zrp release --> {}'.format(pipelines_output_zip_fname))
 
     print("Filed pipelines successfully.", file=sys.stderr)
 
