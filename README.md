@@ -51,7 +51,7 @@ development documentation](./model_report.rst)
 Install
 =======
 
-Install requires an internet connection. The package has been tested on python 3.7.4, but should likely work with 3.7.X.
+Install requires an internet connection. The package has been tested on python 3.7.7, but should likely work with 3.7.X.
 
 Note: Due to the size and number of lookup tables necesary for the zrp
 package, total installation requires 3 GB of available space.
