@@ -230,7 +230,7 @@ class ACS_Parser():
         tmp_data = pd.read_csv(dat_file, sep=",", header=None, dtype=str)
         seq_file = os.path.join(self.raw_acs_path,
                                 sequence_dict[str(i)]['sequence'])
-        tmp_headers = pd.read_excel(seq_file, sep=",",
+        tmp_headers = pd.read_excel(seq_file, 
                                     sheet_name="e", dtype=str)
 
         sequence_dict[str(i)]["headers"] = tmp_headers

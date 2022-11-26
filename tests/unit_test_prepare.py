@@ -1,8 +1,10 @@
 from zrp.prepare.preprocessing import ProcessStrings
 from zrp.prepare.acs_mapper import acs_search,ACSModelPrep
+from zrp.prepare.geo_lookup import GeoLookUpBuilder
 from zrp.prepare.utils import load_json,load_file
 from pandas.util.testing import assert_frame_equal
 from os.path import dirname, join, expanduser
+from zrp.prepare.acs_lookup import ACS_Parser
 from zrp.validate import ValidateGeocoded
 from zrp.prepare.geo_geocoder import ZGeo
 from zrp.prepare.base import BaseZRP
@@ -24,14 +26,14 @@ import re
 
 class testZRP_Prepare(unittest.TestCase):
 
-
+    ## Helper function
     def _copy_and_overwrite(self,from_path, to_path):
         if os.path.exists(to_path):
             shutil.rmtree(to_path)
         shutil.copytree(from_path, to_path)
 
-
-    def test_BaseZRP(self):
+    # Testing # prepare.py file here
+    def test_prepare(self):
 
         ### Moving all static files to zrp_data directory
         self._copy_and_overwrite('./tests/unit_test_data','../zrp/data/processed/')
@@ -130,6 +132,47 @@ class testZRP_Prepare(unittest.TestCase):
 
         shutil.rmtree('../zrp/data/processed/')
         shutil.rmtree('../zrp/artifacts')
+
+
+    def test_aceparser(self):
+        # Support files path pointing to where the raw ACS data is stored
+        support_files_path = "./tests/unit_test_data/ACS_data/"
+        # Year of ACS data
+        year = "2019"
+        # Span of ACS data. The ACS data is available in 1 or 5 year spans. 
+        span = "1"
+        # State
+        state_level = "al"
+        # State County FIPs Code
+        st_cty_code = "01001"
+        ## Testing ace perser here
+        acs_parse = ACS_Parser(support_files_path = support_files_path, year = year, span = span, state_level = state_level, n_jobs=1 )
+        output = acs_parse.transform(save_table = False)
+        ## Here I am generating the data for 148 
+        self.assertEqual(list(output.keys())[0],'148')
+
+
+    def test_dataprepgeo(self):
+        # Support files path pointing to where the raw tigerline shapefile data is stored
+        support_files_path = "./tests/unit_test_data/geo_sample/"
+        # Year of shapefile data
+        year = "2019"
+        # Geo level to build lookup table at
+        st_cty_code = "01001"
+
+        geo_build = GeoLookUpBuilder(support_files_path = support_files_path, year = year,output_folder_suffix='new')
+
+        output = geo_build.transform(st_cty_code, save_table = False)
+        ## Reading previous file
+        self.GEO_fixture = pd.read_parquet(os.path.join(support_files_path,'processed/geo/2019_new/Zest_Geo_Lookup_2019_01001.parquet'))
+        ### checking if schema is correct here
+        out_schema = output.dtypes.to_dict()
+        for key in out_schema.keys():
+            self.GEO_fixture [key] =  self.GEO_fixture[key].astype(out_schema[key])
+        
+        ## Final test on the dataframes
+        assert_frame_equal(self.GEO_fixture, output)
+
 
         
     

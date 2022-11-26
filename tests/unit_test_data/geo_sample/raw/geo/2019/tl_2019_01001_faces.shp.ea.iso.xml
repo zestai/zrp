@@ -1,0 +1,2808 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file contains all the Entity and Attribute Information--><gfc:FC_FeatureCatalogue xmlns:gmx="http://www.isotc211.org/2005/gmx"
+                         xmlns:gco="http://www.isotc211.org/2005/gco"
+                         xmlns:gmd="http://www.isotc211.org/2005/gmd"
+                         xmlns:xlink="http://www.w3.org/1999/xlink"
+                         xmlns:gml="http://www.opengis.net/gml/3.2"
+                         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                         xmlns:gfc="http://www.isotc211.org/2005/gfc"
+                         xsi:schemaLocation="https://www.ngdc.noaa.gov/metadata/published/xsd/schema/gfc/featureCataloging.xsd http://www.isotc211.org/2005/gfc">
+   <gmx:name>
+      <gco:CharacterString>Feature Catalog for the  2019 Topological Faces (Polygons With All Geocodes) County-based Shapefile</gco:CharacterString>
+   </gmx:name>
+   <gmx:scope>
+      <gco:CharacterString> Topological Faces (Polygons With All Geocodes) County-based Shapefile</gco:CharacterString>
+   </gmx:scope>
+   <gmx:versionNumber>
+      <gco:CharacterString>2019</gco:CharacterString>
+   </gmx:versionNumber>
+   <gmx:versionDate>
+      <gco:Date>2019-06-01</gco:Date>
+   </gmx:versionDate>
+   <gmx:language>
+      <gco:CharacterString>eng</gco:CharacterString>
+   </gmx:language>
+   <gmx:characterSet>
+      <gmd:MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode"
+                               codeListValue="utf8"
+                               codeSpace="004">utf8
+            </gmd:MD_CharacterSetCode>
+   </gmx:characterSet>
+   <gfc:featureType>
+      <gfc:FC_FeatureType>
+         <gfc:typeName>
+            <gco:LocalName>FACES.shp</gco:LocalName>
+         </gfc:typeName>
+         <gfc:definition>
+            <gco:CharacterString>
+        Topological Faces (Polygons With all Geocodes) County-based
+        shapefile
+      </gco:CharacterString>
+         </gfc:definition>
+         <gfc:isAbstract>
+            <gco:Boolean>false</gco:Boolean>
+         </gfc:isAbstract>
+         <gfc:featureCatalogue uuidref="2019_faces.ea.iso.xml"/>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TFID</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Permanent face ID</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString> Range Domain Minimum: 1
+                                              Range Domain Maximum: 999999999</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>STATEFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2100 state Federal Information Processing Standards
+        (FIPS) codes
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            INCITS.38-200x (R2004), Codes for the Identification of
+            the States, the the District of Columbia, Puerto Rico, and
+            the Insular Areas of the United States (Formerly FIPS 5-2)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>COUNTYFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 county Federal Information Processing Standards
+        (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            INCITS.31-200x (R2007), Codes for the Identification of
+            the Counties and Equivalent Areas of the United States,
+            Puerto Rico, and the Insular Areas of the United States
+            (Formerly FIPS 6-4)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TRACTCE10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 census tract code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>000000</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>
+            Water tract in some coastal and Great Lakes water and
+            territorial sea
+          </gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>000100 to 998999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Census tract number</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>BLKGRPCE10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 block group number</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>0</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Water block group</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>1 to 9</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Current block group code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>BLOCKCE10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 tabulation block number</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>0001 to 9999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>tabulation block number</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>COUSUBFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 county subdivision Federal Information Processing
+        Standards (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for
+            Named Populated Places, Primary County Divisions, and
+            other Locational Entities of the United States, Puerto
+            Rico, and the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>SUBMCDFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 subbarrio Federal Information Processing Standards
+        (FIPS) code in Puerto Rico
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString> Range Domain Minimum: 00001
+                                              Range Domain Maximum: 89999</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>CONCTYFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 consolidated city Federal Information Processing
+        Standards (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for
+            Named Populated Places, Primary County Divisions, and
+            other Locational Entities of the United States, Puerto
+            Rico, and the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>PLACEFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 place Federal Information Processing Standards
+        (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for
+            Named Populated Places, Primary County Divisions, and
+            other Locational Entities of the United States, Puerto
+            Rico, and the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>AIANNHFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 American Indian/Alaska Native/Native Hawaiian area
+        FIPS code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for
+            Named Populated Places, Primary County Divisions, and
+            other Locational Entities of the United States, Puerto
+            Rico, and the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>AIANNHCE10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 American Indian/Alaska Native/Native Hawaiian area
+        census code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>0001 to 4799</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Federally recognized legal American Indian area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>4800 to 4989</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>American Indian Joint-Use Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>5000 to 5499</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Hawaiian Home Land</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>5500 to 5899</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Oklahoma Tribal Statistical Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>5900 to 5999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Joint-Use Oklahoma Tribal Statistical Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>6000 to 7999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Alaska Native Village Statistical Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>8000 to 8999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Tribal Designated Statistical Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>9000 to 9499</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State recognized legal American Indian area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>9500 to 9998</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State Designated Tribal Statistical Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>COMPTYP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 American Indian/Alaska Native/Native Hawaiian area
+        reservation/statistical area or off-reservation trust land
+        Hawaiian home land indicator
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>R</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Reservation or statistical area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>T</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Off-reservation trust land</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TRSUBFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 American Indian tribal subdivision FIPS code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for
+            Named Populated Places, Primary County Divisions, and
+            other Locational Entities of the United States, Puerto
+            Rico, and the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TRSUBCE10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 American Indian tribal subdivision code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>001 to 998</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Current tribal subdivision code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>
+            Balance of AIAN with at least one tribal subdivision that is
+            not in a tribal subdivision
+          </gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>ANRCFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 Alaska Native Regional Corporation Federal
+        Information Processing Standards (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for
+            Named Populated Places, Primary County Divisions, and
+            other Locational Entities of the United States, Puerto
+            Rico, and the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>ELSDLEA10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 elementary school district local education agency
+        code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00001 to 99996</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>
+            Current elementary school district local education agency
+            code
+          </gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation>
+                                       <gmd:title gco:nilReason="inapplicable"/>
+                                       <gmd:date gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString>local school district</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>SCSDLEA10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        Census 2010 secondary school district local education agency
+        code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference>
+                  <gfc:FC_DefinitionReference>
+                     <gfc:definitionSource>
+                        <gfc:FC_DefinitionSource>
+                           <gfc:source>
+                              <gmd:CI_Citation>
+                                 <gmd:title gco:nilReason="inapplicable"/>
+                                 <gmd:date gco:nilReason="unknown"/>
+                                 <gmd:citedResponsibleParty>
+                                    <gmd:CI_ResponsibleParty>
+                                       <gmd:organisationName>
+                                          <gco:CharacterString>local school district</gco:CharacterString>
+                                       </gmd:organisationName>
+                                       <gmd:role>
+                                          <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                           codeListValue="resourceProvider"
+                                                           codeSpace="001"> resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                       </gmd:role>
+                                    </gmd:CI_ResponsibleParty>
+                                 </gmd:citedResponsibleParty>
+                              </gmd:CI_Citation>
+                           </gfc:source>
+                        </gfc:FC_DefinitionSource>
+                     </gfc:definitionSource>
+                  </gfc:FC_DefinitionReference>
+               </gfc:definitionReference>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00001 to 99996</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Current secondary school district local education agency code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation>
+                                       <gmd:title gco:nilReason="inapplicable"/>
+                                       <gmd:date gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString>local school district</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>UNSDLEA10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 unified school district local education agency code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference>
+                  <gfc:FC_DefinitionReference>
+                     <gfc:definitionSource>
+                        <gfc:FC_DefinitionSource>
+                           <gfc:source>
+                              <gmd:CI_Citation>
+                                 <gmd:title gco:nilReason="inapplicable"/>
+                                 <gmd:date gco:nilReason="unknown"/>
+                                 <gmd:citedResponsibleParty>
+                                    <gmd:CI_ResponsibleParty>
+                                       <gmd:organisationName>
+                                          <gco:CharacterString>local school district</gco:CharacterString>
+                                       </gmd:organisationName>
+                                       <gmd:role>
+                                          <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                           codeListValue="resourceProvider"
+                                                           codeSpace="001"> resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                       </gmd:role>
+                                    </gmd:CI_ResponsibleParty>
+                                 </gmd:citedResponsibleParty>
+                              </gmd:CI_Citation>
+                           </gfc:source>
+                        </gfc:FC_DefinitionSource>
+                     </gfc:definitionSource>
+                  </gfc:FC_DefinitionReference>
+               </gfc:definitionReference>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00001 to 99996</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Census 2010 Local Education Agency code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation>
+                                       <gmd:title gco:nilReason="inapplicable"/>
+                                       <gmd:date gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString>local school district</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>99997</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Land area not assigned</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation>
+                                       <gmd:title gco:nilReason="inapplicable"/>
+                                       <gmd:date gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString>local school district Enumerated_Domain:</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>99998</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Water area not assigned</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation>
+                                       <gmd:title gco:nilReason="inapplicable"/>
+                                       <gmd:date gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString>local school district</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>UACE10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Corrected Census 2010 urban area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00001 to 98999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Urban Area Code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>CD113FP</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        113th congressional district Federal Information Processing
+        Standards (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>At Large Representation</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>98</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Non-Voting Delegate</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>99</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>No Representation</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>01 to 53</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>
+            Congressional District (in states with more than one
+            district)
+          </gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>SLDUST10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 state legislative district (upper chamber) code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Any ASCII alphabetic or numeric character combination plus
+            hyphens from one to three characters
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State-assigned legislative district (upper chamber) code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>ZZZ</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State legislative district (upper chamber) not defined</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>SLDLST10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 state legislative district (lower chamber) code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Any ASCII alphabetic or numeric character combination plus
+            hyphens from one to three characters
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State-assigned legislative district (lower chamber) code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>ZZZ</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State legislative district (lower chamber) not defined</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>VTDST10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 voting district code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Any ASCII alphabetic or numeric character combination plus
+            hyphens from one to six characters
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Voting district code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>ZZZZZZ</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>No voting district defined</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>ZCTA5CE10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 5-digit ZIP Code Tabulation Area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00401 to 99950</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Five-digit ZIP code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TAZCE10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 traffic analysis zone code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Any ASCII alphabetic or numeric character combination from
+            one to six characters
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>traffic analysis zone code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>UGACE10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 urban growth area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00001 to 89999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Census 2010 urban growth area code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>PUMA5CE10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Census 2010 public use microdata area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00100 to 08200</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Census PUMA5 Code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>STATEFP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census state Federal Information Processing Standards
+        (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            INCITS.38-200x (R2004), Codes for the Identification of
+            the States, the District of Columbia, Puerto Rico, and the
+            Insular Areas of the United States (Formerly FIPS 5-2)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>COUNTYFP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census county Federal Information Processing Standards
+        (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            INCITS.31-200x (R2007), Codes for the Identification of
+            the Counties and Equivalent Areas of the United States,
+            Puerto Rico, and the Insular Areas of the United States
+            (Formerly FIPS 6-4)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TRACTCE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census census tract code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>000000</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>
+            Water tract in some coastal and Great Lakes water and
+            territorial sea
+          </gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>000100 to 998999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Census tract number</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>BLKGRPCE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census block group number</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>0</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Water block group</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>1 to 9</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Census 2000 block group code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>BLOCKCE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census tabulation block number</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>0001 to 9999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>tabulation block number</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>COUSUBFP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census county subdivision Federal Information Processing
+        Standards (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for
+            Named Populated Places, Primary County Divisions, and
+            other Locational Entities of the United States, Puerto
+            Rico, and the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>SUBMCDFP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census subminor civil division Federal Information
+        Processing Standards (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString> Range Domain Minimum: 00001
+                                              Range Domain Maximum: 89999</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>CONCTYFP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census consolidated city Federal Information Processing
+        Standards (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for
+            Named Populated Places, Primary County Divisions, and
+            other Locational Entities of the United States, Puerto
+            Rico, and the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>PLACEFP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census place Federal Information Processing Standards
+        (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for
+            Named Populated Places, Primary County Divisions, and
+            other Locational Entities of the United States, Puerto
+            Rico, and the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>AIANNHFP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census American Indian/Alaska Native/Native Hawaiian area
+        Federal Information Processing Standards (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for Named
+            Populated Places, Primary County Divisions, and other
+            Locational Entities of the United States, Puerto Rico, and
+            the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>AIANNHCE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census American Indian/Alaska Native/Native Hawaiian Area
+        code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>0001 to 4799</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Federally recognized legal American Indian area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>4800 to 4989</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>American Indian Joint-Use Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>5000 to 5499</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Hawaiian Home Land</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>5500 to 5899</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Oklahoma Tribal Statistical Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>5900 to 5999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Joint-Use Oklahoma Tribal Statistical Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>6000 to 7999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Alaska Native Village Statistical Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>8000 to 8999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Tribal Designated Statistical Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>9000 to 9499</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State recognized legal American Indian area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>9500 to 9998</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State Designated Tribal Statistical Area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>COMPTYP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census American Indian/Alaska Native/Native Hawaiian area
+        reservation/statistical area or off-reservation trust land
+        indicator
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>R</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Reservation or statistical area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>T</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Off-reservation trust land</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TRSUBFP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census American Indian tribal subdivision Federal
+        Information Processing Standards (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for Named
+            Populated Places, Primary County Divisions, and other
+            Locational Entities of the United States, Puerto Rico, and
+            the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TRSUBCE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census American Indian tribal subdivision code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>001 to 998</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Current tribal subdivision code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>
+            Balance of AIAN with at least one tribal subdivision that is
+            not in a tribal subdivision
+          </gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>ANRCFP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census Alaska Native Regional Corporation Federal
+        Information Processing Standards (FIPS) code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Federal Information Processing Series Census Codes for
+            Named Populated Places, Primary County Divisions, and
+            other Locational Entities of the United States, Puerto
+            Rico, and the Island Areas (Formerly FIPS 55-3)
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TTRACTCE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census tribal census tract code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>000000 to 998999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Blank</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>T00000 to T98999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Blank</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TBLKGPCE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census tribal block group letter</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>J</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Blank</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>K</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Blank</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>A to H</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Blank</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>ELSDLEA20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census elementary school district local education agency
+        code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00001 to 99996</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>
+            Current elementary school district local education agency
+            code
+          </gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation>
+                                       <gmd:title gco:nilReason="inapplicable"/>
+                                       <gmd:date gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString>local school district</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>SCSDLEA20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2020 Census secondary school district local education agency
+        code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference>
+                  <gfc:FC_DefinitionReference>
+                     <gfc:definitionSource>
+                        <gfc:FC_DefinitionSource>
+                           <gfc:source>
+                              <gmd:CI_Citation>
+                                 <gmd:title gco:nilReason="inapplicable"/>
+                                 <gmd:date gco:nilReason="unknown"/>
+                                 <gmd:citedResponsibleParty>
+                                    <gmd:CI_ResponsibleParty>
+                                       <gmd:organisationName>
+                                          <gco:CharacterString>local school district</gco:CharacterString>
+                                       </gmd:organisationName>
+                                       <gmd:role>
+                                          <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                           codeListValue="resourceProvider"
+                                                           codeSpace="001"> resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                       </gmd:role>
+                                    </gmd:CI_ResponsibleParty>
+                                 </gmd:citedResponsibleParty>
+                              </gmd:CI_Citation>
+                           </gfc:source>
+                        </gfc:FC_DefinitionSource>
+                     </gfc:definitionSource>
+                  </gfc:FC_DefinitionReference>
+               </gfc:definitionReference>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00001 to 99996</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Current secondary school district local education agency code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation>
+                                       <gmd:title gco:nilReason="inapplicable"/>
+                                       <gmd:date gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString>local school district</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>UNSDLEA20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census unified school district local education agency code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference>
+                  <gfc:FC_DefinitionReference>
+                     <gfc:definitionSource>
+                        <gfc:FC_DefinitionSource>
+                           <gfc:source>
+                              <gmd:CI_Citation>
+                                 <gmd:title gco:nilReason="inapplicable"/>
+                                 <gmd:date gco:nilReason="unknown"/>
+                                 <gmd:citedResponsibleParty>
+                                    <gmd:CI_ResponsibleParty>
+                                       <gmd:organisationName>
+                                          <gco:CharacterString>local school district</gco:CharacterString>
+                                       </gmd:organisationName>
+                                       <gmd:role>
+                                          <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                           codeListValue="resourceProvider"
+                                                           codeSpace="001"> resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                       </gmd:role>
+                                    </gmd:CI_ResponsibleParty>
+                                 </gmd:citedResponsibleParty>
+                              </gmd:CI_Citation>
+                           </gfc:source>
+                        </gfc:FC_DefinitionSource>
+                     </gfc:definitionSource>
+                  </gfc:FC_DefinitionReference>
+               </gfc:definitionReference>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00001 to 99996</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Census 2000 Local Education Agency code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation>
+                                       <gmd:title gco:nilReason="inapplicable"/>
+                                       <gmd:date gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString>local school district</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>99997</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Land area not assigned</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation>
+                                       <gmd:title gco:nilReason="inapplicable"/>
+                                       <gmd:date gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString>local school district Enumerated_Domain:</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>99998</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Water area not assigned</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation>
+                                       <gmd:title gco:nilReason="inapplicable"/>
+                                       <gmd:date gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString>local school district</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>UACE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census urban area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00001 to 98999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Urban Area Code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>CD116FP</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>116th congressional district code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>At Large Representation</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>98</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Non-Voting Delegate</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>99</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>No Representation</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>01 to 53</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>
+            Congressional District (in states with more than one
+            district)
+          </gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>SLDUST20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census state legislative district (upper chamber) code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Any ASCII alphabetic or numeric character combination plus
+            hyphens from one to three characters
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State-assigned legislative district (upper chamber) code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>ZZZ</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State legislative district (upper chamber) not defined</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>SLDLST20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census state legislative district (lower chamber) code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Any ASCII alphabetic or numeric character combination plus
+            hyphens from one to three characters
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State-assigned legislative district (lower chamber) code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>ZZZ</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>State legislative district (lower chamber) not defined</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>VTDST20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census voting district code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Any ASCII alphabetic or numeric character combination plus
+            hyphens from one to six characters
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Voting district code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>ZZZZZZ</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>No voting district defined</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>ZCTA5CE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census 5-digit ZIP Code Tabulation Area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00401 to 99950</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Five-digit ZIP code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>TAZCE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census traffic analysis zone code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>
+            Any ASCII alphabetic or numeric character combination from
+            one to six characters
+          </gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>traffic analysis zone code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>UGACE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census urban growth area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00001 to 89999</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Census 2000 urban growth area code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>PUMA5CE20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census public use microdata area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00100 to 08200</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Census PUMA5 Code</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>CSAFP20</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2020 Census combined statistical area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString> Range Domain Minimum: 100
+                                              Range Domain Maximum: 599</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>CBSAFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>
+        2010 Census metropolitan statistical area/micropolitan
+        statistical area code
+      </gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString> Range Domain Minimum: 10000
+                                              Range Domain Maximum: 49999</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>METDIVFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2010 Census metropolitan division code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString> Range Domain Minimum: 10004
+                                              Range Domain Maximum: 49994</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>CNECTAFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2010 Census combined New England city and town area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString> Range Domain Minimum: 700
+                                              Range Domain Maximum: 799</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>NECTAFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2010 Census New England city and town area code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString> Range Domain Minimum: 70000
+                                              Range Domain Maximum: 79999</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>NCTADVFP10</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>2010 Census New England city and town area division code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString> Range Domain Minimum: 70004
+                                              Range Domain Maximum: 79994</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>LWFLAG</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>land/water flag</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>G</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Glacier</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>I</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Intermittent Water</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>L</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Land</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>P</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Perennial Water</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>S</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Marsh/Swamp</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>OFFSET</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Geographic corridor/offset flag</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>N</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Not in a Geographic Corridor/Offset </gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>Y</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>This polygon is in a Geographic Corridor/Offset.</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>ATOTAL</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Total Area</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Blank</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>INTPTLAT</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Latitude of the internal point</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Blank</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName>INTPTLON</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString>Longitude of the internal point</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality gco:nilReason="unknown"/>
+               <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString>00</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString>Blank</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+      </gfc:FC_FeatureType>
+   </gfc:featureType>
+</gfc:FC_FeatureCatalogue>

@@ -12,3 +12,4 @@ scikit_learn==1.0.2
 surgeo==1.1.2
 tqdm==4.46.0
 xgboost==1.0.2
+pyyaml==5.4.1
