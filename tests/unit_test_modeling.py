@@ -67,8 +67,7 @@ class testZRP_Modeling(unittest.TestCase):
 
 
     def test_artifect_input_validator(self):
-        df = pd.read_json("./zrp/data/processed/artifacts/input_validator.json")
-        self.assertEqual(df.columns.to_list(),['is_empty', 'is_all_missing', 'n_obs', 'is_unique_key', 'pct_na'])
+        df = pd.read_json('./zrp/data/processed/artifacts/input_validator.json')
         self.assertEqual(df.shape,(7, 5))
 
     def test_proxy_output(self):
@@ -87,6 +86,27 @@ class testZRP_Modeling(unittest.TestCase):
         'source_zrp_name_only'])
         self.assertEqual(df.shape,(565, 12))
 
+    def test_acs_validator(self):
+            df = pd.read_json('./zrp/data/processed/artifacts/input_acs_validator.json')
+            self.assertEqual(df.shape,(8, 6))
+
+    def test_geo_validator(self):
+        df = pd.read_json('./zrp/data/processed/artifacts/input_geo_validator.json')
+        self.assertEqual(df.shape,(2, 1))
+
+     
+    def test_bisg_proxy(self):
+        df = pd.read_feather("./zrp/data/processed/artifacts/bisg_proxy_output.feather")
+        self.assertEqual(df.columns.to_list(),['ZEST_KEY',
+        'AAPI',
+        'AIAN',
+        'BLACK',
+        'HISPANIC',
+        'WHITE',
+        'race_proxy',
+        'source_bisg'])
+        self.assertEqual(df.shape,(565, 8))
+
     
     def test_remove_unwanted_file(self):
         if os.path.exists('./zrp/data'):
@@ -97,4 +117,3 @@ class testZRP_Modeling(unittest.TestCase):
 if __name__ =='__main__':
     unittest.main()
 
-    
