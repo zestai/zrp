@@ -35,14 +35,23 @@ class testZRP_Prepare(unittest.TestCase):
     # Testing # prepare.py file here
     def test_prepare(self):
 
+        if not os.path.exists('./zrp/data'):
+            os.mkdir('./zrp/data')
+
+
         ### Moving all static files to zrp_data directory
         self._copy_and_overwrite('./tests/unit_test_data','../zrp/data/processed/')
         ### moving artifects files to zrp directory
 
         if not os.path.exists('../zrp/artifacts'):
             os.mkdir('../zrp/artifacts')
-        self._copy_and_overwrite('./tests/unit_test_data/artifacts','../zrp/artifacts')
+
+        
+
+        self._copy_and_overwrite('./tests/unit_test_data/artifacts_static','../zrp/artifacts')
         print("all required files are now moved to ")
+
+        self._copy_and_overwrite('../zrp/data/','./zrp/data')
 
         ## Loading sample data for testing
         from zrp.prepare.prepare import ZRP_Prepare
@@ -128,11 +137,6 @@ class testZRP_Prepare(unittest.TestCase):
         ## Final test on the dataframes
         assert_frame_equal(self.fixture, data_out)
 
-        ### Cleaning artifects file ETC
-
-        shutil.rmtree('../zrp/data/processed/')
-        shutil.rmtree('../zrp/artifacts')
-
 
     def test_aceparser(self):
         # Support files path pointing to where the raw ACS data is stored
@@ -172,6 +176,16 @@ class testZRP_Prepare(unittest.TestCase):
         
         ## Final test on the dataframes
         assert_frame_equal(self.GEO_fixture, output)
+
+
+    def test_remove_unwanted_file(self):
+        if os.path.exists('./zrp/data'):
+            shutil.rmtree('./zrp/data')
+        if os.path.exists('../zrp/data/processed/'):
+            shutil.rmtree('../zrp/data/processed/')
+        if os.path.exists('../zrp/artifacts'):
+            shutil.rmtree('../zrp/artifacts')
+        pass
 
 
         
