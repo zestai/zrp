@@ -127,15 +127,15 @@ class testZRP_Prepare(unittest.TestCase):
         data_out = amp.acs_combine(geo_coded, acs_bg, acs_ct, acs_zip)
 
         # data_out.to_csv("tests/unit_test_data/unit_test_results.csv")
-        self.fixture = pd.read_parquet("./tests/unit_test_data/unit_test_results.parquet.gzip") 
+        self.static_data = pd.read_parquet("./tests/unit_test_data/unit_test_results.parquet.gzip") 
 
         ### checking if schema is correct here
         out_schema = data_out.dtypes.to_dict()
         for key in out_schema.keys():
-            self.fixture [key] =  self.fixture[key].astype(out_schema[key])
+            self.static_data [key] =  self.static_data[key].astype(out_schema[key])
         
         ## Final test on the dataframes
-        assert_frame_equal(self.fixture, data_out)
+        assert_frame_equal(self.static_data, data_out)
 
 
     def step2_aceparser(self):
@@ -152,8 +152,17 @@ class testZRP_Prepare(unittest.TestCase):
         ## Testing ace perser here
         acs_parse = ACS_Parser(support_files_path = support_files_path, year = year, span = span, state_level = state_level, n_jobs=1 )
         output = acs_parse.transform(save_table = False)
+        
         ## Here I am generating the data for 148 
         self.assertEqual(list(output.keys())[0],'148')
+        # output['148']['data'].to_parquet('./tests/unit_test_data/acs_parsed.parquet.gzip',compression='gzip')
+        self.ace_parsed_static = pd.read_parquet('./tests/unit_test_data/acs_parsed.parquet.gzip')
+        out_schema = output['148']['data'].dtypes.to_dict()
+        for key in out_schema.keys():
+            self.ace_parsed_static[key] =  self.ace_parsed_static[key].astype(out_schema[key])
+        assert_frame_equal(self.ace_parsed_static, output['148']['data'])
+
+       
 
 
     def step3_dataprepgeo(self):
@@ -168,14 +177,14 @@ class testZRP_Prepare(unittest.TestCase):
 
         output = geo_build.transform(st_cty_code, save_table = False)
         ## Reading previous file
-        self.GEO_fixture = pd.read_parquet(os.path.join(support_files_path,'processed/geo/2019_new/Zest_Geo_Lookup_2019_01001.parquet'))
+        self.GEO_static = pd.read_parquet(os.path.join(support_files_path,'processed/geo/2019_new/Zest_Geo_Lookup_2019_01001.parquet'))
         ### checking if schema is correct here
         out_schema = output.dtypes.to_dict()
         for key in out_schema.keys():
-            self.GEO_fixture [key] =  self.GEO_fixture[key].astype(out_schema[key])
+            self.GEO_static [key] =  self.GEO_static[key].astype(out_schema[key])
         
         ## Final test on the dataframes
-        assert_frame_equal(self.GEO_fixture, output)
+        assert_frame_equal(self.GEO_static, output)
 
 
     def step4_remove_unwanted_file(self):
