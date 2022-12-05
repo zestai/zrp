@@ -31,9 +31,9 @@ class testZRP_Prepare(unittest.TestCase):
         if os.path.exists(to_path):
             shutil.rmtree(to_path)
         shutil.copytree(from_path, to_path)
-
+    ## keeping the test to be  monolithic 
     # Testing # prepare.py file here
-    def test_prepare(self):
+    def step1_prepare(self):
 
         if not os.path.exists('./zrp/data'):
             os.mkdir('./zrp/data')
@@ -138,7 +138,7 @@ class testZRP_Prepare(unittest.TestCase):
         assert_frame_equal(self.fixture, data_out)
 
 
-    def test_aceparser(self):
+    def step2_aceparser(self):
         # Support files path pointing to where the raw ACS data is stored
         support_files_path = "./tests/unit_test_data/ACS_data/"
         # Year of ACS data
@@ -156,7 +156,7 @@ class testZRP_Prepare(unittest.TestCase):
         self.assertEqual(list(output.keys())[0],'148')
 
 
-    def test_dataprepgeo(self):
+    def step3_dataprepgeo(self):
         # Support files path pointing to where the raw tigerline shapefile data is stored
         support_files_path = "./tests/unit_test_data/geo_sample/"
         # Year of shapefile data
@@ -178,7 +178,7 @@ class testZRP_Prepare(unittest.TestCase):
         assert_frame_equal(self.GEO_fixture, output)
 
 
-    def test_remove_unwanted_file(self):
+    def step4_remove_unwanted_file(self):
         if os.path.exists('./zrp/data'):
             shutil.rmtree('./zrp/data')
         if os.path.exists('../zrp/data/processed/'):
@@ -187,6 +187,18 @@ class testZRP_Prepare(unittest.TestCase):
             shutil.rmtree('../zrp/artifacts')
         pass
 
+    def _steps(self):
+        for name in dir(self): # dir() result is implicitly sorted
+            if name.startswith("step"):
+                yield name, getattr(self, name) 
+
+
+    def test_steps(self):
+        for name, step in self._steps():
+            try:
+                step()
+            except Exception as e:
+                self.fail("{} failed ({}: {})".format(step, type(e), e))
 
         
     

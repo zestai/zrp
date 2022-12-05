@@ -21,8 +21,8 @@ class testZRP_Modeling(unittest.TestCase):
         if os.path.exists(to_path):
             shutil.rmtree(to_path)
         shutil.copytree(from_path, to_path)
-
-    def test_prepare(self):
+    ## keeping the test to be  monolithic 
+    def step1_prepare(self):
         if not os.path.exists('./zrp/data'):
             os.mkdir('./zrp/data')
         if not os.path.exists('./zrp/data/processed'):
@@ -66,11 +66,15 @@ class testZRP_Modeling(unittest.TestCase):
 
 
 
-    def test_artifect_input_validator(self):
-        df = pd.read_json('./zrp/data/processed/artifacts/input_validator.json')
+    def step2_artifect_input_validator(self):
+        with open('./zrp/data/processed/artifacts/input_validator.json') as json_file:
+            data = json.load(json_file)
+
+        df = pd.DataFrame(data)
+        json_file.close()
         self.assertEqual(df.shape,(7, 5))
 
-    def test_proxy_output(self):
+    def step3_proxy_output(self):
         df = pd.read_feather("./zrp/data/processed/artifacts/proxy_output.feather")
         self.assertEqual(df.columns.to_list(),['ZEST_KEY',
         'AAPI',
@@ -86,16 +90,26 @@ class testZRP_Modeling(unittest.TestCase):
         'source_zrp_name_only'])
         self.assertEqual(df.shape,(565, 12))
 
-    def test_acs_validator(self):
-            df = pd.read_json('./zrp/data/processed/artifacts/input_acs_validator.json')
-            self.assertEqual(df.shape,(8, 6))
+    def step4_acs_validator(self):
+        with open('./zrp/data/processed/artifacts/input_acs_validator.json') as json_file:
+            data = json.load(json_file)
 
-    def test_geo_validator(self):
-        df = pd.read_json('./zrp/data/processed/artifacts/input_geo_validator.json')
+        df = pd.DataFrame(data)
+        json_file.close()
+
+
+        self.assertEqual(df.shape,(8, 6))
+
+    def step5_geo_validator(self):
+        with open('./zrp/data/processed/artifacts/input_geo_validator.json') as json_file:
+             data = json.load(json_file)
+
+        df = pd.DataFrame(data)
+        json_file.close()
         self.assertEqual(df.shape,(2, 1))
 
      
-    def test_bisg_proxy(self):
+    def step6_bisg_proxy(self):
         df = pd.read_feather("./zrp/data/processed/artifacts/bisg_proxy_output.feather")
         self.assertEqual(df.columns.to_list(),['ZEST_KEY',
         'AAPI',
@@ -107,11 +121,25 @@ class testZRP_Modeling(unittest.TestCase):
         'source_bisg'])
         self.assertEqual(df.shape,(565, 8))
 
-    
-    def test_remove_unwanted_file(self):
+    def step7_remove_unwanted_file(self):
         if os.path.exists('./zrp/data'):
             shutil.rmtree('./zrp/data')
         pass
+
+    def _steps(self):
+        for name in dir(self): # dir() result is implicitly sorted
+            if name.startswith("step"):
+                yield name, getattr(self, name) 
+
+
+    def test_steps(self):
+        for name, step in self._steps():
+            try:
+                step()
+            except Exception as e:
+                self.fail("{} failed ({}: {})".format(step, type(e), e))
+        
+
 
 
 if __name__ =='__main__':

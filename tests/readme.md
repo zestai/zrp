@@ -9,6 +9,8 @@ Steps to follow
 
 - Create a new environment 
 - Use pip to install all dependencies using pip install -r requirements.txt
+- All unit test data should be moved to tests folder before trigring the pipeline
+- 
 - Nevigate to zrp directory
 - Run the unit test using "python -m tests.unit_test_prepare" 
 - ✨Magic ✨
