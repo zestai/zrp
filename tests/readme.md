@@ -12,8 +12,10 @@ Steps to follow
 - All unit test data should be moved to tests folder before trigring the pipeline
 - unit testing data is availabe in shared folder on given path shared/zrp/unit_test_data.zip :-
 - for testing the framework
---- cp shared/zrp/unit_test_data.zip zrp/tests/unit_test_data.zip
+--- cp shared/zrp/unit_test_data.zip.gz zrp/tests/unit_test_data.zip.gz
+
 unzip the data 
+--- gzip -dv zrp/tests/unit_test_data.zip.gz  zrp/tests/unit_test_data.zip
 --- unzip zrp/tests/unit_test_data.zip -d  zrp/tests
 
 - Nevigate to zrp directory
