@@ -20,10 +20,12 @@ unzip the data
 
 - Nevigate to zrp directory
 - Run the unit test using "python -m tests.unit_test_prepare" 
-- 
 
-- ✨Magic ✨
+ ✨Magic ✨
 
+- You can run the unit testing module as many times as you want but, after completion, directory structure may not remain same hence avoid commiting any code to git as ./zrp/data directory will be affected while testing. 
+
+-
 ## Features
 
 - Is going to test all the modules used for data processing are working or not
