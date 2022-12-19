@@ -65,12 +65,16 @@ ACS_data directory:
  - Processed_Zest_ACS_Lookup_20195yr_blockgroup.parquet: 
    a sample of processed 5-year American Community Survey data at the block group level from the 2019 survey
  
- -pipe.pkl: Pipeline file saved as pkl.
+ - pipe.pkl: Pipeline file saved as pkl.
  
- -standard_population_weights.json: Population weightage by race for all states.
- -unit_test_results.parquet.gzip  : Ideal results for given parameters, There results are further used to perform unit testing and compare test results with ideal output.
+ - standard_population_weights.json: Population weightage by race for all states.
+ - unit_test_results.parquet.gzip  : Ideal results for given parameters, There results are further used to perform unit testing and compare test results with ideal output.
  
- -models directory: contains trained 2019 models for block_group,zip level and census_tract levels.
+ - models directory: contains trained 2019 models for block_group,zip level and census_tract levels.
  
- -Zest_Geo_Lookup_2019_01001.parquet:  Contains details about STATEFP,	COUNTYFP,	TRACTCE, BLKGRPCE mosting used for geotagging.
+ - Zest_Geo_Lookup_2019_01001.parquet:  Contains details about STATEFP,	COUNTYFP,	TRACTCE, BLKGRPCE mosting used for geotagging.
+
+ - artifacts_static directory:
+ contins validatin files for acs and geo data mostly does staic check if dataframe is not empty, all values are not NaNs 
   
+- Zest_Geocoded__2019__34_1: Contains zeocoded data of New Jersey, sample having 565 rows and  23 columns, It is used to perform unit testing on geocoder module.
