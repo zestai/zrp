@@ -43,13 +43,10 @@ ACS_data directory:
     c. seq148.xlsx : this files contais schema of data for sequence number 148, basically used to provide column names to pandas dataframe.
     
     d. 1_year_Mini_Geo: geographical names and Geography ID for given state.
-       |      | State   |   Logical Record Number | Geography ID      | Geography Name                                                                                                           |
-       |-----:|:--------|------------------------:|:------------------|:-------------------------------------------------------------------------------------------------------------------------|
-       |    0 | US      |                       1 | 01000US           | United States                                                                                                            |
-       |    1 | US      |                       2 | 01001US           | United States -- Urban                                                                                                   |
-       |    2 | US      |                       3 | 01043US           | United States -- Rural                                                                                                   |
-       |    3 | US      |                       4 | 01089US           | United States -- American Indian Reservation and Trust Land -- Federal                                                   |
-       |    4 | US      |                       5 | 01091US           | United States -- Oklahoma Tribal Statistical Area  
+         |      | State   |   Logical Record Number | Geography ID      | Geography Name  
+         -----------------------------------------------------------------------------------
+         |    0 | US      |                       1 | 01000US           | United States                                                                          |    1 | US      |                       2 | 01001US           | United States -- Urban  
+
 - Parsed Data
     a. Zest_ACS_nj_seq2_2019_1yr.parquet : A sample of processed 1-year American Community Survey data at the  level from the 2019 survey for state: NJ	GeoId: 04000US34	Geography Name:New Jersey
     b. processed_Zest_ACS_Lookup_20195yr_blockgroup.parquet:  processed 5-year American Community Survey data at the blockgroup level from the 2019 survey
