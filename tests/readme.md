@@ -42,10 +42,14 @@ ACS_data directory:
     a. {e20191ak0148000.txt,e20191al0148000.txt} : Sample data files of ACS data, ACS data is provided within multipe files having state names and sequence number, these files are a sample data for alaska state.
     c. seq148.xlsx : this files contais schema of data for sequence number 148, basically used to provide column names to pandas dataframe.
     
-    d. 1_year_Mini_Geo: geographical names and Geography ID for given state.
-         |      | State   |   Logical Record Number | Geography ID      | Geography Name  
-         -----------------------------------------------------------------------------------
-         |    0 | US      |                       1 | 01000US           | United States                                                                          |    1 | US      |                       2 | 01001US           | United States -- Urban  
+    d. 1_year_Mini_Geo: geographical names and Geography ID for given state. Ex.
+         
+         
+|      | State   |   Logical Record Number | Geography ID      | Geography Name         |
+|----- |:-------:|:-----------------------:|:-----------------:|-----------------------:|
+|    0 | US      |                       1 | 01000US           | United States          |
+|    2 | US      |                       3 | 01043US           | United States -- Rural |
+ 
 
 - Parsed Data
     a. Zest_ACS_nj_seq2_2019_1yr.parquet : A sample of processed 1-year American Community Survey data at the  level from the 2019 survey for state: NJ	GeoId: 04000US34	Geography Name:New Jersey
