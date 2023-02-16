@@ -26,13 +26,16 @@ class ZRP_Performance(BaseEstimator, TransformerMixin):
     target_col: str
         default val = "race"
         Name of race column 
-    prob_columns: list
-        default val ["race"].unique
+    return_result: int
+        default val 1
+        return results form pycm module
+        if 2 then return results from both sklearn and pycm modules
         
     """
-    def __init__(self,key="ZEST_KEY", target_col="race"):
+    def __init__(self,key="ZEST_KEY", target_col="race",return_res = 1):
         self.key = key
         self.target_col = target_col
+        self.return_res = return_res
         
     def fit(self,x=None,y= None):
         return self
@@ -136,13 +139,7 @@ class ZRP_Performance(BaseEstimator, TransformerMixin):
             np.array(proxies)
         )
         performance_dict = {}
-        
-        
         return cm
-    
-    
-    
-    
     
     
     def transform(self, proxy_data):
@@ -160,8 +157,20 @@ class ZRP_Performance(BaseEstimator, TransformerMixin):
         self.performance_dict_sklern = {}
         self.cm.COUNT = self.sk_cm['COUNT']
 
-        for metric in ["PPV", "TPR", "FPR", "FNR", "TNR", "AUC","F1","COUNT"]:
+        for metric in ["PPV", "TPR", "FPR", "FNR", "TNR", "AUC","F1","COUNT","ACC"]:
             self.performance_dict_pycm[metric] = eval(f"self.cm.{metric}")
             self.performance_dict_sklern[metric] = eval("self.sk_cm['"+metric+"']")
-
+            
         
+        dff_sk  = pd.DataFrame(self.performance_dict_sklern).sort_index()
+        dff_cm  = pd.DataFrame(self.performance_dict_pycm).sort_index()
+        
+        for dff in [dff_sk,dff_cm]:
+            weighted_sum = [(dff[metric]*dff["COUNT"]).sum()/dff["COUNT"].sum() for metric in ["PPV", "TPR", "FPR", "FNR", "TNR", "AUC","F1","COUNT","ACC"]]
+            dff.loc['weighted_sum'] = weighted_sum
+            dff.loc['macro_avg'] = dff.mean()
+
+        if self.return_res ==1:
+            return dff_cm
+        else:
+            return dff_sk,dff_cm
