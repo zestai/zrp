@@ -2,13 +2,84 @@ from pycm import ConfusionMatrix
 from zrp.prepare.utils import load_file
 from zrp.prepare.preprocessing import set_id
 from sklearn.base import BaseEstimator, TransformerMixin 
+from multiprocessing import Pool, Manager,cpu_count
+from joblib import Parallel, delayed
+from collections import defaultdict
 from pycm import ConfusionMatrix
 from sklearn import metrics 
+from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import json
 import os
 import re
+
+
+
+class metrices:
+    """
+    Helper function to generate metrics on Multiple probability threshold    
+    Parameters
+    ----------
+    data: data frame with zrp_output structure
+    thres: threshold to apply on dataframe
+
+    """
+
+    def __init__(self,data,thres=0,target_col ='race',cols =None):
+        self.data = data 
+        self.thres = thres
+        self.target_col = 'race'
+        self.classes = data[self.target_col].unique()  
+        self.filterd_df=  self._apply_threshold()
+        
+        
+    def _apply_threshold(self):
+        return self.data.loc[(self.data[self.data[self.target_col].unique()]>self.thres).max(axis=1)]
+        
+        
+    def TPR(self):
+        ## prob is a series containing the prediction probability for given class
+        ## TPR is true positive/ actual positive
+        tprd = defaultdict()
+        act = self.filterd_df[self.target_col]
+        prob= self.filterd_df[self.classes].idxmax(axis=1) 
+        for col in self.classes:
+            pred_onehot=  (prob == col).astype(int)
+            act_onehot  = (act == col).astype(int)
+            true_positive = np.dot(pred_onehot,act_onehot)
+            act_positive = act_onehot.sum()
+            tprd[col] = true_positive/act_positive
+        return tprd
+    
+    def FPR(self):
+        fprd = defaultdict()
+        act = self.filterd_df[self.target_col]
+        prob= self.filterd_df[self.classes].idxmax(axis=1) 
+        for col in self.classes:
+            pred_onehot=  (prob == col).astype(int)
+            act_onehot  = (act != col).astype(int)
+            true_positive = np.dot(pred_onehot,act_onehot)
+            act_positive = act_onehot.sum()
+            fprd[col] = true_positive/act_positive
+        return fprd
+    
+    ##PPV(Precision or positive predictive value) Micro or weighted avg 
+    def PPV(self):
+        fppv = defaultdict()
+        act  = self.filterd_df[self.target_col]
+        prob = self.filterd_df[self.classes].idxmax(axis=1) 
+        for col in self.classes:
+            pred_onehot=  (prob == col).astype(int)
+            act_onehot  = (act == col).astype(int)
+            true_positive = np.dot(pred_onehot,act_onehot)
+            prd_positive = pred_onehot.sum()
+            fppv[col] = true_positive/prd_positive
+        return fppv
+
+
+
+
 
     
     
@@ -20,7 +91,7 @@ class ZRP_Performance(BaseEstimator, TransformerMixin):
     Parameters
     ----------
     df: pd.DataFrame
-        dataframe containes results predicted probabilities and target column
+        dataframe contains results predicted probabilities and target column
     key: str 
         default val = "ZEST_KEY"
         Key to set as index. If not provided, a key will be generated.
@@ -31,8 +102,18 @@ class ZRP_Performance(BaseEstimator, TransformerMixin):
         "path to save final results in json and HTML format"
     return_result: int
         default val 1
-        return results form pycm module
+        return results from pycm module
         if 2 then return results from both sklearn and pycm modules
+
+        
+    Returns:
+    ----------
+    results = .fit_transform(df)
+    result['pycm_results']: Provides all pycm results
+    result['sklern_results']: All Metrics calculated using sklearn library
+    result['coverage_met']: A dictionary with all metrics at different probability threshold
+           
+     
         
     """
     def __init__(self,key="ZEST_KEY", target_col="race",save_path= None,return_res = 1):
@@ -43,6 +124,36 @@ class ZRP_Performance(BaseEstimator, TransformerMixin):
         
     def fit(self,x=None,y= None):
         return self
+    
+    
+    def calculate_cov_thres(self,outfile,threshold):
+        total_lines = outfile.shape[0]
+        cov_dic1 =defaultdict()
+        filter_bool = ((outfile[['AAPI', 'AIAN', 'BLACK', 'HISPANIC','WHITE']]>threshold).sum(axis=1)>0)
+        fil_outfile = outfile[filter_bool]
+        coverage = filter_bool.sum()
+        coverage_per = (coverage/total_lines)*100
+        outfile.race_proxy == outfile.race
+        accuracy = (fil_outfile.race_proxy == fil_outfile.race).sum()/fil_outfile.shape[0]
+        clf = metrices(outfile,threshold)
+        cm1 = ConfusionMatrix(fil_outfile.race.values,fil_outfile.race_proxy.values)
+        cov_dic1[threshold]=[coverage,coverage_per,cm1.overall_stat['Overall ACC']*100,cm1.ACC_Macro*100,cm1.TNR_Micro*100,cm1.TPR_Micro*100,
+                           cm1.FNR_Micro*100,cm1.FPR_Micro*100]+ [i*100 for i in clf.TPR().values()]+ [i*100 for i in clf.FPR().values()] + [i*100 for i in clf.PPV().values()]
+        df_col = ['Coverage','Coverage_Percentage','Accuracy','Accuracy_Macro','TNR_Micro','TPR_Micro','FNR_Micro','FPR_Micro'] + [i+'_TPR'for i in clf.TPR().keys()]+ [i+ '_FPR' for i in clf.FPR().keys()]+ [i+ '_PPV' for i in clf.PPV().keys()]
+
+    
+        return pd.DataFrame(cov_dic1,index = df_col)
+    
+    
+
+    
+    def calculate_cov(self,outfile):
+        print(f"starting processing in {int(max(cpu_count()/3,1))} threads" )
+        com_df = Parallel(n_jobs=int(max(cpu_count()/3,1)), verbose=1, prefer='processes')(delayed(self.calculate_cov_thres)(outfile,chunk) for chunk in tqdm(np.array(range(0,20,1))/20))
+        final_df= pd.concat(com_df,axis=1).T
+        return final_df.to_dict()
+    
+    
     
     
     def calculate_tpr_fpr(self,y_real, y_pred):
@@ -86,6 +197,7 @@ class ZRP_Performance(BaseEstimator, TransformerMixin):
     def sklearn_results(self,proxy_data):
         
         sklearn_res = {}
+        self.key = "ZEST_KEY"
         
         df = proxy_data
         if df.index.name != self.key:
@@ -148,15 +260,18 @@ class ZRP_Performance(BaseEstimator, TransformerMixin):
     
     def transform(self, proxy_data):
 
+        ### Getting coverge ralated metrices
+        
+        self.coverage_met = self.calculate_cov(proxy_data)
         
         
+        proxy_data = proxy_data.dropna()
         ### Getting sklearn based results
         self.sk_cm = self.sklearn_results(proxy_data)
         
         
         
         ### Getting pycm results here:
-        
         self.cm = self.pycm_results(proxy_data)
         
         
@@ -171,19 +286,18 @@ class ZRP_Performance(BaseEstimator, TransformerMixin):
         
         dff_sk  = pd.DataFrame(self.performance_dict_sklern).sort_index()
         dff_cm  = pd.DataFrame(self.performance_dict_pycm).sort_index()
-        
-#         for dff in [dff_sk,dff_cm]:
-#             weighted_sum = [(dff[metric]*dff["COUNT"]).sum()/dff["COUNT"].sum() for metric in ["PPV", "TPR", "FPR", "FNR", "TNR", "AUC","F1","COUNT","ACC"]]
-#             dff.loc['weighted_sum'] = weighted_sum
-#             dff.loc['macro_avg'] = dff.mean()
 
+        
+        
+        
+        del(self.cm.__dict__['predict_vector'],self.cm.__dict__['actual_vector'])
+        final_result = {}
+        final_result['pycm_results'] = self.cm.__dict__
+        final_result['sklern_results'] =  self.__dict__['sk_cm']
+        final_result['coverage_met']= self.coverage_met
         
     
         if self.save_path != None:
-            del(self.cm.__dict__['predict_vector'],self.cm.__dict__['actual_vector'])
-            final_result = {}
-            final_result['pycm_results'] = self.cm.__dict__
-            final_result['sklern_results'] =  self.__dict__['sk_cm']
             
             # Serializing json
             json_object = json.dumps(final_result, indent=4)
@@ -194,6 +308,6 @@ class ZRP_Performance(BaseEstimator, TransformerMixin):
             
             self.cm.save_html(self.save_path  +"/test_results")
         if self.return_res ==1:
-            return dff_cm
+            return final_result
         else:
             return dff_sk,dff_cm
