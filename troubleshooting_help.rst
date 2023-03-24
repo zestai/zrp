@@ -9,7 +9,6 @@ In this document, we seek to provide insight for troubleshooting issues you may 
 #. There are spaces in the house number, ex.: "103 a". House numbers should not contain spaces.
 #. Supplemental BISG proxies cannot be provided if zipcode is not a part of the input data.
 #. You have duplicate rows in your data.
-#. The current version of the ZRP accepts the following race "labels/classes": 'BLACK', 'HISPANIC', 'AAPI', 'AIAN', 'WHITE'. The input training data to ZRP_Build shouldn't contain any other labels in the provided 'race' column.
 
 Manually Installing Lookup Tables and Pipeline Files
 ======================================================
