@@ -76,9 +76,24 @@ Ex.:
     python -m venv /Users/joejones/Documents/ZestAI/zrpvenv
     source /Users/joejones/Documents/ZestAI/zrpvenv/bin/activate
     
-    
-### Unix-like systems
+### General Installation
 
+    pip install zrp
+
+After installing via pip, you need to download the lookup tables and
+pipelines using the following command: :
+
+    python -m zrp download   
+    
+If you're experiencing issues with installation, please consult our [Common Issues](https://github.com/zestai/zrp/blob/main/troubleshooting.rst#manually-installing-lookup-tables-and-pipeline-files) page.
+
+### Advanced Installation
+
+*Required only if processing the data from scratch instead of using existing ZRP data
+
+#### Unix-like systems
+
+    pip install fiona
     pip install zrp
 
 After installing via pip, you need to download the lookup tables and
@@ -86,7 +101,7 @@ pipelines using the following command: :
 
     python -m zrp download
 
-### Windows
+#### Windows
 
     pip install pipwin
     pipwin install gdal
@@ -99,7 +114,7 @@ pipelines using the following command: :
 
     python -m zrp download
 
-If you're experiencing issues with installation, please consult our [Common Issues](https://github.com/zestai/zrp/blob/main/common_issues.rst#manually-installing-lookup-tables-and-pipeline-files) page.
+If you're experiencing issues with installation, please consult our [Common Issues](https://github.com/zestai/zrp/blob/main/troubleshooting.rst#manually-installing-lookup-tables-and-pipeline-files) page.
 
 Data
 ====
