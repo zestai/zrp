@@ -85,7 +85,7 @@ pipelines using the following command: :
 
     python -m zrp download   
     
-If you're experiencing issues with installation, please consult our [Common Issues](https://github.com/zestai/zrp/blob/main/troubleshooting.rst#manually-installing-lookup-tables-and-pipeline-files) page.
+If you're experiencing issues with installation, please consult our [troubleshooting help](https://github.com/zestai/zrp/blob/main/troubleshooting_help.rst#manually-installing-lookup-tables-and-pipeline-files) page.
 
 ### Advanced Installation
 
@@ -114,7 +114,7 @@ pipelines using the following command: :
 
     python -m zrp download
 
-If you're experiencing issues with installation, please consult our [Common Issues](https://github.com/zestai/zrp/blob/main/troubleshooting.rst#manually-installing-lookup-tables-and-pipeline-files) page.
+If you're experiencing issues with installation, please consult our [troubleshooting help](https://github.com/zestai/zrp/blob/main/troubleshooting_help.rst#manually-installing-lookup-tables-and-pipeline-files) page.
 
 Data
 ====
@@ -172,8 +172,8 @@ Check out the guides in the
 [examples](https://github.com/zestai/zrp/tree/main/examples) folder.
 Clone the repo in order to obtain the example notebooks and data; this
 is not provided in the pip installable package. If you\'re experiencing
-issues, first consult our [common issues
-guide](https://github.com/zestai/zrp/blob/main/common_issues.rst).
+issues, first consult our [troubleshooting help
+guide](https://github.com/zestai/zrp/blob/main/troubleshooting_help.rst) .
 
 [Here](https://mybinder.org/v2/gh/zestai/zrp/HEAD), we additionally
 provide an interactive virtual environment, via Binder, with ZRP
@@ -239,8 +239,8 @@ Next, we present the primary ways you\'ll use ZRP.
 Input data, **df**, into the prediction/modeling pipeline **MUST**
 contain the following columns: first name, middle name, last name, house
 number, street address (street name), city, state, zip code, and zest
-key. Consult our [common issues
-guide](https://github.com/zestai/zrp/blob/main/common_issues.rst) to
+key. Consult our [troubleshooting help
+guide](https://github.com/zestai/zrp/blob/main/troubleshooting_help.rst) to
 ensure your input data is the correct format.
 
 -   Output: A dataframe with the following columns: AAPI AIAN BLACK
@@ -336,8 +336,8 @@ ZRP Build
 Input data, **df**, into this pipeline **MUST** contain the following
 columns: first name, middle name, last name, house number, street
 address (street name), city, state, zip code, zest key, and race.
-Consult our [common issues
-guide](https://github.com/zestai/zrp/blob/main/common_issues.rst) to
+Consult our [troubleshooting help
+guide](https://github.com/zestai/zrp/blob/main/troubleshooting_help.rst) to
 ensure your input data is the correct format.
 
 -   Output: A dictionary of race & ethnicity probablities and labels.
