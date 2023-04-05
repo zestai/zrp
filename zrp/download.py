@@ -61,7 +61,7 @@ def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tab
     path_to_lt_zip = os.path.join(cwd, lookup_tables_output_zip_fname)
     print("Downloading zrp release...", file=sys.stderr)
     download_progress(url, path_to_lt_zip)
-    print("Finished download.")
+    print("Finished download")
     print("\n")
 
     print("Filing extras...")
@@ -94,12 +94,13 @@ def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tab
 
     if os.path.isdir(dl_geo_dir):
         shutil.move(dl_geo_dir, geo_data_dir)
-        print("New geo lookup tables successfully migrated.")
+        print(f"New geo lookup tables successfully migrated from {dl_geo_dir} to {geo_data_dir}.")
     else:
         warnings.warn(f"The geo lookup data was not found in {dl_geo_dir}. Ensure you're requesting a valid year. "
                       "Consult the lookup_tables release to troubleshoot.")
     if os.path.isdir(dl_acs_dir):
         shutil.move(dl_acs_dir, acs_data_dir)
+        print(f"New geo lookup tables successfully migrated from {dl_acs_dir} to {acs_data_dir}.")
     else:
         warnings.warn(f"The acs lookup data was not found in {dl_acs_dir}. Ensure you're requesting a valid year and"
                       "year range. Consult the lookup_tables release to troubleshoot.")
@@ -112,7 +113,8 @@ def download_and_clean_lookup_tables(url, lookup_tables_output_fname, lookup_tab
     with open(vpath, 'w') as vfile:
         vfile.write('zrp release --> {}'.format(lookup_tables_output_fname))
 
-    print("Filed lookup tables successfully.", file=sys.stderr)
+    print("Filed lookup tables successfully,", file=sys.stderr)
+    print("   to", data_dir)
 
 
 def download_and_clean_pipelines(url, pipelines_output_fname, pipelines_output_zip_fname):
@@ -129,7 +131,7 @@ def download_and_clean_pipelines(url, pipelines_output_fname, pipelines_output_z
     path_to_ppln_zip = os.path.join(cwd, pipelines_output_zip_fname)
     print("Downloading zrp release...", file=sys.stderr)
     download_progress(url, path_to_ppln_zip)
-    print("Finished download.")
+    print("Finished download")
     print("\n")
 
     print("Filing extras...")
@@ -197,7 +199,8 @@ def download_and_clean_pipelines(url, pipelines_output_fname, pipelines_output_z
     with open(vpath, 'w') as vfile:
         vfile.write('zrp release --> {}'.format(pipelines_output_fname))
 
-    print("Filed pipelines successfully.", file=sys.stderr)
+    print("Filed pipelines successfully", file=sys.stderr)
+    print("   to", model_dir)
 
 
 def get_release():
