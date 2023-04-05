@@ -179,6 +179,7 @@ class ACS_Parser():
             new_col_names = list(tmp_headers.columns)
             tmp_data_1.columns = new_col_names
             tmp_data_2.columns = new_col_names
+            tmp_data = tmp_data_1.append(tmp_data_2)
 
         except pd.errors.EmptyDataError:
             print(f'   Note: {dat_file_1} was empty.')
