@@ -24,6 +24,7 @@ from zrp.prepare.utils import load_json, load_file, save_feather, make_directory
 from zrp.prepare.base import BaseZRP
 from zrp.prepare.prepare import ZRP_Prepare
 
+
 import warnings
 warnings.filterwarnings(action='ignore')
 
@@ -169,6 +170,8 @@ class ZRP_Build_Model(BaseZRP):
         y_phat_train.columns = self.y_unique
 
         y_phat_train.reset_index(drop=False).to_feather(os.path.join(self.outputs_path, f"train_proxy_probs.feather"))
+        
+        print("Artifacts saved to:", self.outputs_path)
 
         return (y_hat_train, y_phat_train)
 
@@ -255,8 +258,10 @@ class ZRP_Build(BaseZRP):
 
     def __init__(self, file_path=None, zrp_model_name='zrp_0', *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
+        self.params_dict =  kwargs
+        #self.z_prepare = ZRP_Prepare(file_path=self.file_path,  *args, **kwargs)
         self.zrp_model_name = zrp_model_name
-        self.geo_key = 'GEOID'
+        self.geo_key = 'GEOID'    
 
     def validate_input_columns(self, data):
         """
@@ -272,6 +277,7 @@ class ZRP_Build(BaseZRP):
         for name in modeling_col_names():
             if name not in data.columns:
                 raise KeyError("Your input dataframe has incorrect columns provided. Ensure that the following data is in your input data frame: first_name, middle_name, last_name, house_number, street_address, city, state, zip_code, race. If you have provided this data, ensure that the column names for said data are either the same as the aformentioned data column names, or ensure that you have specified, via arguements, the column names for these data you have provided in your input data frame.")
+                
         return True
     
     def validate_target_classes(self, data, population_weights_dict, standard_population_weights_dicts):
@@ -306,7 +312,7 @@ class ZRP_Build(BaseZRP):
                 raise ValueError(f'Dataset target classes and "population_weights_dict" target classes do not match')
             else:
                 if sum(population_weights_dict.values()) != 1:
-                    raise ValueError('Sum of "population_weights_dict" classes must be equal to 1')
+                    raise ValueError('Sum of "population_weights_dict" classes must be equal to 1')        
 
     def select_population_weights_dict(self, data, standard_population_weights_dicts):
         """
@@ -323,12 +329,12 @@ class ZRP_Build(BaseZRP):
         user_target_classes = set(data[self.race].unique())
         for standard_population_weights in standard_population_weights_dicts:
             if user_target_classes == set(standard_population_weights.keys()):
-                return standard_population_weights
+                return standard_population_weights        
     
     def fit(self):
         return self
 
-    def transform(self, data, population_weights_dict = None):
+    def transform(self, data, population_weights_dict = None, chunk_size=25000):
         """
         Transforms the data
         
@@ -338,8 +344,9 @@ class ZRP_Build(BaseZRP):
             A pandas data frame of user input data.
         population_weights_dict: dict
             Prevalence of target classes within the USA population as provided by the end-user. Sum of the values provided in the dictionary must be equal to one. Example: {'class1': 0.7, 'class2': 0.3}
-        """    
-        
+        chunk_size: int
+            Numer of rows to be processed in each iteration. input_data processed all at once if None is provided.
+        """            
         cur_path = dirname(__file__)
         self.validate_input_columns(data)
         
@@ -366,10 +373,24 @@ class ZRP_Build(BaseZRP):
                              }
                   )
         data = data.drop_duplicates(subset=['ZEST_KEY'])
-        z_prepare = ZRP_Prepare(file_path=self.file_path)
-        z_prepare.fit(data)
-        prepared_data = z_prepare.transform(data)
-
+        
+        if chunk_size is None: 
+            chunk_size = len(data) 
+        chunk_max = int((len(data)-1)/chunk_size) + 1 
+        prepare_out_list = list() 
+        
+        for chunk in range(chunk_max): 
+            print("####################################") 
+            print(f'Processing rows: {chunk*chunk_size}:{(chunk+1)*chunk_size}') 
+            print("####################################") 
+            data_chunk = data[chunk*chunk_size:(chunk+1)*chunk_size] 
+            
+            z_prepare = ZRP_Prepare(file_path=self.file_path, **self.params_dict) 
+            z_prepare.fit(data_chunk)                                
+            prepared_data_chunk = z_prepare.transform(data_chunk)     
+            prepare_out_list.append(prepared_data_chunk) 
+            
+        prepared_data = pd.concat(prepare_out_list) 
 
         ft_list_source_map = {'census_tract': 'ct', 'block_group': 'bg', 'zip_code': 'zp'}
         source_to_geoid_level_map = {'census_tract': 'GEOID_CT', 'block_group': 'GEOID_BG', 'zip_code': 'GEOID_ZIP'}

@@ -145,7 +145,7 @@ def replicate_house_number(data, house_number, add_to_flg):
     df_base =  data.copy()# base is complete, containing the original record (1)
     data['replicate_flg'] = data['replicate_flg'].apply(lambda s: str(int(s) + add_to_flg).zfill(6))
     print("         ...Number processing...")
-    data[house_number].apply(lambda x: re.sub("[^0-9]","",str(x))) 
+    data[house_number] = data[house_number].apply(lambda x: re.sub("[^0-9]","",str(x))) 
     dataout = pd.concat([df_base, data], axis=0)
     dataout = dataout.drop_duplicates(keep = 'first', subset = [col for col in dataout.columns if col != 'replicate_flg'])
     print(f"         House number dataframe expansion is complete! (n={len(dataout)})")
@@ -553,7 +553,7 @@ class  ProcessGeo(BaseZRP):
         super().__init__(*args, **kwargs)
         
             
-    def fit(self, data):
+    def fit(self, data):        
         data_cols = list(data.columns)
         print("   [Start] Validating input geo data")
         if self.census_tract in data_cols:
@@ -571,7 +571,7 @@ class  ProcessGeo(BaseZRP):
         geo_validators_in = geo_validate.transform(data)
         save_json(geo_validators_in, self.out_path, "input_geo_validator.json") 
         print("   [Completed] Validating input geo data")
-        
+                
         return self
 
 
@@ -587,7 +587,8 @@ class  ProcessGeo(BaseZRP):
             Indicator is the data was previously cleaned & processed 
         replicate: bool
             Indicator to process compenents of the address
-        """        
+        """    
+        
         curpath = dirname(__file__)
         print("   [Start] Processing geo data")
         # Load Data
@@ -665,6 +666,7 @@ class  ProcessGeo(BaseZRP):
 
         data = reduce_whitespace(data)
         print("   [Completed] Processing geo data")
+        
         return data
 
     

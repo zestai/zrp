@@ -13,7 +13,6 @@ import json
 import sys
 import os
 import re
-
 import warnings
 warnings.filterwarnings(action='ignore')
 
@@ -31,7 +30,6 @@ class ZRP_Prepare(BaseZRP):
     def __init__(self, file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.params_dict =  kwargs
-
         
     def fit(self, input_data):
         if self.census_tract:
@@ -47,7 +45,7 @@ class ZRP_Prepare(BaseZRP):
             bg_len  = most_common(bg_lengths)
             if bg_len != 12:  
                 raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '060373116003')")
-
+                
     
     def transform(self, input_data):
         """
@@ -58,6 +56,7 @@ class ZRP_Prepare(BaseZRP):
         input_data: pd.Dataframe
             Dataframe to be transformed
         """  
+        
         curpath = dirname(__file__)
         # Load Data
         try:
@@ -91,7 +90,7 @@ class ZRP_Prepare(BaseZRP):
         inv_state_map = load_json(join(data_path, "inv_state_mapping.json"))
         data['zest_in_state_fips'] = data[self.state].replace(inv_state_map)
         print("")
-
+        
         geocode = ZGeo(file_path=self.file_path, **self.params_dict)
         geocode_out = [] 
         geo_grps = data.groupby([self.state])
@@ -106,17 +105,17 @@ class ZRP_Prepare(BaseZRP):
 
         geo_out = [] 
         for s in tqdm(gdkys):
-            print("   ... on state:", str(s))
+            print("   ... on state:", str(s))                         
             geo = inv_state_map[s].zfill(2)
             output = geocode.transform(geo_dict[s], geo, processed = True, replicate = True, save_table = True)
             geocode_out.append(output)
         if len(geocode_out) > 0:
             geo_coded = pd.concat(geocode_out)
-
+                    
             # append data unable to enter geo mapping
             geo_coded_keys = list(geo_coded.ZEST_KEY_COL.values)
             data_not_geo_coded = data[~data.index.isin(geo_coded_keys)]
-            geo_coded = pd.concat([geo_coded, data_not_geo_coded])
+            geo_coded = pd.concat([geo_coded, data_not_geo_coded])            
         else:
             geo_coded = data
             geo_coded['GEOID'] = None
