@@ -256,12 +256,15 @@ class ZRP_Build(BaseZRP):
         Name of zrp_model.
     """
 
-    def __init__(self, file_path=None, zrp_model_name='zrp_0', *args, **kwargs):
+    def __init__(self, file_path=None, zrp_model_name='zrp_0', prepare_chunks_file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.params_dict =  kwargs
         #self.z_prepare = ZRP_Prepare(file_path=self.file_path,  *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.geo_key = 'GEOID'    
+        if prepare_chunks_file_path is None:
+            prepare_chunks_file_path = './prepare_chunks'
+        self.prepare_chunks_file_path = prepare_chunks_file_path
 
     def validate_input_columns(self, data):
         """
@@ -379,7 +382,25 @@ class ZRP_Build(BaseZRP):
         chunk_max = int((len(data)-1)/chunk_size) + 1 
         prepare_out_list = list() 
         
-        for chunk in range(chunk_max):  
+        chunk_save_path = os.path.join(self.prepare_chunks_file_path,self.zrp_model_name)
+        if not os.path.exists(chunk_save_path):
+            print("Creating chunk path") 
+            make_directory(chunk_save_path)
+        
+        existing_chunk_files = [fname for fname in os.listdir(chunk_save_path) if os.path.isfile(os.path.join(chunk_save_path, fname))]
+        chunk_min = len(existing_chunk_files)
+        if chunk_min>0:
+            memory_loaded = 0.0
+            print("####################################") 
+            for chunk in range(np.min([chunk_min,chunk_max])):
+                prepare_out_list.append(pd.read_feather(os.path.join(chunk_save_path,"prepare_chunk_{}.feather".format(chunk))))
+                prepare_out_list[-1].set_index('ZEST_KEY',inplace=True)
+                print(f'Loading processed rows: {chunk*chunk_size}:{(chunk+1)*chunk_size}'+',chunk_size = {}Mb'.format(np.sum(prepare_out_list[-1].memory_usage(deep=True))*1.0e-6)) 
+                memory_loaded+=np.sum(prepare_out_list[-1].memory_usage(deep=True))*1.0e-6
+            print('Total memory loaded = {:.3f}'.format(memory_loaded))
+            print("####################################") 
+        
+        for chunk in range(chunk_min,chunk_max):  
             print("####################################") 
             print(f'Processing rows: {chunk*chunk_size}:{(chunk+1)*chunk_size}') 
             print("####################################") 
@@ -388,10 +409,13 @@ class ZRP_Build(BaseZRP):
             z_prepare = ZRP_Prepare(file_path=self.file_path, **self.params_dict) 
             z_prepare.fit(data_chunk)                                
             prepared_data_chunk = z_prepare.transform(data_chunk)
+            save_feather(prepared_data_chunk, chunk_save_path, "prepare_chunk_{}.feather".format(chunk))
             print('chunk_size = {}Mb'.format(np.sum(prepared_data_chunk.memory_usage(deep=True))*1.0e-6))
             prepare_out_list.append(prepared_data_chunk) 
+        print("Chunks being concatenated....") 
         prepared_data = pd.concat(prepare_out_list) 
-        prepare_out_list = None
+        prepare_out_list = None 
+        print("Finished chunks being concatenated....") 
 
         ft_list_source_map = {'census_tract': 'ct', 'block_group': 'bg', 'zip_code': 'zp'}
         source_to_geoid_level_map = {'census_tract': 'GEOID_CT', 'block_group': 'GEOID_BG', 'zip_code': 'GEOID_ZIP'}
