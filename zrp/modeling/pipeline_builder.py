@@ -391,6 +391,7 @@ class ZRP_Build(BaseZRP):
             print('chunk_size = {}Mb'.format(np.sum(prepared_data_chunk.memory_usage(deep=True))*1.0e-6))
             prepare_out_list.append(prepared_data_chunk) 
         prepared_data = pd.concat(prepare_out_list) 
+        prepare_out_list = None
 
         ft_list_source_map = {'census_tract': 'ct', 'block_group': 'bg', 'zip_code': 'zp'}
         source_to_geoid_level_map = {'census_tract': 'GEOID_CT', 'block_group': 'GEOID_BG', 'zip_code': 'GEOID_ZIP'}
