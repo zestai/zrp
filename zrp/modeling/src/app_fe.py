@@ -47,6 +47,8 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
 
     def _process_target(self, y): 
         y_unique = y.unique()
+        if isinstance(y_unique.dtype,pd.CategoricalDtype):
+            y_unique = y_unique.astype(str)
         y_unique.sort()
         self.n_classes = len(y_unique)
         
