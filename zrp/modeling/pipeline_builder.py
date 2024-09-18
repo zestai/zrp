@@ -143,7 +143,7 @@ class ZRP_Build_Model(BaseZRP):
             sample_weight=y.sample_weight
         )
 
-        self.y_unique = y[self.race].unique()
+        self.y_unique = y[self.race].unique().astype(str)
         self.y_unique.sort()
         
         make_directory(self.outputs_path)
