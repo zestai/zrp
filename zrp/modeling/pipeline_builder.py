@@ -7,7 +7,7 @@ import sys
 import json
 import joblib
 import pickle
-
+import time
 import xgboost
 from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
@@ -123,7 +123,8 @@ class ZRP_Build_Model(BaseZRP):
         ### Build the zrp_model
         ##### specify zrp_model parameters
         print('\n---\nbuilding zrp_model')
-
+        print('\n training data shape:{},{}'.format(X.shape[0],X.shape[1]))
+        
         opt_params = {'gamma': 5,
                       'learning_rate': 0.01,
                       'max_depth': 3,
@@ -132,17 +133,22 @@ class ZRP_Build_Model(BaseZRP):
                       'subsample': 0.20}
 
         ##### Initialize the zrp_model
-        self.zrp_model = XGBClassifier(objective='multi:softprob',
-                                       num_class=len(y[self.race].unique()),
+        num_class=len(y[self.race].unique())
+        self.zrp_model = XGBClassifier(objective='multi:softprob',   #'multi:softprob','binary:logistic'
+                                       num_class=num_class,
                                        **opt_params)
         ##### Fit
-        print('\n---\nfitting zrp_model')
-
+        print('\n---\nfitting zrp_model... n_class={}'.format(num_class))
+        #save_path = '/d/shared/users/gmw/zrp/model_artifacts'
+        #save_feather(X, save_path, "fe_data_{}.feather".format(self.zrp_model_source))
+        #save_feather(y[self.race], save_path, "target_data_{}.feather".format(self.zrp_model_source))    
+        start_time = time.time()  # Start timing
         self.zrp_model.fit(
             X, y[self.race],
             sample_weight=y.sample_weight
         )
-
+        elapsed_time = time.time() - start_time
+        print('\n---\nfinished fitting zrp_model....{:.3f}'.format(elapsed_time))
         self.y_unique = y[self.race].unique().astype(str)
         self.y_unique.sort()
         
@@ -153,7 +159,7 @@ class ZRP_Build_Model(BaseZRP):
             self.zrp_model.save_model(os.path.join(self.outputs_path, "model.txt"))
         except:
             pass
-
+        print('\n---\nfinished saving zrp_model')
         return self
 
     def transform(self, X):
