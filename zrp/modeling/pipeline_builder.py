@@ -196,9 +196,13 @@ class ZRP_DataSampling(BaseZRP):
         Indicates the source of zrp_modeling data to use. There are three optional sources 'block_group', 'census_tract', and 'zip_code'. By default 'census_tract' is inferred.
     population_weights_dict: dict
         Prevalence of target classes within the USA population as provided by the end-user. Sum of the values provided in the dictionary must be equal to one. Example: {'class1': 0.7, 'class2': 0.3}
+    test_size: float (default=0.2)
+        The fraction of samples to use as the test holdout
+    valid_size: float (default=0.2)
+        The fraction of samples to use as the test holdout
     """
 
-    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', population_weights_dict=None, *args, **kwargs):
+    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', population_weights_dict=None, test_size=0.2, valid_size=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.zrp_model_source = zrp_model_source
@@ -208,6 +212,8 @@ class ZRP_DataSampling(BaseZRP):
                                          self.zrp_model_source)
         self.geo_key = 'GEOID'
         self.population_weights_dict = population_weights_dict
+        self.test_size = test_size
+        self.valid_size = valid_size
 
     def fit(self):
         return self
@@ -240,14 +246,21 @@ class ZRP_DataSampling(BaseZRP):
             y = df[[self.key, self.geo_key, self.race, "sample_weight"]]
 
         # Train (80) + Test(20)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=9)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=self.test_size, random_state=9)
+        
+        X_valid = None
+        y_valid = None
+        if self.valid_size is not None:
+            X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=self.valid_size/(1.0-self.test_size), random_state=19)
+            save_feather(X_valid, self.outputs_path, f"X_valid.feather")
+            save_feather(y_valid, self.outputs_path, f"y_valid.feather")      
 
         save_feather(X_train, self.outputs_path, f"X_train.feather")
         save_feather(y_train, self.outputs_path, f"y_train.feather")
         save_feather(X_test, self.outputs_path, f"X_test.feather")
         save_feather(y_test, self.outputs_path, f"y_test.feather")
 
-        return (X_train, X_test, y_train, y_test)
+        return (X_train, X_test, X_valid, y_train, y_test, y_valid)
 
 
 class ZRP_Build(BaseZRP):
@@ -457,7 +470,7 @@ class ZRP_Build(BaseZRP):
             # Data Sampling 
             dsamp = ZRP_DataSampling(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name,population_weights_dict = population_weights_dict)
 
-            X_train, X_test, y_train, y_test = dsamp.transform(relevant_source_data)
+            X_train, X_test, X_valid, y_train, y_test, y_valid = dsamp.transform(relevant_source_data)
 
             data = data.drop_duplicates(subset=['ZEST_KEY'])
             print("Post-sampling shape: ", data.shape)
