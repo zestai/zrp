@@ -167,7 +167,14 @@ class ZRP_Build_Model(BaseZRP):
         objective = opt_params.pop('objective','multi:softprob')
         eval_metric = opt_params.pop('eval_metric','weighted_auc')
         if eval_metric=='weighted_auc' or eval_metric=='auc':
-            eval_metric=_weighted_multiclass_auc
+            feval=_weighted_multiclass_auc
+            eval_metric=None
+        elif callable(eval_metric):
+            feval=eval_metric
+            eval_metric=None            
+        else:
+            feval=None
+            opt_params['eval_metric'] = eval_metric 
         early_stopping_rounds = opt_params.pop('early_stopping_rounds',None)  
         
         ##### Initialize the zrp_model
@@ -196,13 +203,17 @@ class ZRP_Build_Model(BaseZRP):
         #save_feather(y[self.race], save_path, "target_data_{}.feather".format(self.zrp_model_source))    
         start_time = time.time()  # Start timing
         evals_result = dict()
-        model = xgboost.train({'objective':objective,'num_class':num_class,'tree_method':tree_method},
+        train_opts = {'objective':objective,'num_class':num_class,'tree_method':tree_method}
+        if eval_metric is not None:
+            train_opts['eval_metric'] = eval_metric
+        
+        model = xgboost.train(train_opts,
                           dtrain=dtrain,
                           num_boost_round=num_boost_round,
                           evals=evals,
                           early_stopping_rounds=early_stopping_rounds,
                           evals_result=evals_result,
-                          feval=eval_metric)  
+                          feval=feval)  
         elapsed_time = time.time() - start_time
         self.y_unique = y[self.race].unique().astype(str)
         print('\n---\nfinished fitting zrp_model....{:.3f}'.format(elapsed_time))
