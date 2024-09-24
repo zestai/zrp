@@ -99,18 +99,15 @@ class ZRP_Build_Pipeline(BaseZRP):
 
 def _weighted_multiclass_auc(pred, dtrain):
     """Used when custom objective is supplied."""
-    y = dtrain.encoded_label
     weights = dtrain.get_weight()
     pred_softmax = np.exp(pred)
     pred_softmax = pred_softmax/(np.sum(pred_softmax,axis=1)[:,None])
     weighted_auc = 0.0
     weight_total = 0.0
     for iclass in range(pred.shape[1]):
-        indx = np.where(y==iclass)[0]
-        y_class = np.zeros(y.shape[0],dtype=np.int64)
-        y_class[indx] = 1
-        weight_total+=float(len(indx))
-        weighted_auc+=float(len(indx))*roc_auc_score(y_class, pred_softmax[:,iclass])
+        y_class = dtrain.encoded_label[:,iclass]
+        weight_total+=float(dtrain.label_counts[iclass])
+        weighted_auc+=float(dtrain.label_counts[iclass])*roc_auc_score(y_class, pred_softmax[:,iclass])
     weighted_auc/=weight_total
     #return the negative since it tries to minimize the metric
     return 'WeightedAUC', -weighted_auc
@@ -134,7 +131,13 @@ class ZRP_Build_Model(BaseZRP):
     class MultiClassDMatrix(xgboost.DMatrix):
         def __init__(self, data, label, *args, **kwargs):
             super(ZRP_Build_Model.MultiClassDMatrix,self).__init__(data, label=label, *args, **kwargs)
-            self.encoded_label = label
+            self.unique_label = np.sort(np.unique(label))
+            self.num_label = len(self.unique_label)
+            self.encoded_label = np.zeros(label.shape[0],dtype=np.int64)
+            for iclass,class_label in enumerate(self.unique_label):
+                indx = np.where(label==class_label)[0]
+                self.encoded_label[indx,iclass]=1
+            self.label_counts = np.sum(self.encoded_label,axis=0)
             
     def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', xgb_params=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
