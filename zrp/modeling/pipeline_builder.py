@@ -134,7 +134,7 @@ class ZRP_Build_Model(BaseZRP):
             super(ZRP_Build_Model.MultiClassDMatrix,self).__init__(data, label=label, *args, **kwargs)
             self.unique_label = np.sort(np.unique(label))
             self.num_label = len(self.unique_label)
-            self.encoded_label = np.zeros(label.shape[0],dtype=np.int64)
+            self.encoded_label = np.zeros((label.shape[0],self.num_label),dtype=np.int32)
             for iclass,class_label in enumerate(self.unique_label):
                 indx = np.where(label==class_label)[0]
                 self.encoded_label[indx,iclass]=1
