@@ -14,6 +14,7 @@ from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score
 from feature_engine.imputation import MeanMedianImputer
 from feature_engine.selection import SmartCorrelatedSelection, DropFeatures
 
@@ -150,7 +151,7 @@ class ZRP_Build_Model(BaseZRP):
             opt_params = self.xgb_params
         
         eval_metric = opt_params.pop('eval_metric','weighted_auc')
-        if eval_metric=='weighted_auc':
+        if eval_metric=='weighted_auc' or eval_metric=='auc':
             eval_metric=_weighted_multiclass_auc
         early_stopping_rounds = opt_params.pop('early_stopping_rounds',None)  
         tree_method = opt_params.pop('tree_method','auto')  
@@ -163,9 +164,9 @@ class ZRP_Build_Model(BaseZRP):
         num_boost_round=opt_params.pop('n_estimators',2000)
         if early_stopping_rounds is None:
             early_stopping_rounds = num_boost_round
-        dtrain = ZRP_Build_Model.MultiClassDMatrix(X, pd.get_dummies(y['race']).astype('int').values, sample_weight=y.sample_weight)
+        dtrain = ZRP_Build_Model.MultiClassDMatrix(X, pd.get_dummies(y['race']).astype('int').values, weight=y.sample_weight)
         if X_valid is not None:
-            dvalid = ZRP_Build_Model.MultiClassDMatrix(X_valid, pd.get_dummies(y_valid['race']).astype('int').values, sample_weight=y_valid.sample_weight)
+            dvalid = ZRP_Build_Model.MultiClassDMatrix(X_valid, pd.get_dummies(y_valid['race']).astype('int').values, weight=y_valid.sample_weight)
             evals = [(dtrain, 'train'), (dvalid, 'val')]
         else:
             evals = [(dtrain, 'train')]
@@ -183,19 +184,20 @@ class ZRP_Build_Model(BaseZRP):
                           evals=evals,
                           early_stopping_rounds=early_stopping_rounds,
                           evals_result=evals_result,
-                          feval=mean_multiclass_auc)  
+                          feval=eval_metric)  
         elapsed_time = time.time() - start_time
+        self.y_unique = y[self.race].unique().astype(str)
         print('\n---\nfinished fitting zrp_model....{:.3f}'.format(elapsed_time))
-        setattr(self.zrp_model,'classes_',np.unique(target_sample))
+        setattr(self.zrp_model,'classes_',self.y_unique)
         setattr(self.zrp_model,'n_classes_',num_class)
-        setattr(self.zrp_model,'_le',xgboost.compat.XGBoostLabelEncoder().fit(target_sample))    
+        setattr(self.zrp_model,'_le',xgboost.compat.XGBoostLabelEncoder().fit(y[self.race].astype(str)))    
         setattr(self.zrp_model,'_Booster',model)  
         setattr(self.zrp_model,'objective ','multi:softprob')   
         setattr(self.zrp_model,'evals_result_ ',evals_result) 
         setattr(self.zrp_model,'best_score',model.best_score)  
         setattr(self.zrp_model,'best_iteration',model.best_iteration)   
         setattr(self.zrp_model,'best_ntree_limit',model.best_ntree_limit)
-        self.y_unique = y[self.race].unique().astype(str)
+        
         self.y_unique.sort()
         
         make_directory(self.outputs_path)
