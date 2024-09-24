@@ -96,7 +96,6 @@ class ZRP_Build_Pipeline(BaseZRP):
         save_feather(X_train_fe, self.outputs_path, f"train_fe_data.feather")
         return (X_train_fe)
 
-    
 def _weighted_multiclass_auc(pred, dtrain):
     """Used when custom objective is supplied."""
     y = dtrain.encoded_label
