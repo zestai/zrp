@@ -96,11 +96,23 @@ class ZRP_Build_Pipeline(BaseZRP):
         save_feather(X_train_fe, self.outputs_path, f"train_fe_data.feather")
         return (X_train_fe)
 
+
 def _weighted_multiclass_auc(pred, dtrain):
     """Used when custom objective is supplied."""
     y = dtrain.encoded_label
     weights = dtrain.get_weight()
-    return 'WeightedAUC', roc_auc_score(y, pred, average='weighted', sample_weight=weights)
+    pred_softmax = np.exp(pred)
+    pred_softmax = pred_softmax/(np.sum(pred_softmax,axis=1)[:,None])
+    weighted_auc = 0.0
+    weight_total = 0.0
+    for iclass in range(pred.shape[1]):
+        indx = np.where(y==iclass)[0]
+        y_class = np.zeros(y.shape[0],dtype=np.int64)
+        y_class[indx] = 1
+        weight_total+=float(len(indx))
+        weighted_auc+=float(len(indx))*roc_auc_score(y_class, pred_softmax[:,iclass])
+    weighted_auc/=weight_total
+    return 'WeightedAUC', weighted_auc
 
 class ZRP_Build_Model(BaseZRP):
     """
@@ -157,6 +169,8 @@ class ZRP_Build_Model(BaseZRP):
         early_stopping_rounds = opt_params.pop('early_stopping_rounds',None)  
         
         ##### Initialize the zrp_model
+        label_encoder = xgboost.compat.XGBoostLabelEncoder().fit(y[self.race])
+        y_dummies = label_encoder.transform(y[self.race])
         num_class=len(y[self.race].unique())
         self.zrp_model = XGBClassifier(objective=objective,
                                        num_class=num_class,
@@ -165,9 +179,10 @@ class ZRP_Build_Model(BaseZRP):
         num_boost_round=opt_params.pop('n_estimators',2000)
         if early_stopping_rounds is None:
             early_stopping_rounds = num_boost_round
-        dtrain = ZRP_Build_Model.MultiClassDMatrix(X, pd.get_dummies(y['race']).astype('int').values, weight=y.sample_weight)
+        dtrain = ZRP_Build_Model.MultiClassDMatrix(X, y_dummies, weight=y.sample_weight)
         if X_valid is not None:
-            dvalid = ZRP_Build_Model.MultiClassDMatrix(X_valid, pd.get_dummies(y_valid['race']).astype('int').values, weight=y_valid.sample_weight)
+            y_valid_dummies = label_encoder.transform(y_valid[self.race])
+            dvalid = ZRP_Build_Model.MultiClassDMatrix(X_valid, y_valid_dummies, weight=y_valid.sample_weight)
             evals = [(dtrain, 'train'), (dvalid, 'val')]
         else:
             evals = [(dtrain, 'train')]
@@ -191,7 +206,7 @@ class ZRP_Build_Model(BaseZRP):
         print('\n---\nfinished fitting zrp_model....{:.3f}'.format(elapsed_time))
         setattr(self.zrp_model,'classes_',self.y_unique)
         setattr(self.zrp_model,'n_classes_',num_class)
-        setattr(self.zrp_model,'_le',xgboost.compat.XGBoostLabelEncoder().fit(y[self.race].astype(str)))    
+        setattr(self.zrp_model,'_le',label_encoder)    
         setattr(self.zrp_model,'_Booster',model)  
         setattr(self.zrp_model,'objective ',objective)
         setattr(self.zrp_model,'evals_result_ ',evals_result) 
