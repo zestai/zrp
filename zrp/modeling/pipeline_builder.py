@@ -8,6 +8,7 @@ import json
 import joblib
 import pickle
 import time
+
 import xgboost
 from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
@@ -107,9 +108,12 @@ class ZRP_Build_Model(BaseZRP):
         Name of zrp_model
     zrp_model_source: str
         Indicates the source of zrp_modeling data to use. There are three optional sources 'block_group', 'census_tract', and 'zip_code'. By default 'census_tract' is inferred.
+    xgb_params: dict (default=None)
+        The xgboost model params to use when building the model.  If None then the default will be used 
+        {'gamma': 5,'learning_rate': 0.01,'max_depth': 3,'min_child_weight': 500,'n_estimators': 2000,'subsample': 0.20}
     """
 
-    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', *args, **kwargs):
+    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', xgb_params=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.zrp_model_source = zrp_model_source
@@ -118,19 +122,23 @@ class ZRP_Build_Model(BaseZRP):
                                          self.zrp_model_name,
                                          self.zrp_model_source)
         self.geo_key = 'GEOID'
+        self.xgb_params = xgb_params
 
-    def fit(self, X, y):
+    def fit(self, X, y, X_valid=None, y_valid=None):
         ### Build the zrp_model
         ##### specify zrp_model parameters
         print('\n---\nbuilding zrp_model')
         print('\n training data shape:{},{}'.format(X.shape[0],X.shape[1]))
         
-        opt_params = {'gamma': 5,
-                      'learning_rate': 0.01,
-                      'max_depth': 3,
-                      'min_child_weight': 500,
-                      'n_estimators': 2000,
-                      'subsample': 0.20}
+        if self.xgb_params is None:
+            opt_params = {'gamma': 5,
+                          'learning_rate': 0.01,
+                          'max_depth': 3,
+                          'min_child_weight': 500,
+                          'n_estimators': 2000,
+                          'subsample': 0.20}
+        else:
+            opt_params = self.xgb_params
 
         ##### Initialize the zrp_model
         num_class=len(y[self.race].unique())
@@ -143,10 +151,18 @@ class ZRP_Build_Model(BaseZRP):
         #save_feather(X, save_path, "fe_data_{}.feather".format(self.zrp_model_source))
         #save_feather(y[self.race], save_path, "target_data_{}.feather".format(self.zrp_model_source))    
         start_time = time.time()  # Start timing
-        self.zrp_model.fit(
-            X, y[self.race],
-            sample_weight=y.sample_weight
-        )
+        if X_valid is None:
+            self.zrp_model.fit(
+                X, y[self.race],
+                sample_weight=y.sample_weight
+            )
+        else:
+            self.zrp_model.fit(
+                X, y[self.race], 
+                eval_set=[(X_valid, y_valid[self.race])],
+                sample_weight=y.sample_weight
+            )            
+
         elapsed_time = time.time() - start_time
         print('\n---\nfinished fitting zrp_model....{:.3f}'.format(elapsed_time))
         self.y_unique = y[self.race].unique().astype(str)
@@ -262,7 +278,6 @@ class ZRP_DataSampling(BaseZRP):
 
         return (X_train, X_test, X_valid, y_train, y_test, y_valid)
 
-
 class ZRP_Build(BaseZRP):
     """
     This class builds a new custom ZRP model trained off of user input data. Supply standard ZRP requirements including name, address, and race to build your custom model-pipeline. The pipeline, model, and supporting data is saved automatically to "./artifacts/experiments/{zrp_model_name}/{zrp_model_source}/" in the support files path defined.
@@ -273,9 +288,17 @@ class ZRP_Build(BaseZRP):
         Path indicating where to put artifacts folder its files (pipeline, model, and supporting data), generated during intermediate steps.
     zrp_model_name: str
         Name of zrp_model.
+    test_size: float (default=0.2)
+        The fraction of samples to use as the test holdout
+    valid_size: float (default=0.2)
+        The fraction of samples to use as the test holdout
+    xgb_params: dict (default=None)
+        The xgboost model params to use when building the model.  If None then the default will be used 
+        {'gamma': 5,'learning_rate': 0.01,'max_depth': 3,'min_child_weight': 500,'n_estimators': 2000,'subsample': 0.20}
+    sources: list (default=None)
+        The sources to build a model for.  If None is provided then all sources will be used: ['block_group', 'census_tract', 'zip_code']
     """
-
-    def __init__(self, file_path=None, zrp_model_name='zrp_0', prepare_chunks_file_path=None, *args, **kwargs):
+    def __init__(self, file_path=None, zrp_model_name='zrp_0', prepare_chunks_file_path=None, test_size=0.2, valid_size=None, xgb_params=None, sources=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.params_dict =  kwargs
         #self.z_prepare = ZRP_Prepare(file_path=self.file_path,  *args, **kwargs)
@@ -284,6 +307,10 @@ class ZRP_Build(BaseZRP):
         if prepare_chunks_file_path is None:
             prepare_chunks_file_path = './prepare_chunks'
         self.prepare_chunks_file_path = prepare_chunks_file_path
+        self.test_size = test_size
+        self.valid_size = valid_size
+        self.xgb_params = xgb_params
+        self.sources = sources
 
     def validate_input_columns(self, data):
         """
@@ -439,6 +466,8 @@ class ZRP_Build(BaseZRP):
         ft_list_source_map = {'census_tract': 'ct', 'block_group': 'bg', 'zip_code': 'zp'}
         source_to_geoid_level_map = {'census_tract': 'GEOID_CT', 'block_group': 'GEOID_BG', 'zip_code': 'GEOID_ZIP'}
         sources = ['block_group', 'census_tract', 'zip_code']
+        if self.sources is not None:
+            sources = self.sources if isinstance(self.sources,list) else [self.sources]
         
         for source in sources:
             print("=========================")
@@ -468,7 +497,12 @@ class ZRP_Build(BaseZRP):
             print("    ...Data shape post feature drop: ", relevant_source_data.shape)
 
             # Data Sampling 
-            dsamp = ZRP_DataSampling(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name,population_weights_dict = population_weights_dict)
+            dsamp = ZRP_DataSampling(file_path=self.file_path, 
+                                     zrp_model_source=source, 
+                                     zrp_model_name=self.zrp_model_name,
+                                     population_weights_dict = population_weights_dict,
+                                     test_size=self.test_size,
+                                     valid_size=self.valid_size)
 
             X_train, X_test, X_valid, y_train, y_test, y_valid = dsamp.transform(relevant_source_data)
 
@@ -496,13 +530,34 @@ class ZRP_Build(BaseZRP):
             X_train.sort_index(inplace=True)
             y_train.sort_index(inplace=True)
             sample_weights.sort_index(inplace=True)
+              
 
             feature_cols = list(set(X_train.columns) - set([self.key, self.geo_key, 'GEOID_BG', 'GEOID_CT',
                                                             'GEOID_ZIP', "first_name", "middle_name",
                                                             "last_name", 'ZEST_KEY_COL']))
 
             X_train[feature_cols] = X_train[feature_cols].apply(pd.to_numeric, errors='coerce')
+            
+            if X_valid is not None:
+                y_valid = y_valid.drop_duplicates(self.key)
+                valid_keys = list(y_valid[self.key].values)
+                X_valid = X_valid[X_valid[self.key].isin(valid_keys)]
+                X_valid = X_valid.drop_duplicates(self.key)
 
+                y_valid[[self.geo_key, self.key]] = y_valid[[self.geo_key, self.key]].astype(str)
+
+                if X_valid.shape[0] != y_valid.shape[0]:
+                    raise AssertionError("Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data")
+
+                #### Set Index
+                X_valid.set_index(self.key, inplace=True)
+                y_valid.set_index(self.key, inplace=True)
+                sample_weights.set_index(self.key, inplace=True)
+                X_valid.sort_index(inplace=True)
+                y_valid.sort_index(inplace=True)
+                sample_weights.sort_index(inplace=True)  
+                X_valid[feature_cols] = X_valid[feature_cols].apply(pd.to_numeric, errors='coerce')
+                
             print('\n---\nSaving raw data')
             save_feather(X_train, outputs_path, "train_raw_data.feather")
             save_feather(y_train, outputs_path, "train_raw_targets.feather")
@@ -511,10 +566,18 @@ class ZRP_Build(BaseZRP):
             build_pipe = ZRP_Build_Pipeline(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
             build_pipe.fit(X_train, y_train)
             X_train_fe = build_pipe.transform(X_train)
-
+            save_feather(X_train_fe, outputs_path, "train_fe_data.feather")
+            X_valid_fe = None
+            if X_valid is not None:
+                X_valid_fe = build_pipe.transform(X_valid)
+                save_feather(X_valid_fe, outputs_path, "valid_fe_data.feather")
+                
             # Build Model
-            build_model = ZRP_Build_Model(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
-            build_model.fit(X_train_fe, y_train)
+            build_model = ZRP_Build_Model(file_path=self.file_path, 
+                                          zrp_model_source=source, 
+                                          zrp_model_name=self.zrp_model_name,
+                                          xgb_params=self.xgb_params)
+            build_model.fit(X_train_fe, y_train, X_valid_fe, y_valid)
             
             print(f"Completed building {source} model.")
         
