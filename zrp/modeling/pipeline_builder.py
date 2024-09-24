@@ -81,7 +81,7 @@ class ZRP_Build_Pipeline(BaseZRP):
 
         return self
 
-    def transform(self, X):
+    def transform(self, X, file_name="train_fe_data.feather"):
         make_directory(self.outputs_path)
         # Save pipeline
         pickle.dump(self.pipe, open(os.path.join(self.outputs_path, 'pipe.pkl'), 'wb'))
@@ -93,7 +93,8 @@ class ZRP_Build_Pipeline(BaseZRP):
 
         # Save train fe data
         print('\n---\nSaving FE data')
-        save_feather(X_train_fe, self.outputs_path, f"train_fe_data.feather")
+        if file_name is not None:
+            save_feather(X_train_fe, self.outputs_path, file_name)
         return (X_train_fe)
 
 def _weighted_multiclass_auc(pred, dtrain):
@@ -111,7 +112,8 @@ def _weighted_multiclass_auc(pred, dtrain):
         weight_total+=float(len(indx))
         weighted_auc+=float(len(indx))*roc_auc_score(y_class, pred_softmax[:,iclass])
     weighted_auc/=weight_total
-    return 'WeightedAUC', weighted_auc
+    #return the negative since it tries to minimize the metric
+    return 'WeightedAUC', -weighted_auc
 
 class ZRP_Build_Model(BaseZRP):
     """
@@ -588,11 +590,9 @@ class ZRP_Build(BaseZRP):
             build_pipe = ZRP_Build_Pipeline(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
             build_pipe.fit(X_train, y_train)
             X_train_fe = build_pipe.transform(X_train)
-            save_feather(X_train_fe, outputs_path, "train_fe_data.feather")
             X_valid_fe = None
             if X_valid is not None:
-                X_valid_fe = build_pipe.transform(X_valid)
-                save_feather(X_valid_fe, outputs_path, "valid_fe_data.feather")
+                X_valid_fe = build_pipe.transform(X_valid, "valid_fe_data.feather")
                 
             # Build Model
             build_model = ZRP_Build_Model(file_path=self.file_path, 
