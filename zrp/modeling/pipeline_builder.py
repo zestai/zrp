@@ -179,7 +179,7 @@ class ZRP_Build_Model(BaseZRP):
         #save_feather(y[self.race], save_path, "target_data_{}.feather".format(self.zrp_model_source))    
         start_time = time.time()  # Start timing
         evals_result = dict()
-        model = xgboost.train({'objective':'multi:softprob','num_class':num_class,'tree_method':tree_method},
+        model = xgboost.train({'objective':objective,'num_class':num_class,'tree_method':tree_method},
                           dtrain=dtrain,
                           num_boost_round=num_boost_round,
                           evals=evals,
