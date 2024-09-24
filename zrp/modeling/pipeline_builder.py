@@ -524,10 +524,8 @@ class ZRP_Build(BaseZRP):
                 #### Set Index
                 X_valid.set_index(self.key, inplace=True)
                 y_valid.set_index(self.key, inplace=True)
-                sample_weights.set_index(self.key, inplace=True)
                 X_valid.sort_index(inplace=True)
                 y_valid.sort_index(inplace=True)
-                sample_weights.sort_index(inplace=True)  
                 X_valid[feature_cols] = X_valid[feature_cols].apply(pd.to_numeric, errors='coerce')
                 
             print('\n---\nSaving raw data')
