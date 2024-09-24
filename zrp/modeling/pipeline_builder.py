@@ -96,6 +96,7 @@ class ZRP_Build_Pipeline(BaseZRP):
         save_feather(X_train_fe, self.outputs_path, f"train_fe_data.feather")
         return (X_train_fe)
 
+    
 def _weighted_multiclass_auc(pred, dtrain):
     """Used when custom objective is supplied."""
     y = dtrain.encoded_label
@@ -146,21 +147,22 @@ class ZRP_Build_Model(BaseZRP):
                           'max_depth': 3,
                           'min_child_weight': 500,
                           'n_estimators': 2000,
-                          'subsample': 0.20}
+                          'subsample': 0.20,
+                          'objective': 'multi:softprob'}
         else:
-            opt_params = self.xgb_params
-        
+            opt_params = self.xgb_params.copy()
+        objective = opt_params.pop('objective','multi:softprob')
         eval_metric = opt_params.pop('eval_metric','weighted_auc')
         if eval_metric=='weighted_auc' or eval_metric=='auc':
             eval_metric=_weighted_multiclass_auc
         early_stopping_rounds = opt_params.pop('early_stopping_rounds',None)  
-        tree_method = opt_params.pop('tree_method','auto')  
         
         ##### Initialize the zrp_model
         num_class=len(y[self.race].unique())
-        self.zrp_model = XGBClassifier(objective='multi:softprob',   #'multi:softprob','binary:logistic'
+        self.zrp_model = XGBClassifier(objective=objective,
                                        num_class=num_class,
                                        **opt_params)
+        tree_method = opt_params.pop('tree_method','auto')  
         num_boost_round=opt_params.pop('n_estimators',2000)
         if early_stopping_rounds is None:
             early_stopping_rounds = num_boost_round
@@ -178,7 +180,7 @@ class ZRP_Build_Model(BaseZRP):
         #save_feather(y[self.race], save_path, "target_data_{}.feather".format(self.zrp_model_source))    
         start_time = time.time()  # Start timing
         evals_result = dict()
-        model = xgboost.train({'objective':'multi:softprob','num_class':num_class,'tree_method':tree_method},
+        model = xgboost.train({'objective':objective,'num_class':num_class,'tree_method':tree_method},
                           dtrain=dtrain,
                           num_boost_round=num_boost_round,
                           evals=evals,
@@ -192,7 +194,7 @@ class ZRP_Build_Model(BaseZRP):
         setattr(self.zrp_model,'n_classes_',num_class)
         setattr(self.zrp_model,'_le',xgboost.compat.XGBoostLabelEncoder().fit(y[self.race].astype(str)))    
         setattr(self.zrp_model,'_Booster',model)  
-        setattr(self.zrp_model,'objective ','multi:softprob')   
+        setattr(self.zrp_model,'objective ',objective)
         setattr(self.zrp_model,'evals_result_ ',evals_result) 
         setattr(self.zrp_model,'best_score',model.best_score)  
         setattr(self.zrp_model,'best_iteration',model.best_iteration)   
