@@ -150,7 +150,7 @@ class ZRP_Build_Model(BaseZRP):
                           'subsample': 0.20,
                           'objective': 'multi:softprob'}
         else:
-            opt_params = self.xgb_params
+            opt_params = self.xgb_params.copy()
         objective = opt_params.pop('objective','multi:softprob')
         eval_metric = opt_params.pop('eval_metric','weighted_auc')
         if eval_metric=='weighted_auc' or eval_metric=='auc':
