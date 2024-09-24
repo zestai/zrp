@@ -14,6 +14,7 @@ from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score
 from feature_engine.imputation import MeanMedianImputer
 from feature_engine.selection import SmartCorrelatedSelection, DropFeatures
 
