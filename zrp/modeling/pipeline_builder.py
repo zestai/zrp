@@ -146,10 +146,11 @@ class ZRP_Build_Model(BaseZRP):
                           'max_depth': 3,
                           'min_child_weight': 500,
                           'n_estimators': 2000,
-                          'subsample': 0.20}
+                          'subsample': 0.20,
+                          'objective': 'multi:softprob'}
         else:
             opt_params = self.xgb_params
-        
+        objective = opt_params.pop('objective','multi:softprob')
         eval_metric = opt_params.pop('eval_metric','weighted_auc')
         if eval_metric=='weighted_auc' or eval_metric=='auc':
             eval_metric=_weighted_multiclass_auc
@@ -158,7 +159,7 @@ class ZRP_Build_Model(BaseZRP):
         
         ##### Initialize the zrp_model
         num_class=len(y[self.race].unique())
-        self.zrp_model = XGBClassifier(objective='multi:softprob',   #'multi:softprob','binary:logistic'
+        self.zrp_model = XGBClassifier(objective=objective,   #'multi:softprob','binary:logistic'
                                        num_class=num_class,
                                        **opt_params)
         num_boost_round=opt_params.pop('n_estimators',2000)
@@ -192,7 +193,7 @@ class ZRP_Build_Model(BaseZRP):
         setattr(self.zrp_model,'n_classes_',num_class)
         setattr(self.zrp_model,'_le',xgboost.compat.XGBoostLabelEncoder().fit(y[self.race].astype(str)))    
         setattr(self.zrp_model,'_Booster',model)  
-        setattr(self.zrp_model,'objective ','multi:softprob')   
+        setattr(self.zrp_model,'objective ',objective)
         setattr(self.zrp_model,'evals_result_ ',evals_result) 
         setattr(self.zrp_model,'best_score',model.best_score)  
         setattr(self.zrp_model,'best_iteration',model.best_iteration)   
