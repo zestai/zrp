@@ -95,6 +95,7 @@ class ZRP_Build_Pipeline(BaseZRP):
         save_feather(X_train_fe, self.outputs_path, f"train_fe_data.feather")
         return (X_train_fe)
 
+    
 def _weighted_multiclass_auc(pred, dtrain):
     """Used when custom objective is supplied."""
     y = dtrain.encoded_label
@@ -137,7 +138,8 @@ class ZRP_Build_Model(BaseZRP):
         ### Build the zrp_model
         ##### specify zrp_model parameters
         print('\n---\nbuilding zrp_model')
-
+        print('\n training data shape:{},{}'.format(X.shape[0],X.shape[1]))
+        
         if self.xgb_params is None:
             opt_params = {'gamma': 5,
                           'learning_rate': 0.01,
@@ -149,28 +151,31 @@ class ZRP_Build_Model(BaseZRP):
             opt_params = self.xgb_params
         
         eval_metric = opt_params.pop('eval_metric','weighted_auc')
-        if eval_metric=='weighted_auc':
+        if eval_metric=='weighted_auc' or eval_metric=='auc':
             eval_metric=_weighted_multiclass_auc
         early_stopping_rounds = opt_params.pop('early_stopping_rounds',None)  
         tree_method = opt_params.pop('tree_method','auto')  
         
         ##### Initialize the zrp_model
         num_class=len(y[self.race].unique())
-        self.zrp_model = XGBClassifier(objective='multi:softprob',
+        self.zrp_model = XGBClassifier(objective='multi:softprob',   #'multi:softprob','binary:logistic'
                                        num_class=num_class,
                                        **opt_params)
         num_boost_round=opt_params.pop('n_estimators',2000)
         if early_stopping_rounds is None:
             early_stopping_rounds = num_boost_round
-        dtrain = ZRP_Build_Model.MultiClassDMatrix(X, pd.get_dummies(y['race']).astype('int').values, sample_weight=y.sample_weight)
+        dtrain = ZRP_Build_Model.MultiClassDMatrix(X, pd.get_dummies(y['race']).astype('int').values, weight=y.sample_weight)
         if X_valid is not None:
-            dvalid = ZRP_Build_Model.MultiClassDMatrix(X_valid, pd.get_dummies(y_valid['race']).astype('int').values, sample_weight=y_valid.sample_weight)
+            dvalid = ZRP_Build_Model.MultiClassDMatrix(X_valid, pd.get_dummies(y_valid['race']).astype('int').values, weight=y_valid.sample_weight)
             evals = [(dtrain, 'train'), (dvalid, 'val')]
         else:
             evals = [(dtrain, 'train')]
             
         ##### Fit
         print('\n---\nfitting zrp_model... n_class={}'.format(num_class))
+        #save_path = '/d/shared/users/gmw/zrp/model_artifacts'
+        #save_feather(X, save_path, "fe_data_{}.feather".format(self.zrp_model_source))
+        #save_feather(y[self.race], save_path, "target_data_{}.feather".format(self.zrp_model_source))    
         start_time = time.time()  # Start timing
         evals_result = dict()
         model = xgboost.train({'objective':'multi:softprob','num_class':num_class,'tree_method':tree_method},
@@ -179,19 +184,20 @@ class ZRP_Build_Model(BaseZRP):
                           evals=evals,
                           early_stopping_rounds=early_stopping_rounds,
                           evals_result=evals_result,
-                          feval=mean_multiclass_auc)  
+                          feval=eval_metric)  
         elapsed_time = time.time() - start_time
+        self.y_unique = y[self.race].unique().astype(str)
         print('\n---\nfinished fitting zrp_model....{:.3f}'.format(elapsed_time))
-        setattr(self.zrp_model,'classes_',np.unique(target_sample))
+        setattr(self.zrp_model,'classes_',self.y_unique)
         setattr(self.zrp_model,'n_classes_',num_class)
-        setattr(self.zrp_model,'_le',xgboost.compat.XGBoostLabelEncoder().fit(target_sample))    
+        setattr(self.zrp_model,'_le',xgboost.compat.XGBoostLabelEncoder().fit(y[self.race].astype(str)))    
         setattr(self.zrp_model,'_Booster',model)  
         setattr(self.zrp_model,'objective ','multi:softprob')   
         setattr(self.zrp_model,'evals_result_ ',evals_result) 
         setattr(self.zrp_model,'best_score',model.best_score)  
         setattr(self.zrp_model,'best_iteration',model.best_iteration)   
         setattr(self.zrp_model,'best_ntree_limit',model.best_ntree_limit)
-        self.y_unique = y[self.race].unique().astype(str)
+        
         self.y_unique.sort()
         
         make_directory(self.outputs_path)
@@ -201,7 +207,7 @@ class ZRP_Build_Model(BaseZRP):
             self.zrp_model.save_model(os.path.join(self.outputs_path, "model.txt"))
         except:
             pass
-
+        print('\n---\nfinished saving zrp_model')
         return self
 
     def transform(self, X):
