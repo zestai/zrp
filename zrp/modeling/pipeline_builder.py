@@ -155,13 +155,13 @@ class ZRP_Build_Model(BaseZRP):
         if eval_metric=='weighted_auc' or eval_metric=='auc':
             eval_metric=_weighted_multiclass_auc
         early_stopping_rounds = opt_params.pop('early_stopping_rounds',None)  
-        tree_method = opt_params.pop('tree_method','auto')  
         
         ##### Initialize the zrp_model
         num_class=len(y[self.race].unique())
         self.zrp_model = XGBClassifier(objective=objective,   #'multi:softprob','binary:logistic'
                                        num_class=num_class,
                                        **opt_params)
+        tree_method = opt_params.pop('tree_method','auto')  
         num_boost_round=opt_params.pop('n_estimators',2000)
         if early_stopping_rounds is None:
             early_stopping_rounds = num_boost_round
