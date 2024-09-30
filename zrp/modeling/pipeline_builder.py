@@ -274,11 +274,11 @@ class ZRP_DataSampling(BaseZRP):
         Prevalence of target classes within the USA population as provided by the end-user. Sum of the values provided in the dictionary must be equal to one. Example: {'class1': 0.7, 'class2': 0.3}
     test_size: float (default=0.2)
         The fraction of samples to use as the test holdout
-    valid_size: float (default=0.2)
+    valid_size: float (default=0.0)
         The fraction of samples to use as the test holdout
     """
 
-    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', population_weights_dict=None, test_size=0.2, valid_size=None, *args, **kwargs):
+    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', population_weights_dict=None, test_size=0.2, valid_size=0.0, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.zrp_model_source = zrp_model_source
@@ -326,7 +326,7 @@ class ZRP_DataSampling(BaseZRP):
         
         X_valid = None
         y_valid = None
-        if self.valid_size is not None:
+        if self.valid_size is not None and self.valid_size>0:
             X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=self.valid_size/(1.0-self.test_size), random_state=19)
             save_feather(X_valid, self.outputs_path, f"X_valid.feather")
             save_feather(y_valid, self.outputs_path, f"y_valid.feather")      
@@ -350,7 +350,7 @@ class ZRP_Build(BaseZRP):
         Name of zrp_model.
     test_size: float (default=0.2)
         The fraction of samples to use as the test holdout
-    valid_size: float (default=0.2)
+    valid_size: float (default=0.0)
         The fraction of samples to use as the test holdout
     xgb_params: dict (default=None)
         The xgboost model params to use when building the model.  If None then the default will be used 
@@ -359,7 +359,7 @@ class ZRP_Build(BaseZRP):
         The sources to build a model for.  If None is provided then all sources will be used: ['block_group', 'census_tract', 'zip_code']
     """
 
-    def __init__(self, file_path=None, zrp_model_name='zrp_0', test_size=0.2, valid_size=None, xgb_params=None, sources=None, *args, **kwargs):
+    def __init__(self, file_path=None, zrp_model_name='zrp_0', test_size=0.2, valid_size=0.0, xgb_params=None, sources=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.params_dict =  kwargs
         #self.z_prepare = ZRP_Prepare(file_path=self.file_path,  *args, **kwargs)
