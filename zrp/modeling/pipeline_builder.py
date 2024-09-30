@@ -199,10 +199,7 @@ class ZRP_Build_Model(BaseZRP):
             evals = [(dtrain, 'train')]
             
         ##### Fit
-        print('\n---\nfitting zrp_model... n_class={}'.format(num_class))
-        #save_path = '/d/shared/users/gmw/zrp/model_artifacts'
-        #save_feather(X, save_path, "fe_data_{}.feather".format(self.zrp_model_source))
-        #save_feather(y[self.race], save_path, "target_data_{}.feather".format(self.zrp_model_source))    
+        print('\n---\nfitting zrp_model... n_class={}'.format(num_class)) 
         start_time = time.time()  # Start timing
         evals_result = dict()
         train_opts = {'objective':objective,'num_class':num_class,'tree_method':tree_method}
