@@ -275,7 +275,7 @@ class ZRP_DataSampling(BaseZRP):
     test_size: float (default=0.2)
         The fraction of samples to use as the test holdout
     valid_size: float (default=0.0)
-        The fraction of samples to use as the test holdout
+        The fraction of samples to use as the validation set
     """
 
     def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', population_weights_dict=None, test_size=0.2, valid_size=0.0, *args, **kwargs):
@@ -351,7 +351,7 @@ class ZRP_Build(BaseZRP):
     test_size: float (default=0.2)
         The fraction of samples to use as the test holdout
     valid_size: float (default=0.0)
-        The fraction of samples to use as the test holdout
+        The fraction of samples to use as the validation set
     xgb_params: dict (default=None)
         The xgboost model params to use when building the model.  If None then the default will be used 
         {'gamma': 5,'learning_rate': 0.01,'max_depth': 3,'min_child_weight': 500,'n_estimators': 2000,'subsample': 0.20}
@@ -362,7 +362,6 @@ class ZRP_Build(BaseZRP):
     def __init__(self, file_path=None, zrp_model_name='zrp_0', test_size=0.2, valid_size=0.0, xgb_params=None, sources=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.params_dict =  kwargs
-        #self.z_prepare = ZRP_Prepare(file_path=self.file_path,  *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.geo_key = 'GEOID'  
         self.test_size = test_size
@@ -499,6 +498,7 @@ class ZRP_Build(BaseZRP):
             prepare_out_list.append(prepared_data_chunk) 
         prepared_data = pd.concat(prepare_out_list) 
         prepare_out_list = None
+        display(prepared_data.acs_source.value_counts(dropna=False))
 
         ft_list_source_map = {'census_tract': 'ct', 'block_group': 'bg', 'zip_code': 'zp'}
         source_to_geoid_level_map = {'census_tract': 'GEOID_CT', 'block_group': 'GEOID_BG', 'zip_code': 'GEOID_ZIP'}
@@ -527,7 +527,11 @@ class ZRP_Build(BaseZRP):
             
             # Get records that can be geocoded down to given source geo level
             geoid_level = source_to_geoid_level_map[source]
-            relevant_source_data = prepared_data[~prepared_data[geoid_level].isna()]
+            acs_source = geoid_level.split('_')[-1]
+            relevant_source_data = prepared_data[(prepared_data['acs_source']==acs_source)]
+            ## Add un-geocoded records
+            add_nans = prepared_data[~(prepared_data.index.isin(relevant_source_data.index))]
+            relevant_source_data = relevant_source_data.append(add_nans)
             
             print("    ...Data shape pre feature drop: ", relevant_source_data.shape)
             relevant_source_data = relevant_source_data[relevant_source_data.columns.intersection(features_to_keep_list)]
@@ -596,7 +600,7 @@ class ZRP_Build(BaseZRP):
             print('\n---\nSaving raw data')
             save_feather(X_train, outputs_path, "train_raw_data.feather")
             save_feather(y_train, outputs_path, "train_raw_targets.feather")
-
+            
             # Build Pipeline
             build_pipe = ZRP_Build_Pipeline(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
             build_pipe.fit(X_train, y_train)
