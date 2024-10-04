@@ -178,6 +178,7 @@ class ZRP(BaseZRP):
             
             if self.bisg:
                 bisgw = BISGWrapper(**self.params_dict)
+                prepared_data_chunk = prepared_data_chunk.astype(str)
                 bisg_proxies_chunk = bisgw.transform(prepared_data_chunk[~prepared_data_chunk.index.duplicated(keep='first')])
                 full_bisg_proxies_list.append(bisg_proxies_chunk)
            

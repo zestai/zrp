@@ -56,7 +56,7 @@ class ZRP_Prepare(BaseZRP):
         input_data: pd.Dataframe
             Dataframe to be transformed
         """  
-        
+
         curpath = dirname(__file__)
         # Load Data
         try:
@@ -170,4 +170,28 @@ class ZRP_Prepare(BaseZRP):
         print("[Complete] Preparing ACS data")
         print("")
         
+        #######################################
+        #cleanup data_out columns
+        #######################################
+        data_columns=list(input_data.columns)
+        if self.key in data_columns:
+            data_columns.remove(self.key)
+        object_columns = ['GEO_NAME','EXT_GEOID','GEOID_BG', 'GEOID_CT', 'GEOID_ZIP',
+                          'acs_source','FROMHN_LEFT','TOHN_LEFT','ZEST_KEY_COL',self.key+'_COL']
+        drop_columns = ['GEO_NAME','EXT_GEOID','FROMHN_LEFT','TOHN_LEFT','original_race','original_sex']
+        data_out = data_out[list(set(data_out.columns)-set(drop_columns))]
+        data_out_float_columns = list(set(data_out.columns)-set(data_columns))
+        for col in object_columns:
+            if col in data_out_float_columns:
+                data_out_float_columns.remove(col)
+                    
+        for col in data_out_float_columns:
+            data_out[col] = data_out[col].astype('float32')
+        if 'age' in data_out.columns:
+            data_out['age'] = data_out['age'].astype('float32')
+        cat_columns = ['street_address','city','first_name','last_name','house_number','middle_name',
+                       'zip_code','state','race','sex','GEOID_BG','GEOID_ZIP','GEOID_CT','acs_source']
+        for col in cat_columns:
+            if col in data_out.columns:
+                data_out[col] = data_out[col].astype('category')
         return(data_out)

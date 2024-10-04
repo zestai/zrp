@@ -46,6 +46,7 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
         self.keys = [self.key, self.geo_key]
 
     def _process_target(self, y): 
+        y = y.astype(str)
         y_unique = y.unique()
         y_unique.sort()
         self.n_classes = len(y_unique)

@@ -7,12 +7,14 @@ import sys
 import json
 import joblib
 import pickle
+import time
 
 import xgboost
 from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score
 from feature_engine.imputation import MeanMedianImputer
 from feature_engine.selection import SmartCorrelatedSelection, DropFeatures
 
@@ -79,7 +81,7 @@ class ZRP_Build_Pipeline(BaseZRP):
 
         return self
 
-    def transform(self, X):
+    def transform(self, X, file_name="train_fe_data.feather"):
         make_directory(self.outputs_path)
         # Save pipeline
         pickle.dump(self.pipe, open(os.path.join(self.outputs_path, 'pipe.pkl'), 'wb'))
@@ -91,9 +93,24 @@ class ZRP_Build_Pipeline(BaseZRP):
 
         # Save train fe data
         print('\n---\nSaving FE data')
-        save_feather(X_train_fe, self.outputs_path, f"train_fe_data.feather")
+        if file_name is not None:
+            save_feather(X_train_fe, self.outputs_path, file_name)
         return (X_train_fe)
 
+def _weighted_multiclass_auc(pred, dtrain):
+    """Used when custom objective is supplied."""
+    weights = dtrain.get_weight()
+    pred_softmax = np.exp(pred)
+    pred_softmax = pred_softmax/(np.sum(pred_softmax,axis=1)[:,None])
+    weighted_auc = 0.0
+    weight_total = 0.0
+    for iclass in range(pred.shape[1]):
+        y_class = dtrain.encoded_label[:,iclass]
+        weight_total+=float(dtrain.label_counts[iclass])
+        weighted_auc+=float(dtrain.label_counts[iclass])*roc_auc_score(y_class, pred_softmax[:,iclass])
+    weighted_auc/=weight_total
+    #return the negative since it tries to minimize the metric
+    return 'WeightedAUC', -weighted_auc
 
 class ZRP_Build_Model(BaseZRP):
     """
@@ -107,9 +124,22 @@ class ZRP_Build_Model(BaseZRP):
         Name of zrp_model
     zrp_model_source: str
         Indicates the source of zrp_modeling data to use. There are three optional sources 'block_group', 'census_tract', and 'zip_code'. By default 'census_tract' is inferred.
+    xgb_params: dict (default=None)
+        The xgboost model params to use when building the model.  If None then the default will be used 
+        {'gamma': 5,'learning_rate': 0.01,'max_depth': 3,'min_child_weight': 500,'n_estimators': 2000,'subsample': 0.20}
     """
-
-    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', *args, **kwargs):
+    class MultiClassDMatrix(xgboost.DMatrix):
+        def __init__(self, data, label, *args, **kwargs):
+            super(ZRP_Build_Model.MultiClassDMatrix,self).__init__(data, label=label, *args, **kwargs)
+            self.unique_label = np.sort(np.unique(label))
+            self.num_label = len(self.unique_label)
+            self.encoded_label = np.zeros((label.shape[0],self.num_label),dtype=np.int32)
+            for iclass,class_label in enumerate(self.unique_label):
+                indx = np.where(label==class_label)[0]
+                self.encoded_label[indx,iclass]=1
+            self.label_counts = np.sum(self.encoded_label,axis=0)
+            
+    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', xgb_params=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.zrp_model_source = zrp_model_source
@@ -118,32 +148,84 @@ class ZRP_Build_Model(BaseZRP):
                                          self.zrp_model_name,
                                          self.zrp_model_source)
         self.geo_key = 'GEOID'
+        self.xgb_params = xgb_params
 
-    def fit(self, X, y):
+    def fit(self, X, y, X_valid=None, y_valid=None):
         ### Build the zrp_model
         ##### specify zrp_model parameters
         print('\n---\nbuilding zrp_model')
-
-        opt_params = {'gamma': 5,
-                      'learning_rate': 0.01,
-                      'max_depth': 3,
-                      'min_child_weight': 500,
-                      'n_estimators': 2000,
-                      'subsample': 0.20}
-
+        print('\n training data shape:{},{}'.format(X.shape[0],X.shape[1]))
+        
+        if self.xgb_params is None:
+            opt_params = {'gamma': 5,
+                          'learning_rate': 0.01,
+                          'max_depth': 3,
+                          'min_child_weight': 500,
+                          'n_estimators': 2000,
+                          'subsample': 0.20,
+                          'objective': 'multi:softprob'}
+        else:
+            opt_params = self.xgb_params.copy()
+        objective = opt_params.pop('objective','multi:softprob')
+        eval_metric = opt_params.pop('eval_metric','weighted_auc')
+        if eval_metric=='weighted_auc' or eval_metric=='auc':
+            feval=_weighted_multiclass_auc
+            eval_metric=None
+        elif callable(eval_metric):
+            feval=eval_metric
+            eval_metric=None            
+        else:
+            feval=None
+            opt_params['eval_metric'] = eval_metric 
+        early_stopping_rounds = opt_params.pop('early_stopping_rounds',None)  
+        
         ##### Initialize the zrp_model
-        self.zrp_model = XGBClassifier(objective='multi:softprob',
-                                       num_class=len(y[self.race].unique()),
+        label_encoder = xgboost.compat.XGBoostLabelEncoder().fit(y[self.race])
+        y_dummies = label_encoder.transform(y[self.race])
+        num_class=len(y[self.race].unique())
+        self.zrp_model = XGBClassifier(objective=objective,
+                                       num_class=num_class,
                                        **opt_params)
+        tree_method = opt_params.pop('tree_method','auto')  
+        num_boost_round=opt_params.pop('n_estimators',2000)
+        if early_stopping_rounds is None:
+            early_stopping_rounds = num_boost_round
+        dtrain = ZRP_Build_Model.MultiClassDMatrix(X, y_dummies, weight=y.sample_weight)
+        if X_valid is not None:
+            y_valid_dummies = label_encoder.transform(y_valid[self.race])
+            dvalid = ZRP_Build_Model.MultiClassDMatrix(X_valid, y_valid_dummies, weight=y_valid.sample_weight)
+            evals = [(dtrain, 'train'), (dvalid, 'val')]
+        else:
+            evals = [(dtrain, 'train')]
+            
         ##### Fit
-        print('\n---\nfitting zrp_model')
-
-        self.zrp_model.fit(
-            X, y[self.race],
-            sample_weight=y.sample_weight
-        )
-
-        self.y_unique = y[self.race].unique()
+        print('\n---\nfitting zrp_model... n_class={}'.format(num_class)) 
+        start_time = time.time()  # Start timing
+        evals_result = dict()
+        train_opts = {'objective':objective,'num_class':num_class,'tree_method':tree_method}
+        if eval_metric is not None:
+            train_opts['eval_metric'] = eval_metric
+        
+        model = xgboost.train(train_opts,
+                          dtrain=dtrain,
+                          num_boost_round=num_boost_round,
+                          evals=evals,
+                          early_stopping_rounds=early_stopping_rounds,
+                          evals_result=evals_result,
+                          feval=feval)  
+        elapsed_time = time.time() - start_time
+        self.y_unique = y[self.race].unique().astype(str)
+        print('\n---\nfinished fitting zrp_model....{:.3f}'.format(elapsed_time))
+        setattr(self.zrp_model,'classes_',self.y_unique)
+        setattr(self.zrp_model,'n_classes_',num_class)
+        setattr(self.zrp_model,'_le',label_encoder)    
+        setattr(self.zrp_model,'_Booster',model)  
+        setattr(self.zrp_model,'objective ',objective)
+        setattr(self.zrp_model,'evals_result_ ',evals_result) 
+        setattr(self.zrp_model,'best_score',model.best_score)  
+        setattr(self.zrp_model,'best_iteration',model.best_iteration)   
+        setattr(self.zrp_model,'best_ntree_limit',model.best_ntree_limit)
+        
         self.y_unique.sort()
         
         make_directory(self.outputs_path)
@@ -153,7 +235,7 @@ class ZRP_Build_Model(BaseZRP):
             self.zrp_model.save_model(os.path.join(self.outputs_path, "model.txt"))
         except:
             pass
-
+        print('\n---\nfinished saving zrp_model')
         return self
 
     def transform(self, X):
@@ -190,9 +272,13 @@ class ZRP_DataSampling(BaseZRP):
         Indicates the source of zrp_modeling data to use. There are three optional sources 'block_group', 'census_tract', and 'zip_code'. By default 'census_tract' is inferred.
     population_weights_dict: dict
         Prevalence of target classes within the USA population as provided by the end-user. Sum of the values provided in the dictionary must be equal to one. Example: {'class1': 0.7, 'class2': 0.3}
+    test_size: float (default=0.2)
+        The fraction of samples to use as the test holdout
+    valid_size: float (default=0.0)
+        The fraction of samples to use as the validation set
     """
 
-    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', population_weights_dict=None, *args, **kwargs):
+    def __init__(self, zrp_model_source, file_path=None, zrp_model_name='zrp_0', population_weights_dict=None, test_size=0.2, valid_size=0.0, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.zrp_model_name = zrp_model_name
         self.zrp_model_source = zrp_model_source
@@ -202,6 +288,8 @@ class ZRP_DataSampling(BaseZRP):
                                          self.zrp_model_source)
         self.geo_key = 'GEOID'
         self.population_weights_dict = population_weights_dict
+        self.test_size = test_size
+        self.valid_size = valid_size
 
     def fit(self):
         return self
@@ -234,15 +322,21 @@ class ZRP_DataSampling(BaseZRP):
             y = df[[self.key, self.geo_key, self.race, "sample_weight"]]
 
         # Train (80) + Test(20)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=9)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=self.test_size, random_state=9)
+        
+        X_valid = None
+        y_valid = None
+        if self.valid_size is not None and self.valid_size>0:
+            X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=self.valid_size/(1.0-self.test_size), random_state=19)
+            save_feather(X_valid, self.outputs_path, f"X_valid.feather")
+            save_feather(y_valid, self.outputs_path, f"y_valid.feather")      
 
         save_feather(X_train, self.outputs_path, f"X_train.feather")
         save_feather(y_train, self.outputs_path, f"y_train.feather")
         save_feather(X_test, self.outputs_path, f"X_test.feather")
         save_feather(y_test, self.outputs_path, f"y_test.feather")
 
-        return (X_train, X_test, y_train, y_test)
-
+        return (X_train, X_test, X_valid, y_train, y_test, y_valid)
 
 class ZRP_Build(BaseZRP):
     """
@@ -254,14 +348,26 @@ class ZRP_Build(BaseZRP):
         Path indicating where to put artifacts folder its files (pipeline, model, and supporting data), generated during intermediate steps.
     zrp_model_name: str
         Name of zrp_model.
+    test_size: float (default=0.2)
+        The fraction of samples to use as the test holdout
+    valid_size: float (default=0.0)
+        The fraction of samples to use as the validation set
+    xgb_params: dict (default=None)
+        The xgboost model params to use when building the model.  If None then the default will be used 
+        {'gamma': 5,'learning_rate': 0.01,'max_depth': 3,'min_child_weight': 500,'n_estimators': 2000,'subsample': 0.20}
+    sources: list (default=None)
+        The sources to build a model for.  If None is provided then all sources will be used: ['block_group', 'census_tract', 'zip_code']
     """
 
-    def __init__(self, file_path=None, zrp_model_name='zrp_0', *args, **kwargs):
+    def __init__(self, file_path=None, zrp_model_name='zrp_0', test_size=0.2, valid_size=0.0, xgb_params=None, sources=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.params_dict =  kwargs
-        #self.z_prepare = ZRP_Prepare(file_path=self.file_path,  *args, **kwargs)
         self.zrp_model_name = zrp_model_name
-        self.geo_key = 'GEOID'    
+        self.geo_key = 'GEOID'  
+        self.test_size = test_size
+        self.valid_size = valid_size
+        self.xgb_params = xgb_params
+        self.sources = sources
 
     def validate_input_columns(self, data):
         """
@@ -379,7 +485,7 @@ class ZRP_Build(BaseZRP):
         chunk_max = int((len(data)-1)/chunk_size) + 1 
         prepare_out_list = list() 
         
-        for chunk in range(chunk_max): 
+        for chunk in range(chunk_max):  
             print("####################################") 
             print(f'Processing rows: {chunk*chunk_size}:{(chunk+1)*chunk_size}') 
             print("####################################") 
@@ -387,14 +493,18 @@ class ZRP_Build(BaseZRP):
             
             z_prepare = ZRP_Prepare(file_path=self.file_path, **self.params_dict) 
             z_prepare.fit(data_chunk)                                
-            prepared_data_chunk = z_prepare.transform(data_chunk)     
+            prepared_data_chunk = z_prepare.transform(data_chunk)
+            print('chunk_size = {}Mb'.format(np.sum(prepared_data_chunk.memory_usage(deep=True))*1.0e-6))
             prepare_out_list.append(prepared_data_chunk) 
-            
         prepared_data = pd.concat(prepare_out_list) 
+        prepare_out_list = None
+        display(prepared_data.acs_source.value_counts(dropna=False))
 
         ft_list_source_map = {'census_tract': 'ct', 'block_group': 'bg', 'zip_code': 'zp'}
         source_to_geoid_level_map = {'census_tract': 'GEOID_CT', 'block_group': 'GEOID_BG', 'zip_code': 'GEOID_ZIP'}
         sources = ['block_group', 'census_tract', 'zip_code']
+        if self.sources is not None:
+            sources = self.sources if isinstance(self.sources,list) else [self.sources]
         
         for source in sources:
             print("=========================")
@@ -417,16 +527,25 @@ class ZRP_Build(BaseZRP):
             
             # Get records that can be geocoded down to given source geo level
             geoid_level = source_to_geoid_level_map[source]
-            relevant_source_data = prepared_data[~prepared_data[geoid_level].isna()]
+            acs_source = geoid_level.split('_')[-1]
+            relevant_source_data = prepared_data[(prepared_data['acs_source']==acs_source)]
+            ## Add un-geocoded records
+            add_nans = prepared_data[~(prepared_data.index.isin(relevant_source_data.index))]
+            relevant_source_data = relevant_source_data.append(add_nans)
             
             print("    ...Data shape pre feature drop: ", relevant_source_data.shape)
             relevant_source_data = relevant_source_data[relevant_source_data.columns.intersection(features_to_keep_list)]
             print("    ...Data shape post feature drop: ", relevant_source_data.shape)
 
             # Data Sampling 
-            dsamp = ZRP_DataSampling(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name,population_weights_dict = population_weights_dict)
+            dsamp = ZRP_DataSampling(file_path=self.file_path, 
+                                     zrp_model_source=source, 
+                                     zrp_model_name=self.zrp_model_name,
+                                     population_weights_dict = population_weights_dict,
+                                     test_size=self.test_size,
+                                     valid_size=self.valid_size)
 
-            X_train, X_test, y_train, y_test = dsamp.transform(relevant_source_data)
+            X_train, X_test, X_valid, y_train, y_test, y_valid = dsamp.transform(relevant_source_data)
 
             data = data.drop_duplicates(subset=['ZEST_KEY'])
             print("Post-sampling shape: ", data.shape)
@@ -452,25 +571,50 @@ class ZRP_Build(BaseZRP):
             X_train.sort_index(inplace=True)
             y_train.sort_index(inplace=True)
             sample_weights.sort_index(inplace=True)
+              
 
             feature_cols = list(set(X_train.columns) - set([self.key, self.geo_key, 'GEOID_BG', 'GEOID_CT',
                                                             'GEOID_ZIP', "first_name", "middle_name",
                                                             "last_name", 'ZEST_KEY_COL']))
 
             X_train[feature_cols] = X_train[feature_cols].apply(pd.to_numeric, errors='coerce')
+            
+            if X_valid is not None:
+                y_valid = y_valid.drop_duplicates(self.key)
+                valid_keys = list(y_valid[self.key].values)
+                X_valid = X_valid[X_valid[self.key].isin(valid_keys)]
+                X_valid = X_valid.drop_duplicates(self.key)
 
+                y_valid[[self.geo_key, self.key]] = y_valid[[self.geo_key, self.key]].astype(str)
+
+                if X_valid.shape[0] != y_valid.shape[0]:
+                    raise AssertionError("Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data")
+
+                #### Set Index
+                X_valid.set_index(self.key, inplace=True)
+                y_valid.set_index(self.key, inplace=True)
+                X_valid.sort_index(inplace=True)
+                y_valid.sort_index(inplace=True)
+                X_valid[feature_cols] = X_valid[feature_cols].apply(pd.to_numeric, errors='coerce')
+                
             print('\n---\nSaving raw data')
             save_feather(X_train, outputs_path, "train_raw_data.feather")
             save_feather(y_train, outputs_path, "train_raw_targets.feather")
-
+            
             # Build Pipeline
             build_pipe = ZRP_Build_Pipeline(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
             build_pipe.fit(X_train, y_train)
             X_train_fe = build_pipe.transform(X_train)
-
+            X_valid_fe = None
+            if X_valid is not None:
+                X_valid_fe = build_pipe.transform(X_valid, "valid_fe_data.feather")
+                
             # Build Model
-            build_model = ZRP_Build_Model(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
-            build_model.fit(X_train_fe, y_train)
+            build_model = ZRP_Build_Model(file_path=self.file_path, 
+                                          zrp_model_source=source, 
+                                          zrp_model_name=self.zrp_model_name,
+                                          xgb_params=self.xgb_params)
+            build_model.fit(X_train_fe, y_train, X_valid_fe, y_valid)
             
             print(f"Completed building {source} model.")
         
