@@ -3,9 +3,10 @@ _______________________
 
 Context
 =======
-There are two facests to providing new ZRP releases. This is because the ZRP requires additional files to function that aren't available when you git clone or pip install. This is due to the fact that the pre-build pipelines and lookup tables that the ZRP requires are rather large and aren't able to be stored conventionally on github. We, thus, utilize Github's Releases functionality to bundle the souce code as a release, and with it, attach two zip files: 1) the lookup tables, and 2) the pipelines. 
+There are two facets to providing new ZRP releases. This is because the ZRP requires additional files to function that aren't available when you git clone or pip install. This is due to the fact that the pre-built pipelines and lookup tables that the ZRP requires are rather large and aren't able to be stored conventionally on GitHub. We, thus, utilize GitHub's Releases functionality to bundle the source code as a release, and with it, attach two zip files: 1) the lookup tables, and 2) the pipelines.
 
-The additional lookup tables and pipelines are installed after you pip install or clone the package by running the zrp modeule, download.py. This module downloads the two zips, unzips them, files the contents, and then removes the unnecessary downloaded folders. Ultimately, after running this module (steps shown in the README), the acs and geo lookup tables will be stored with the following paths:
+The additional lookup tables and pipelines are installed after you pip install or clone the package by running the zrp module, download.py. This module downloads the two zips, unzips them, files the contents, and then removes the unnecessary downloaded folders. Ultimately, after running this module (steps shown in the README), the acs and geo lookup tables will be stored with the following paths:
+
 ::
 
   zrp/data/processed/acs/{acs_year}/{acs_range}/*.parquet
@@ -27,7 +28,7 @@ The pipelines will be stored with the following paths:
 Preparing the release
 =====================
 
-Observe the following steps in order to safely and correctly prepare and push new Pypi, and Github releases for the zrp packages. Note that in order to ensure continuity between all releases, every new push to the main branch should be accompanied by a new pypi and Github release with appropriate versioning (idential across the various release locations). Thus, you should always
+Observe the following steps in order to safely and correctly prepare and push new PyPI, and GitHub releases for the zrp packages. Note that in order to ensure continuity between all releases, every new push to the main branch should be accompanied by a new PyPI and GitHub release with appropriate versioning (identical across the various release locations). Thus, you should always:
 
 #. Push all changes to the Github. 
     * Ensure that the acs/, geo/ data folders, and the {geo_level}/pipe.pkl files are not tracked in git and are added to the gitignore. 
@@ -42,14 +43,14 @@ Pypi
 ====
 (`Reference <https://widdowquinn.github.io/coding/update-pypi-package/>`_)
 
-#. Once you've updated the package source code, ensure you have an up to date local repo and push/merge all commits to Github
+#. Once you've updated the package source code, ensure you have an up-to-date local repo and push/merge all commits to GitHub.
 
-#. Incremenet the version number for the package. We use the tool `Bump Version <https://pypi.org/project/bumpversion/>`_ to ensure all version numbers are kept consistent. You can install Bumpversion from PyPI:
+#. Increment the version number for the package. We use the tool `Bump Version <https://pypi.org/project/bumpversion/>`_ to ensure all version numbers are kept consistent. You can install bumpversion from PyPI:
     ::
 
       $ pip install bumpversion
 
-    Bumpversion is used as follows:
+    bumpversion is used as follows:
     ::
 
     $ bumpversion --current-version ?.?.? [major/minor/patch] [<file_names>]
