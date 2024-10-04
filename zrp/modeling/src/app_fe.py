@@ -66,6 +66,7 @@ class AppFeatureEngineering(BaseEstimator, TransformerMixin):
         return y_ohe
     
     def fit(self, X, y):
+        print("n app fe y nput:", y.head())
         targets = X[[self.key]].merge(y.reset_index(drop=False), on=self.key, how="left")
         y = targets[self.race]
         X = X.reset_index(drop=True)

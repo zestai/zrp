@@ -60,6 +60,7 @@ class ZRP_Build_Pipeline(BaseZRP):
     def fit(self, X, y):
         ### Build Pipeline
         print('\n---\nBuilding pipeline')
+        print("y n plne:", y.head())
 
         self.pipe = Pipeline(
             [("Drop Features", DropFeatures(features_to_drop=['GEOID_BG', 'GEOID_CT', 'GEOID_ZIP', 'ZEST_KEY_COL'])),
@@ -190,6 +191,15 @@ class ZRP_Build_Model(BaseZRP):
         num_boost_round=opt_params.pop('n_estimators',2000)
         if early_stopping_rounds is None:
             early_stopping_rounds = num_boost_round
+
+        print("X head:", X.dtypes)
+        display("X nonnum head:", X.select_dtypes(exclude='number').head())
+
+        print("y dum type:",y_dummies.dtypes)
+        display("y dum head:", y_dummies.select_dtypes(exclude='number').head())
+
+        print("y sw dtype:", y.sample_weight.dtype)
+        
         dtrain = ZRP_Build_Model.MultiClassDMatrix(X, y_dummies, weight=y.sample_weight)
         if X_valid is not None:
             y_valid_dummies = label_encoder.transform(y_valid[self.race])
@@ -284,8 +294,7 @@ class ZRP_DataSampling(BaseZRP):
         self.zrp_model_source = zrp_model_source
         self.outputs_path = os.path.join(self.out_path,
                                          "experiments",
-                                         self.zrp_model_name,
-                                         self.zrp_model_source)
+                                         self.zrp_model_name)
         self.geo_key = 'GEOID'
         self.population_weights_dict = population_weights_dict
         self.test_size = test_size
@@ -295,48 +304,129 @@ class ZRP_DataSampling(BaseZRP):
         return self
 
     def transform(self, data):
+        cur_path = dirname(__file__)
         make_directory(self.outputs_path)
-        df = data.copy()
-        df = df[(df[self.race].notna()) & (df[self.race] != "None")]
+        data = data[(data[self.race].notna()) & (data[self.race] != "None")]
 
         # sample weights normalizing to us population
-        target_classes = list(df[self.race].unique())
+        target_classes = list(data[self.race].unique())
         ratios = dict()
         for tc in target_classes:
-            ratios[tc] = df[self.race].value_counts(normalize=True)[tc]
+            ratios[tc] = data[self.race].value_counts(normalize=True)[tc]
         
         sw_full_map = dict()
         for tc in target_classes:
-            sw_full_map[tc] = np.round(self.population_weights_dict[tc]/ratios[tc] ,5)
+            sw_full_map[tc] = np.round(self.population_weights_dict[tc]/ratios[tc], 5)
     
-        df["sample_weight"] = df[self.race].map(sw_full_map)
-
-        # Split working data
-        df.reset_index(inplace=True)
-        X = df.copy()
-        X.drop([self.race, "sample_weight"], axis=1, inplace=True)
-
-        if self.geo_key == df.index.name:
-            y = df[[self.geo_key, self.race, "sample_weight"]]
-        else:
-            y = df[[self.key, self.geo_key, self.race, "sample_weight"]]
-
-        # Train (80) + Test(20)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=self.test_size, random_state=9)
+        data["sample_weight"] = data[self.race].map(sw_full_map)
+        data["acs_source"] = np.where(data["acs_source"]=="ZIP", "ZP", data["acs_source"])
         
-        X_valid = None
-        y_valid = None
-        if self.valid_size is not None and self.valid_size>0:
-            X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=self.valid_size/(1.0-self.test_size), random_state=19)
-            save_feather(X_valid, self.outputs_path, f"X_valid.feather")
-            save_feather(y_valid, self.outputs_path, f"y_valid.feather")      
+        source_mapping = {"BG":"block_group", "CT":"census_tract", "ZP":"zip_code"}
 
-        save_feather(X_train, self.outputs_path, f"X_train.feather")
-        save_feather(y_train, self.outputs_path, f"y_train.feather")
-        save_feather(X_test, self.outputs_path, f"X_test.feather")
-        save_feather(y_test, self.outputs_path, f"y_test.feather")
+        # Data Sampling
+        data.reset_index(inplace=True)
+        if "data_sampling" not in os.listdir(self.outputs_path):
+            X = data.copy()
+            X = X[X['acs_source'].isna()][[self.key, self.geo_key, self.race, "sample_weight"]]
+            
+            if self.geo_key == X.index.name:
+                y = X[[self.geo_key, self.race, "sample_weight"]]
+            else:
+                y = X[[self.key, self.geo_key, self.race, "sample_weight"]]
+                
+            X.drop([self.race, "sample_weight"], axis=1, inplace=True)
 
-        return (X_train, X_test, X_valid, y_train, y_test, y_valid)
+            # Default Train (80) + Test(20)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=self.test_size, random_state=9)
+            train_ids = list(set(y_train[self.key]))
+            test_ids = list(set(y_test[self.key]))
+            X_test = None
+            valid_ids = None
+            if self.valid_size is not None and self.valid_size>0:
+                X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=self.valid_size/(1.0-self.test_size), random_state=19)
+                train_ids = list(set(y_train[self.key]))
+                valid_ids = list(set(y_valid[self.key]))
+                del X_valid, y_valid
+            del X_train, X_test, y_train, y_test 
+
+                
+            # Add split flags to data
+            if self.valid_size is not None:
+                data["data_sampling"] = np.where(data[self.key].isin(train_ids), "train",
+                                                 np.where(data[self.key].isin(valid_ids), "valid",
+                                                          np.where(data[self.key].isin(test_ids), "test", None)))
+                del train_ids, valid_ids, test_ids 
+            else:
+                data["data_sampling"] = np.where(data[self.key].isin(train_ids), "train",
+                                                          np.where(data[self.key].isin(test_ids), "test", None))
+                del train_ids, test_ids 
+
+            # Create data by source and split 
+            data_splits = {}
+            iter = 0
+            in_data_source_list = list(set(data["acs_source"].unique()) - set([None, 'nan', np.nan]))
+            for s in in_data_source_list:
+                # Return the data from the first source only
+                if (s==self.zrp_model_source) and (iter==2):
+                    features_to_keep_list = load_json(os.path.join(cur_path, f'feature_list_{str.lower(s)}.json'))
+                    features_to_keep_list.append('race')
+                    for samp in data["data_sampling"].unique():
+                        X = data[(data["data_sampling"]==samp) & (data["acs_source"]==s)] 
+                        ## Add un-geocoded records
+                        add_nans = data[~(data[self.key].isin(X[self.key])) & (data["acs_source"].isna())]
+                        X = X.append(add_nans)
+                        
+                        data_splits[f"X_{samp}"] = X[X["data_sampling"]==samp][features_to_keep_list]
+                        data_splits[f"X_{samp}"] = data_splits[f"X_{samp}"].set_index(self.key)
+                        data_splits[f"y_{samp}"] = X[X["data_sampling"]==samp][[self.key, self.geo_key, self.race, "sample_weight", "acs_source"]]
+                        data_splits[f"y_{samp}"] = data_splits[f"y_{samp}"].set_index(self.key)
+                        feature_cols = list(set(data_splits[f"X_{samp}"].columns) - set([self.key, self.geo_key, 'GEOID_BG', 'GEOID_CT',
+                                                'GEOID_ZIP', "first_name", "middle_name",
+                                                "last_name", 'ZEST_KEY_COL', 'index']))
+                        data_splits[f"X_{samp}"][feature_cols] = data_splits[f"X_{samp}"][feature_cols].apply(pd.to_numeric, errors='coerce')
+                        if data_splits[f"X_{samp}"].shape[0] != data_splits[f"y_{samp}"].shape[0]:
+                            raise AssertionError("Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data")  
+                        
+                        ## Save
+                        make_directory(os.path.join(self.outputs_path, source_mapping[s]))
+                        save_feather(data_splits[f"X_{samp}"], os.path.join(self.outputs_path, source_mapping[s]), f"X_{samp}.feather")
+                        save_feather(data_splits[f"y_{samp}"], os.path.join(self.outputs_path, source_mapping[s]), f"y_{samp}.feather")  
+                        del X, add_nans
+                # Save data from intermediate sources        
+                else:
+                    features_to_keep_list = load_json(os.path.join(cur_path, f'feature_list_{str.lower(s)}.json'))
+                    features_to_keep_list.append('race')
+                    for samp in data["data_sampling"].unique():
+                        X = data[(data["data_sampling"]==samp) & (data["acs_source"]==s)] 
+                        ## Add un-geocoded records
+                        add_nans = data[~(data[self.key].isin(X[self.key])) & (data["acs_source"].isna())]
+                        X = X.append(add_nans)
+                        
+                        data_splits[f"X_{samp}"] = X[X["data_sampling"]==samp][features_to_keep_list]
+                        data_splits[f"X_{samp}"] = data_splits[f"X_{samp}"].set_index(self.key)
+                        data_splits[f"y_{samp}"] = X[X["data_sampling"]==samp][[self.key, self.geo_key, self.race, "sample_weight", "acs_source"]]
+                        data_splits[f"y_{samp}"] = data_splits[f"y_{samp}"].set_index(self.key)
+                        feature_cols = list(set(data_splits[f"X_{samp}"].columns) - set([self.key, self.geo_key, 'GEOID_BG', 'GEOID_CT',
+                                                'GEOID_ZIP', "first_name", "middle_name",
+                                                "last_name", 'ZEST_KEY_COL', 'index']))
+                        data_splits[f"X_{samp}"][feature_cols] = data_splits[f"X_{samp}"][feature_cols].apply(pd.to_numeric, errors='coerce')
+                        if data_splits[f"X_{samp}"].shape[0] != data_splits[f"y_{samp}"].shape[0]:
+                            raise AssertionError("Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data")  
+                        
+                            
+                        ## Save
+                        make_directory(os.path.join(self.outputs_path, source_mapping[s]))
+                        save_feather(data_splits[f"X_{samp}"], os.path.join(self.outputs_path, source_mapping[s]), f"X_{samp}.feather")
+                        save_feather(data_splits[f"y_{samp}"], os.path.join(self.outputs_path, source_mapping[s]), f"y_{samp}.feather") 
+                        del X, add_nans
+            for n in data_splits.keys(): 
+                print(f"ndex xtr {n}:", data_splits[n].filter(regex='index|ZEST|race').head(3))
+
+            data_splits["source"] = source_mapping[s]
+                
+
+            del data
+            return (data_splits)
 
 class ZRP_Build(BaseZRP):
     """
@@ -498,13 +588,29 @@ class ZRP_Build(BaseZRP):
             prepare_out_list.append(prepared_data_chunk) 
         prepared_data = pd.concat(prepare_out_list) 
         prepare_out_list = None
-        display(prepared_data.acs_source.value_counts(dropna=False))
-
-        ft_list_source_map = {'census_tract': 'ct', 'block_group': 'bg', 'zip_code': 'zp'}
+        
         source_to_geoid_level_map = {'census_tract': 'GEOID_CT', 'block_group': 'GEOID_BG', 'zip_code': 'GEOID_ZIP'}
         sources = ['block_group', 'census_tract', 'zip_code']
         if self.sources is not None:
             sources = self.sources if isinstance(self.sources,list) else [self.sources]
+
+        # Create splits
+        ## Make experiments directory if required
+        make_directory(os.path.join(self.out_path, "experiments", self.zrp_model_name))
+        ## Prepare to generate data splits
+        # Data Sampling 
+        dsamp = ZRP_DataSampling(file_path=self.file_path, 
+                                 zrp_model_source="data_sampling", 
+                                 zrp_model_name=self.zrp_model_name,
+                                 population_weights_dict = population_weights_dict,
+                                 test_size=self.test_size,
+                                 valid_size=self.valid_size)
+
+        data_splits = dsamp.transform(prepared_data)
+        if len(data_splits)==7:
+            X_train, y_train, X_valid, y_valid, X_test, y_test, data_split_source = data_splits
+        else:
+            X_train, y_train, X_test, y_test, data_split_source = data_splits
         
         for source in sources:
             print("=========================")
@@ -516,91 +622,40 @@ class ZRP_Build(BaseZRP):
                                              source)
             
             make_directory(outputs_path)
+
+            if data_split_source==source:
+                print(f"The {data_split_source} data is already loaded ({source})")
+            else:
+                print(f"Load the {source} data")
+                X_train = load_file(os.path.join(outputs_path, f"X_train.feather")).set_index('ZEST_KEY')
+                X_test = load_file(os.path.join(outputs_path, f"X_test.feather")).set_index('ZEST_KEY')
+                y_train = load_file(os.path.join(outputs_path, f"y_train.feather")).set_index('ZEST_KEY')
+                y_train["sample_weight"] = y_train["sample_weight"].astype(float)
+
+                y_test = load_file(os.path.join(outputs_path, f"y_test.feather")).set_index('ZEST_KEY')
+                y_test["sample_weight"] = y_test["sample_weight"].astype(float)
+
+                if self.valid_size is not None:
+                    X_valid = load_file(os.path.join(outputs_path, f"X_valid.feather")).set_index('ZEST_KEY')
+                    y_valid = load_file(os.path.join(outputs_path, f"y_valid.feather")).set_index('ZEST_KEY')
+                    y_valid["sample_weight"] = y_valid["sample_weight"].astype(float)
+
+
+            print("    ...Data shape pre feature drop: ", prepared_data.shape)
+            print("    ...Data shape post feature drop: ", X_train.shape)            
+            print("    ...Unique train labels: ",  y_train[self.race].unique())            
+            print("    ...Unique test labels: ", y_test[self.race].unique()) 
             
-            # Get features to drop from prepared data
-            print(f"Dropping {list(set(sources).difference({source}))} features")
             
-            features_to_keep_list = load_json(os.path.join(cur_path, f'feature_list_{ft_list_source_map[source]}.json'))
-            features_to_keep_list.append('race')
+
+            print("ndex xtr:", X_train.filter(regex='index|ZEST|race'))
+            print("4324")
+
             
-            print("    ...Len features to keep list: ", len(features_to_keep_list))
-            
-            # Get records that can be geocoded down to given source geo level
-            geoid_level = source_to_geoid_level_map[source]
-            acs_source = geoid_level.split('_')[-1]
-            relevant_source_data = prepared_data[(prepared_data['acs_source']==acs_source)]
-            ## Add un-geocoded records
-            add_nans = prepared_data[~(prepared_data.index.isin(relevant_source_data.index))]
-            relevant_source_data = relevant_source_data.append(add_nans)
-            
-            print("    ...Data shape pre feature drop: ", relevant_source_data.shape)
-            relevant_source_data = relevant_source_data[relevant_source_data.columns.intersection(features_to_keep_list)]
-            print("    ...Data shape post feature drop: ", relevant_source_data.shape)
-
-            # Data Sampling 
-            dsamp = ZRP_DataSampling(file_path=self.file_path, 
-                                     zrp_model_source=source, 
-                                     zrp_model_name=self.zrp_model_name,
-                                     population_weights_dict = population_weights_dict,
-                                     test_size=self.test_size,
-                                     valid_size=self.valid_size)
-
-            X_train, X_test, X_valid, y_train, y_test, y_valid = dsamp.transform(relevant_source_data)
-
-            data = data.drop_duplicates(subset=['ZEST_KEY'])
-            print("Post-sampling shape: ", data.shape)
-            print("\n")
-            print("Unique train labels: ", y_train['race'].unique())
-            print("Unique test labels: ", y_test['race'].unique())
-
-            y_train = y_train.drop_duplicates(self.key)
-            train_keys = list(y_train[self.key].values)
-            X_train = X_train[X_train[self.key].isin(train_keys)]
-            X_train = X_train.drop_duplicates(self.key)
-
-            y_train[[self.geo_key, self.key]] = y_train[[self.geo_key, self.key]].astype(str)
-            sample_weights = y_train[[self.key, 'sample_weight']].copy()
-
-            if X_train.shape[0] != y_train.shape[0]:
-                raise AssertionError("Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data")
-
-            #### Set Index
-            X_train.set_index(self.key, inplace=True)
-            y_train.set_index(self.key, inplace=True)
-            sample_weights.set_index(self.key, inplace=True)
-            X_train.sort_index(inplace=True)
-            y_train.sort_index(inplace=True)
-            sample_weights.sort_index(inplace=True)
-              
-
-            feature_cols = list(set(X_train.columns) - set([self.key, self.geo_key, 'GEOID_BG', 'GEOID_CT',
-                                                            'GEOID_ZIP', "first_name", "middle_name",
-                                                            "last_name", 'ZEST_KEY_COL']))
-
-            X_train[feature_cols] = X_train[feature_cols].apply(pd.to_numeric, errors='coerce')
-            
-            if X_valid is not None:
-                y_valid = y_valid.drop_duplicates(self.key)
-                valid_keys = list(y_valid[self.key].values)
-                X_valid = X_valid[X_valid[self.key].isin(valid_keys)]
-                X_valid = X_valid.drop_duplicates(self.key)
-
-                y_valid[[self.geo_key, self.key]] = y_valid[[self.geo_key, self.key]].astype(str)
-
-                if X_valid.shape[0] != y_valid.shape[0]:
-                    raise AssertionError("Unexpected mismatch between shapes. There are duplicates in the data, please remove duplicates & resubmit the data")
-
-                #### Set Index
-                X_valid.set_index(self.key, inplace=True)
-                y_valid.set_index(self.key, inplace=True)
-                X_valid.sort_index(inplace=True)
-                y_valid.sort_index(inplace=True)
-                X_valid[feature_cols] = X_valid[feature_cols].apply(pd.to_numeric, errors='coerce')
-                
-            print('\n---\nSaving raw data')
-            save_feather(X_train, outputs_path, "train_raw_data.feather")
-            save_feather(y_train, outputs_path, "train_raw_targets.feather")
-            
+            print("b4 plne y tr head:", y_train.head())
+                  
+                  
+                  
             # Build Pipeline
             build_pipe = ZRP_Build_Pipeline(file_path=self.file_path, zrp_model_source=source, zrp_model_name=self.zrp_model_name)
             build_pipe.fit(X_train, y_train)
@@ -608,12 +663,14 @@ class ZRP_Build(BaseZRP):
             X_valid_fe = None
             if X_valid is not None:
                 X_valid_fe = build_pipe.transform(X_valid, "valid_fe_data.feather")
-                
+
             # Build Model
             build_model = ZRP_Build_Model(file_path=self.file_path, 
                                           zrp_model_source=source, 
                                           zrp_model_name=self.zrp_model_name,
                                           xgb_params=self.xgb_params)
+            display(X_train_fe.shape)
+            display(np.array(X_train_fe.columns))
             build_model.fit(X_train_fe, y_train, X_valid_fe, y_valid)
             
             print(f"Completed building {source} model.")
