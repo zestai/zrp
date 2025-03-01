@@ -53,7 +53,9 @@ def save_dataframe(data, path, file_name):
     file_name: str
         Name of file
     """      
-    data.to_parquet(os.path.join(path, file_name))
+    data.reset_index(drop = False).to_parquet(os.path.join(path, file_name), 
+                                              engine="pyarrow",
+                                              compression="snappy")    
     return (print("...Output saved"))
 
 
@@ -93,7 +95,7 @@ def make_directory(output_directory = None):
         print("Directory already exists")
         pass
 
-def load_file(file_path):    
+def load_file(file_path, as_string=True):    
     """
     Load files. Compatible with csv, text, feather, xlsx, and parquet
     
@@ -127,8 +129,9 @@ def load_file(file_path):
                              dtype=str,
                              na_values=na_values)
     elif file_path.endswith(".parquet"):
-        data = pd.read_parquet(file_path)
-        data = data.astype(str)
+        data = pd.read_parquet(file_path, engine="pyarrow")
+        if as_string:
+            data = data.astype(str)
     elif file_path.endswith(".txt"):
         with open(file_path) as f:
             first_line = f.readline()
@@ -273,4 +276,24 @@ def most_common(lizt):
 
     return max(set(lizt), key=lizt.count)
 
+def convert_numpy(obj):
+    """
+    Prepare data to be saved to json
+    
+    Parameters
+    ----------
+    obj: numpy object
+        Object to be converted
+    """
+    if isinstance(obj, dict): 
+        return {key: convert_numpy(value) for key, value in obj.items()} 
+    elif isinstance(obj, list):  
+        return [convert_numpy(item) for item in obj]
+    elif isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray): 
+        return obj.tolist()
+    return obj
 

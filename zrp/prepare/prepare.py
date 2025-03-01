@@ -30,21 +30,66 @@ class ZRP_Prepare(BaseZRP):
     def __init__(self, file_path=None, *args, **kwargs):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.params_dict =  kwargs
-        
-    def fit(self, input_data):
-        if self.census_tract:
-            tract_lengths =  input_data[self.census_tract].str.len()
-            tract_len  = most_common(tract_lengths)
-            if not (input_data[self.census_tract].apply(lambda x: str(x).isalnum()).any()):
-                raise ValueError("Cannot provide non-numeric Census Tract code, please remove non-numeric census tract records.")
-            if tract_len != 11:
-                raise ValueError("Improper Census Tract format provided. The tool requires the full state fips, county fips, and tract format. (ie '06037311600')")
 
+    def fit(self, input_data):
+        """
+        Validates the format of Census Tract and Block Group codes. 
+        Incorrectly formatted records are added to a list for geocoding.
+    
+        Parameters
+        ----------
+        input_data : pd.DataFrame
+            DataFrame containing census data.
+        """
+    
+        self.records_to_geocode = []
+        
+        # If neither column is in input_data, mark all records for geocoding
+        if self.census_tract is None and self.block_group is None:
+            if self.key in input_data.columns:
+                self.records_to_geocode = input_data[self.key].tolist()
+            else:
+                self.records_to_geocode = input_data.index.tolist()
+            print(f"Warning: Both Census Tract and Block Group are missing. All {len(self.records_to_geocode)} records need geocoding.")
+
+        
+        if self.census_tract:
+            input_data[self.census_tract] = input_data[self.census_tract].astype(str).str.strip()
+    
+            # Identify invalid or missing census tract records
+            invalid_tracts = input_data[
+                (input_data[self.census_tract].str.len() != 11) |
+                (~input_data[self.census_tract].str.isnumeric()) |
+                (input_data[self.census_tract].isnull()) 
+            ]
+    
+            if not invalid_tracts.empty:
+                if self.key in input_data.columns:
+                    self.records_to_geocode.extend(invalid_tracts[self.key].tolist())
+                else:
+                    self.records_to_geocode.extend(invalid_tracts.index.tolist())
+    
         if self.block_group:
-            bg_lengths =  input_data[self.block_group].str.len()
-            bg_len  = most_common(bg_lengths)
-            if bg_len != 12:  
-                raise ValueError("Improper Census Block Group format provided. The tool requires the full state fips, county fips, tract, and block group format. (ie '060373116003')")
+            input_data[self.block_group] = input_data[self.block_group].astype(str).str.strip()
+    
+            # Identify invalid or missing block group records
+            invalid_bgs = input_data[
+                (input_data[self.block_group].str.len() != 12) |
+                (~input_data[self.block_group].str.isnumeric()) |
+                (input_data[self.block_group].isnull())  
+            ]
+    
+            if not invalid_bgs.empty:
+                if self.key in input_data.columns:
+                    self.records_to_geocode.extend(invalid_bgs[self.key].tolist())
+                else:
+                    self.records_to_geocode.extend(invalid_bgs.index.tolist())
+    
+        self.records_to_geocode = list(set(self.records_to_geocode))
+        
+        if self.records_to_geocode:
+            print(f"Warning: {len(self.records_to_geocode)} records need to be geocoded due to missing or improperly formated Census Tract or Block Group.")
+
                 
     
     def transform(self, input_data):
@@ -65,7 +110,8 @@ class ZRP_Prepare(BaseZRP):
         except AttributeError:
             data = load_file(self.file_path)
             print("Data file is loaded")
-            
+
+        
         data_path = join(curpath, f'../data/processed')
         lookup_tables_config = load_json(join(data_path, "lookup_tables_config.json"))
 
@@ -84,16 +130,20 @@ class ZRP_Prepare(BaseZRP):
         data = gen_process.transform(data)
         
         print("")
-
         print("[Start] Preparing geo data")
 
         inv_state_map = load_json(join(data_path, "inv_state_mapping.json"))
         data['zest_in_state_fips'] = data[self.state].replace(inv_state_map)
         print("")
         
+        if self.key in data.columns:
+            to_geocode = data[data[self.key].isin(self.records_to_geocode)]
+        else:
+            to_geocode = data[data.index.isin(self.records_to_geocode)]
+            
         geocode = ZGeo(file_path=self.file_path, **self.params_dict)
         geocode_out = [] 
-        geo_grps = data.groupby([self.state])
+        geo_grps = to_geocode.groupby([self.state])
         geo_dict = {}
         for s, g in geo_grps:
             geo_dict[s] = g
@@ -109,48 +159,55 @@ class ZRP_Prepare(BaseZRP):
             geo = inv_state_map[s].zfill(2)
             output = geocode.transform(geo_dict[s], geo, processed = True, replicate = True, save_table = True)
             geocode_out.append(output)
+            
         if len(geocode_out) > 0:
             geo_coded = pd.concat(geocode_out)
-                    
             # append data unable to enter geo mapping
-            geo_coded_keys = list(geo_coded.ZEST_KEY_COL.values)
+            geo_coded_keys = list(geo_coded[f"{self.key}_COL"].values)
+            rename_dict = {self.block_group:'GEOID_BG',
+                           self.census_tract:'GEOID_CT', 
+                           self.zip_code:'GEOID_ZIP'}
+            
             data_not_geo_coded = data[~data.index.isin(geo_coded_keys)]
-            geo_coded = pd.concat([geo_coded, data_not_geo_coded])            
+            if 'GEOID_ZIP' in data_not_geo_coded.columns:
+                if self.zip_code!="GEOID_ZIP":
+                    if data_not_geo_coded[self.zip_code].equals(data_not_geo_coded["GEOID_ZIP"]):
+                        data_not_geo_coded =data_not_geo_coded.drop(["GEOID_ZIP"], axis=1)
+                    else:
+                        if data_not_geo_coded[self.zip_code].isna().mean()>data_not_geo_coded["GEOID_ZIP"].isna().mean():
+                            data_not_geo_coded =data_not_geo_coded.drop([self.zip_code], axis=1)
+                        else:
+                            data_not_geo_coded =data_not_geo_coded.drop(["GEOID_ZIP"], axis=1)
+
+            data_not_geo_coded = data_not_geo_coded.rename(columns={self.block_group:'GEOID_BG', self.census_tract:'GEOID_CT', self.zip_code:'GEOID_ZIP'})
+            data_not_geo_coded = data_not_geo_coded.drop(['house_number_LEFT', 'house_number_RIGHT'], axis=1)
+            
+            # Save data that does not require geocoding
+            if self.runname is not None:
+                file_like = f"Zest_Geocoded_{self.runname}__{self.year}__00"
+            else:
+                file_like = f"Zest_Geocoded__{self.year}__00"
+            file_name = f'{file_like}_n.parquet'
+            save_dataframe(data_not_geo_coded, self.out_path, file_name)
+        
+            geo_coded = pd.concat([geo_coded, data_not_geo_coded])  
+
         else:
-            geo_coded = data
-            geo_coded['GEOID'] = None
-            geo_coded['GEOID_BG'] = None
-            geo_coded['GEOID_CT'] = None
-            geo_coded['GEOID_ZIP'] = None
-            geo_coded["ZEST_KEY_COL"] = geo_coded.index 
-        # replace GEOIDs with user-defined values where avaliable
-        if self.block_group is not None and self.census_tract is not None:
-            geo_coded = geo_coded.drop([self.block_group, self.census_tract], axis = 1)
-            geo_coded = geo_coded.merge(data[[self.block_group, self.census_tract]], right_index = True, left_index = True, how = 'left')
-            geo_coded['GEOID_BG'] = np.where((geo_coded[self.block_group].isna()) | (geo_coded[self.block_group].str.contains("None") | (geo_coded[self.block_group] == ''))
-                                             ,geo_coded['GEOID_BG']
-                                             ,geo_coded[self.block_group])
-            geo_coded['GEOID_CT'] = np.where((geo_coded[self.census_tract].isna()) | (geo_coded[self.census_tract].str.contains("None") | (geo_coded[self.census_tract] == ''))
-                                             ,geo_coded['GEOID_CT']
-                                             ,geo_coded[self.census_tract])
-            geo_coded = geo_coded.drop([self.block_group, self.census_tract], axis = 1) 
-        elif self.block_group is not None:
-            geo_coded = geo_coded.drop(self.block_group, axis = 1)
-            geo_coded = geo_coded.merge(data[self.block_group], right_index = True, left_index = True, how = 'left')
-            geo_coded['GEOID_BG'] = np.where((geo_coded[self.block_group].isna()) | (geo_coded[self.block_group].str.contains("None") | (geo_coded[self.block_group] == ''))
-                                             ,geo_coded['GEOID_BG']
-                                             ,geo_coded[self.block_group])
-            geo_coded = geo_coded.drop(self.block_group, axis = 1)            
-        elif self.census_tract is not None:
-            geo_coded['GEOID_BG'] = np.nan
-            geo_coded = geo_coded.drop(self.census_tract, axis = 1)
-            geo_coded = geo_coded.merge(data[self.census_tract], right_index = True, left_index = True, how = 'left')
-            print(geo_coded[self.census_tract] == '')
-            geo_coded['GEOID_CT'] = np.where((geo_coded[self.census_tract].isna()) | (geo_coded[self.census_tract].str.contains("None") | (geo_coded[self.census_tract] == ''))
-                                             ,geo_coded['GEOID_CT']
-                                             ,geo_coded[self.census_tract])
-            geo_coded = geo_coded.drop(self.census_tract, axis = 1)
-                                                   
+            if self.zip_code!="GEOID_ZIP":
+                if data[self.zip_code].equals(data["GEOID_ZIP"]):
+                    data =data.drop(["GEOID_ZIP"], axis=1)
+                else:
+                    if data[self.zip_code].isna().mean()>data["GEOID_ZIP"].isna().mean():
+                        data =data.drop([self.zip_code], axis=1)
+                    else:
+                        data =data.drop(["GEOID_ZIP"], axis=1)
+
+            geo_coded = data.rename(columns={self.block_group:'GEOID_BG', self.census_tract:'GEOID_CT', self.zip_code:'GEOID_ZIP'})
+            for col in ["GEOID_BG", "GEOID_CT", "GEOID_ZIP", "GEOID"]:
+                if col not in geo_coded.columns:
+                     geo_coded[col] = None 
+            geo_coded[f"{self.key}_COL"] = geo_coded.index                                       
+            
         print("")
         
         print("[Completed] Preparing geo data")
@@ -169,15 +226,22 @@ class ZRP_Prepare(BaseZRP):
         data_out = amp.transform(geo_coded, False)
         print("[Complete] Preparing ACS data")
         print("")
+
+        # set geoid
+        data_out['GEOID'] = np.where(data_out.acs_source=='BG', data_out['GEOID_BG'],
+                                    np.where(data_out.acs_source=='CT', data_out['GEOID_CT'],
+                                            np.where(data_out.acs_source=='ZIP', data_out['GEOID_ZIP'],
+                                                     None)))
         
         #######################################
-        #cleanup data_out columns
+        # cleanup data_out columns
         #######################################
-        data_columns=list(input_data.columns)
+        data_columns=list(data_out.columns)
         if self.key in data_columns:
             data_columns.remove(self.key)
-        object_columns = ['GEO_NAME','EXT_GEOID','GEOID_BG', 'GEOID_CT', 'GEOID_ZIP',
-                          'acs_source','FROMHN_LEFT','TOHN_LEFT','ZEST_KEY_COL',self.key+'_COL']
+        object_columns = ['GEOID_BG', 'GEOID_CT', 'GEOID_ZIP',
+                          'GEOID', 'acs_source',self.key+'_COL',
+                          'GEO_NAME','EXT_GEOID', 'FROMHN_LEFT','TOHN_LEFT']
         drop_columns = ['GEO_NAME','EXT_GEOID','FROMHN_LEFT','TOHN_LEFT','original_race','original_sex']
         data_out = data_out[list(set(data_out.columns)-set(drop_columns))]
         data_out_float_columns = list(set(data_out.columns)-set(data_columns))
@@ -186,11 +250,14 @@ class ZRP_Prepare(BaseZRP):
                 data_out_float_columns.remove(col)
                     
         for col in data_out_float_columns:
-            data_out[col] = data_out[col].astype('float32')
+            try:
+                data_out[col] = data_out[col].astype('float32')  
+            except ValueError as e:
+                print(e)
         if 'age' in data_out.columns:
             data_out['age'] = data_out['age'].astype('float32')
-        cat_columns = ['street_address','city','first_name','last_name','house_number','middle_name',
-                       'zip_code','state','race','sex','GEOID_BG','GEOID_ZIP','GEOID_CT','acs_source']
+        cat_columns = set(data_out.columns).intersection(set([self.street_address, self.city, self.first_name, self.last_name, self.house_number, self.middle_name,  self.zip_code, self.state, self.race, self.county, 'sex', 'GEOID_BG', 'GEOID_ZIP', 'GEOID_CT', 'acs_source', 'GEOID']))
+        
         for col in cat_columns:
             if col in data_out.columns:
                 data_out[col] = data_out[col].astype('category')

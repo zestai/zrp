@@ -1,3 +1,4 @@
+from .utils import *
 import pandas as pd
 import os
 
@@ -25,6 +26,8 @@ class BaseZRP():
         Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
     city: str, default 'city'
         Name of city column.
+    county: str, default 'county'   
+        Name of the county column.
     state: str, default 'state'
         Name of state column.
     zip_code: str, default 'zip_code'
@@ -45,13 +48,11 @@ class BaseZRP():
         List of missing values to replace.
     file_path: str, optional
         Path where to put artifacts and other files generated during intermediate steps. 
-    geocode: bool, default True
-        Geocoding indicator, to be deprecated by version 0.4.0.
     bisg: bool, default True
         Whether to return BISG proxies. 
     readout: bool, default True
         Whether to return a readout.
-    n_jobs: int, default 49
+    n_jobs: int, default -1 (all cores)
         Number of jobs in parallel
     year: str, default '2019'
         ACS year to use.
@@ -60,11 +61,7 @@ class BaseZRP():
     runname: str, default 'test'
     """
 
-    def __init__(self, support_files_path="data/processed", key="ZEST_KEY", first_name="first_name",
-                 middle_name="middle_name", last_name="last_name", house_number="house_number",
-                 street_address="street_address", city="city", state="state", zip_code="zip_code", race='race',
-                 census_tract=None, block_group=None, street_address_2=None, name_prefix=None, name_suffix=None,
-                 na_values=None, file_path=None, geocode=True, bisg=True, readout=True, n_jobs=-1, year="2019",
+    def __init__(self, support_files_path="data/processed", key="ZEST_KEY", first_name="first_name", middle_name="middle_name", last_name="last_name", house_number="house_number", street_address="street_address", city="city", county="county", state="state", zip_code="zip_code", race='race', census_tract=None, block_group=None, street_address_2=None, name_prefix=None, name_suffix=None, na_values=None, file_path=None, bisg=True, model_dev=False, readout=True, n_jobs=-1, year="2019",
                  span="5", runname=None):
         self.key = key
         self.first_name = first_name
@@ -75,6 +72,7 @@ class BaseZRP():
         self.street_address = street_address
         self.street_address_2 = street_address_2
         self.city = city
+        self.county = county
         self.state = state
         self.zip_code = zip_code
         self.census_tract = census_tract
@@ -82,9 +80,9 @@ class BaseZRP():
         self.file_path = file_path
         self.support_files_path = support_files_path
         self.na_values = na_values
-        self.geocode = geocode
         self.readout = readout
         self.bisg = bisg
+        self.model_dev = model_dev
         self.race = race
         self.n_jobs = n_jobs
         self.year = year
@@ -102,33 +100,4 @@ class BaseZRP():
 
     def transform(self):
         pass
-
-    def get_column_names(self):
-        """
-        Returns user defined column names of input DF. If user hasn't specified alternative names for columns, the default column names are returned.
-        """
-        column_names = []
-        column_names.append(self.first_name)
-        column_names.append(self.middle_name)
-        column_names.append(self.last_name)
-        column_names.append(self.house_number)
-        column_names.append(self.street_address)
-        column_names.append(self.city)
-        column_names.append(self.state)
-        column_names.append(self.zip_code)
-        column_names.append(self.race)
         
-        return(column_names)
-
-    def reset_column_names(self):
-        """
-        Resets this class' stored column names to the defaults expected by ZRP. 
-        """
-        self.first_name = "first_name"
-        self.middle_name = "middle_name"
-        self.last_name = "last_name"
-        self.house_number = "house_number"
-        self.street_address = "street_address"
-        self.city = "city"
-        self.state = "state"
-        self.zip_code = "zip_code"

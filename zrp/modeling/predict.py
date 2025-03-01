@@ -64,13 +64,12 @@ class PredictPass(BaseZRP):
         return(proxies) 
 
 def validate_case(data, key, last_name):
-    df = data.copy()
-    new_row = df.tail(1).reset_index(drop=False)
+    new_row = data.iloc[-1].copy()
     new_row[key] = "validate_case_001"
     new_row[last_name] = "SMITH JONES"
-    new_row = new_row.set_index(key)
-    df = pd.concat([df, new_row])
-    return(df)
+    # new_row = new_row.set_index(key)
+    data = pd.concat([data, pd.DataFrame([new_row]).set_index(key)])
+    return(data)
     
 def validate_drop(data):
     data = data.drop('validate_case_001')
@@ -361,7 +360,7 @@ class ZRP_Predict(BaseZRP):
             raise AssertionError("XGBoost version does not match requirements, required version is 1.0.2")
 
         data_cols =  list(data.columns)
-        self.required_cols = [self.first_name, self.middle_name, self.last_name, "GEOID", "B01003_001"]
+        self.required_cols = [self.first_name, self.middle_name, self.last_name, "B01003_001",  "GEOID"] 
         val_na = is_missing(data, self.required_cols)
         if val_na:
             raise ValueError(f"Missing required data {val_na}")     
@@ -386,19 +385,14 @@ class ZRP_Predict(BaseZRP):
         is_input: bool
             Indicator if validating raw input data
         """
-        name_cols =  [self.first_name, self.middle_name, self.last_name]
-        
-        data = data.copy()
-        data["has_first_name"] = 0
-        data["has_middle_name"] = 0
-        data["has_last_name"] = 0
+        name_cols = [self.first_name, self.middle_name, self.last_name]
         has_name_columns = ["has_first_name", "has_middle_name", "has_last_name"]
-        
+    
         for name_col, has_name_col in zip(name_cols, has_name_columns):
-            data.loc[~((data[name_col].astype(str).str.upper() == "NONE")
-                                | (data[name_col].astype(str).str.upper() == " ")
-                                | (data[name_col].isna()))
-                , has_name_col] = 1 
+            data[has_name_col] = ~(
+                data[name_col].astype(str).str.strip().str.upper().isin(["NONE", ""])
+                | data[name_col].isna()
+            ).astype(bool)
         return(data)
 
     def standard_target_classes(self):
@@ -448,9 +442,9 @@ class ZRP_Predict(BaseZRP):
             # Select records for zrp geo and name proxy
             df_0 = data[
                 (data['acs_source'] == 'BG') &
-                ((data["has_first_name"] == 1) |
-                 (data["has_middle_name"] == 1) |
-                 (data["has_last_name"] == 1)
+                ((data["has_first_name"] == True) |
+                 (data["has_middle_name"] == True) |
+                 (data["has_last_name"] == True)
                 
             )]
             keys_0 = list(df_0.index.values)
@@ -458,9 +452,9 @@ class ZRP_Predict(BaseZRP):
             df_1 = data[
                 ~(data.index.isin(keys_0)) &
                 (data['acs_source'] == 'CT') &
-                ((data["has_first_name"] == 1) |
-                 (data["has_middle_name"] == 1) |
-                 (data["has_last_name"] == 1)
+                ((data["has_first_name"] == True) |
+                 (data["has_middle_name"] == True) |
+                 (data["has_last_name"] == True)
                 
             )]
             keys_1 = keys_0 + list(df_1.index.values)
@@ -468,9 +462,9 @@ class ZRP_Predict(BaseZRP):
             df_2 = data[
                 ~(data.index.isin(keys_1)) &
                 (data['acs_source'] == 'ZIP') &
-                ((data["has_first_name"] == 1) |
-                 (data["has_middle_name"] == 1) |
-                 (data["has_last_name"] == 1)
+                ((data["has_first_name"] == True) |
+                 (data["has_middle_name"] == True) |
+                 (data["has_last_name"] == True)
                 
             )]
             keys_2 = keys_1 + list(df_2.index.values)
@@ -479,18 +473,18 @@ class ZRP_Predict(BaseZRP):
             df_3 = data[
                 ~(data.index.isin(keys_2)) &
                 (data['acs_source'] == 'BG') &
-                ~((data["has_first_name"] == 1) &
-                 (data["has_middle_name"] == 1) &
-                 (data["has_last_name"] == 1)
+                ~((data["has_first_name"] == True) &
+                 (data["has_middle_name"] == True) &
+                 (data["has_last_name"] == True)
             )]
             keys_3 = keys_2 + list(df_3.index.values)
             
             df_4 = data[
                 ~(data.index.isin(keys_3)) &
                 (data['acs_source'] == 'CT') &
-                ~((data["has_first_name"] == 1) &
-                 (data["has_middle_name"] == 1) &
-                 (data["has_last_name"] == 1)
+                ~((data["has_first_name"] == True) &
+                 (data["has_middle_name"] == True) &
+                 (data["has_last_name"] == True)
                 
             )]
             keys_4 = keys_3 + list(df_4.index.values)
@@ -498,9 +492,9 @@ class ZRP_Predict(BaseZRP):
             df_5 = data[
                 ~(data.index.isin(keys_4)) &
                 (data['acs_source'] == 'ZIP') &
-                ~((data["has_first_name"] == 1) &
-                 (data["has_middle_name"] == 1) &
-                 (data["has_last_name"] == 1)
+                ~((data["has_first_name"] == True) &
+                 (data["has_middle_name"] == True) &
+                 (data["has_last_name"] == True)
                 
             )]
             keys_5 = keys_4 + list(df_5.index.values)
@@ -561,9 +555,9 @@ class ZRP_Predict(BaseZRP):
             
             if not records_failed_bisg_proxy.empty:    # Attempt name only ZRP proxying
                 df_7 = records_failed_bisg_proxy[
-                    (records_failed_bisg_proxy['has_first_name'] == 1) |
-                    (records_failed_bisg_proxy['has_middle_name'] == 1) |
-                    (records_failed_bisg_proxy['has_last_name'] == 1)
+                    (records_failed_bisg_proxy['has_first_name'] == True) |
+                    (records_failed_bisg_proxy['has_middle_name'] == True) |
+                    (records_failed_bisg_proxy['has_last_name'] == True)
                 ]     
                 if not df_7.empty:
                     zrp_names_only = ZRP_Predict_BlockGroup(self.pipe_path, **self.params_dict)
@@ -584,19 +578,21 @@ class ZRP_Predict(BaseZRP):
             print("   ...Proxies generated")
 
         proxies_out = pd.concat(out_list)
-        
-        # Rearangement of columns    
-        all_source_cols = [
+
+        # simplify source
+        all_source_cols = ['source',
             'source_zrp_block_group', 'source_zrp_census_tract',
             'source_zrp_zip_code', 'source_bisg', 'source_zrp_block_group_geo_only',
             'source_zrp_census_tract_geo_only', 'source_zrp_zip_code_geo_only',
             'source_zrp_name_only', 'source_no_proxy']
         source_cols = [col for col in all_source_cols if col in proxies_out.columns]
-        race_cols = list(set(proxies_out.columns) - set(source_cols) - set([f"{self.race}_proxy"]))
-        race_cols.sort()
-        ordered_columns = race_cols + [f"{self.race}_proxy"] + source_cols  
-        proxies_out = proxies_out[ordered_columns]
+        proxies_out['source'] = proxies_out[source_cols].idxmax(axis=1)
         
+        # Rearangement of columns    
+        race_cols = list(set(proxies_out.columns) - set(['source']) - set(source_cols) - set([f"{self.race}_proxy"]))
+        race_cols.sort()
+        ordered_columns = race_cols + [f"{self.race}_proxy"] + ['source'] + source_cols  
+        proxies_out = proxies_out[ordered_columns]        
         proxies_out[race_cols] = proxies_out[race_cols].fillna(0)
         proxies_out[source_cols] = proxies_out[source_cols].fillna(0)
         proxies_out = proxies_out.sort_values(source_cols)        
@@ -604,10 +600,10 @@ class ZRP_Predict(BaseZRP):
         if save_table:
             make_directory(self.out_path)
             if self.runname is not None:
-                file_name = f'proxy_output_{self.runname}.feather'
+                file_name = f'proxy_output_{self.runname}.parquet'
             else:
-                file_name = 'proxy_output.feather'
-            save_feather(proxies_out, self.out_path, file_name)      
+                file_name = 'proxy_output.parquet'
+            save_dataframe(proxies_out, self.out_path, file_name)      
         
         return(proxies_out)
 
@@ -664,10 +660,10 @@ class FEtoPredict(BaseZRP):
         if save_table:
             make_directory(self.out_path)
             if self.runname is not None:
-                file_name = f'proxy_output_{self.runname}.feather'
+                file_name = f'proxy_output_{self.runname}.parquet'
             else:
-                file_name = 'proxy_output.feather'
-            save_feather(proxies_out, self.out_path, file_name) 
+                file_name = 'proxy_output.parquet'
+            save_dataframe(proxies_out, self.out_path, file_name) 
             
         return(proxies)
     

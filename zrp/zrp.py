@@ -39,6 +39,8 @@ class ZRP(BaseZRP):
         Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
     city: str, default 'city'
         Name of city column.
+    county: str, default 'county'   
+        Name of the county column.
     state: str, default 'state'
         Name of state column.
     zip_code: str, default 'zip_code'
@@ -59,13 +61,11 @@ class ZRP(BaseZRP):
         List of missing values to replace.
     file_path: str, optional
         Path where to put artifacts and other files generated during intermediate steps. 
-    geocode: bool, default True
-        Geocoding indicator, to be deprecated by version 0.4.0.
     bisg: bool, default True
         Whether to return BISG proxies. 
     readout: bool, default True
         Whether to return a readout.
-    n_jobs: int, default 49
+    n_jobs: int, default -1 (all cores)
         Number of jobs in parallel
     year: str, default '2019'
         ACS year to use.
@@ -78,6 +78,7 @@ class ZRP(BaseZRP):
         super().__init__(file_path=file_path, *args, **kwargs)
         self.pipe_path = pipe_path
         self.params_dict =  kwargs
+        self.model_dev = False
 
     def fit(self):
         return self
@@ -91,44 +92,36 @@ class ZRP(BaseZRP):
         data: pd.Dataframe
             Dataframe to be transformed
         """
-        renamed_columns = {self.first_name: "first_name", self.middle_name: "middle_name", self.last_name: "last_name", self.house_number: "house_number", self.street_address: "street_address", self.city: "city", self.state: "state", self.zip_code: "zip_code"}
+        renamed_columns = {self.first_name: "first_name", self.middle_name: "middle_name", self.last_name: "last_name"
+                          }
+        
         data = data.rename(columns=renamed_columns)
-        # self.params_dict = {}
         return data
-    
+
+
     def check_for_old_files(self):
         """
         Checks if there are no files created in previous runs.
-
-        Parameters
-        -----------
         """
-        old_files = []
         if self.runname is not None:
             file_like_geo = f'Zest_Geocoded_{self.runname}__{self.year}__'
-            file_like_zrp_proxy = f'proxy_output_{self.runname}.feather'
-            file_like_bisg_proxy = f'bisg_proxy_output__{self.runname}.feather'
+            file_like_zrp_proxy = f'proxy_output_{self.runname}.parquet'
+            file_like_bisg_proxy = f'bisg_proxy_output__{self.runname}.parquet'
         else:
             file_like_geo = f'Zest_Geocoded__{self.year}__'
-            file_like_zrp_proxy = 'proxy_output.feather'
-            file_like_bisg_proxy = 'bisg_proxy_output.feather'
-        
+            file_like_zrp_proxy = 'proxy_output.parquet'
+            file_like_bisg_proxy = 'bisg_proxy_output.parquet'
+            
+        # Patterns to check
+        patterns = [file_like_geo, file_like_zrp_proxy, file_like_bisg_proxy]
+    
+        # Iterate over files in the directory
         for file in os.listdir(self.out_path):
-            if file_like_geo in file:
-                old_files.append(os.path.join(self.out_path,file))
-           
-        file = os.path.join(self.out_path,file_like_zrp_proxy)
-        if os.path.exists(file):
-            old_files.append(file)
-        
-        file = os.path.join(self.out_path,file_like_bisg_proxy)
-        if os.path.exists(file):
-            old_files.append(file)
-        
-        if len(old_files) > 0:
-            raise Exception(f"New value of 'runname' parameter needs to be specified or the following files need to be moved or deleted: {old_files}")
-        
-                  
+            if any(pattern in file for pattern in patterns):
+                raise Exception(
+                    f"New value of 'runname' parameter needs to be specified or the following file needs to be moved or deleted: {os.path.join(self.out_path, file)}"
+                )
+         
     
     def transform(self, input_data, chunk_size = 25000):
         """
@@ -148,14 +141,13 @@ class ZRP(BaseZRP):
             data = load_file(self.file_path)
 
         data = self.rename_data_columns(data)
-        self.reset_column_names()
-        
+            
         make_directory(self.out_path)
         self.check_for_old_files()
         curpath = dirname(__file__)
         if self.pipe_path is None:
             self.pipe_path = join(curpath, "modeling/models")
-
+                    
         data = data.sort_values('state')
         if chunk_size is None:
             chunk_size = len(data)
@@ -170,7 +162,6 @@ class ZRP(BaseZRP):
             z_prepare = ZRP_Prepare(file_path=self.file_path, **self.params_dict)
             z_prepare.fit(data_chunk)
             prepared_data_chunk = z_prepare.transform(data_chunk)
-
             z_predict = ZRP_Predict(file_path=self.file_path, pipe_path=self.pipe_path, **self.params_dict)
             z_predict.fit(prepared_data_chunk)
             predict_out_chunk = z_predict.transform(prepared_data_chunk, save_table = False)
@@ -185,17 +176,17 @@ class ZRP(BaseZRP):
         predict_out = pd.concat(predict_out_list)
         
         if self.runname is not None:
-            file_name = f'proxy_output_{self.runname}.feather'
+            file_name = f'proxy_output_{self.runname}.parquet'
         else:
-            file_name = 'proxy_output.feather'
-        save_feather(predict_out, self.out_path, file_name)    
+            file_name = 'proxy_output.parquet'
+        save_dataframe(predict_out, self.out_path, file_name)    
         if self.bisg:
             full_bisg_proxies = pd.concat(full_bisg_proxies_list)
             if self.runname is not None:
-                file_name = f'bisg_proxy_output_{self.runname}.feather'
+                file_name = f'bisg_proxy_output_{self.runname}.parquet'
             else:
-                file_name = 'bisg_proxy_output.feather'
-            save_feather(full_bisg_proxies, self.out_path, file_name) 
+                file_name = 'bisg_proxy_output.parquet'
+            save_dataframe(full_bisg_proxies, self.out_path, file_name) 
 
         try:
             predict_out = input_data.merge(predict_out.reset_index(drop=False), on=self.key)
