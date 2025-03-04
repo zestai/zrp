@@ -87,10 +87,10 @@ class ACSModelPrep(BaseZRP):
                                 left_on="GEOID_BG",
                                 right_on="GEOID").set_index(self.key)
             mbggk["acs_source"] = "BG"
-            nm_bg =  set(nm_zkeys) - set(mbggk_zkeys)
         except AttributeError:
             mbggk_zkeys = []
             mbggk = pd.DataFrame()
+        nm_bg =  set(nm_zkeys) - set(mbggk_zkeys)
 
         try:
         # Census Tract
@@ -103,11 +103,10 @@ class ACSModelPrep(BaseZRP):
                                 left_on="GEOID_CT",
                                 right_on="GEOID").set_index(self.key)
             mctgk["acs_source"] = "CT"
-            nm_ct =  set(nm_zkeys) - set(mctgk_zkeys)
-
         except AttributeError:
             mctgk_zkeys = []            
             mctgk = pd.DataFrame()
+        nm_ct =  set(nm_zkeys) - set(mctgk_zkeys)
         try:
         # Merge by Zip
             mbz_list = set(data["GEOID_ZIP"].unique()).intersection(set(acs_zip.GEOID.unique())) 
@@ -120,11 +119,10 @@ class ACSModelPrep(BaseZRP):
                             right_on="GEOID",
                             left_on="GEOID_ZIP").set_index(self.key)
             mbz["acs_source"] = "ZIP"
-            nm_zp =  set(nm_zkeys) - set(mbz_zkeys)
-
         except AttributeError:
             mbz_zkeys = []
             mbz = pd.DataFrame()
+        nm_zp =  set(nm_zkeys) - set(mbz_zkeys)
 
         # No Merge
         print(" ...No match")

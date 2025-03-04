@@ -358,8 +358,6 @@ class ProcessStrings(BaseZRP):
         List of missing values to replace 
     file_path: str, optional
         Input data file path
-    geocode: bool
-        Whether to geocode
     race: str
         Name of race column
     bisg: bool, default True
@@ -544,8 +542,6 @@ class  ProcessGeo(BaseZRP):
         List of missing values to replace 
     file_path: str
         Input data file path
-    geocode: bool
-        Whether to geocode
     race: str
         Name of race column
     bisg: bool, default True
@@ -566,7 +562,7 @@ class  ProcessGeo(BaseZRP):
             self.required_cols = [self.census_tract]
         elif (self.census_tract in data_cols) & (self.block_group in data_cols):
             self.required_cols = [self.census_tract, self.block_group]
-        elif (self.zip_code in data_cols) & (self.geocode==True):
+        elif (self.zip_code in data_cols):
             self.required_cols = [self.zip_code, self.house_number, self.street_address, self.city, self.state]
         val_na = is_missing(data, self.required_cols)
         if val_na:
@@ -715,8 +711,6 @@ class  ProcessGLookUp(BaseZRP):
         List of missing values to replace 
     file_path: str
         Input data file path
-    geocode: bool
-        Whether to geocode
     race: str
         Name of race column
     bisg: bool, default True
