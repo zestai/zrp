@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from zrp.prepare.utils import *
 
 
 def is_missing(data, required_cols):
@@ -14,6 +15,7 @@ def is_missing(data, required_cols):
     """
     missing_columns = np.setdiff1d(required_cols,data.columns).tolist()
     return(missing_columns)
+
 
 class BaseValidate():
     """
@@ -39,6 +41,8 @@ class BaseValidate():
         Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
     city: str
         Name of city column
+    county: str, default 'county'   
+        Name of the county column.        
     state: str
         Name of state column
     zip_code: str
@@ -57,7 +61,7 @@ class BaseValidate():
 
 
     
-    def __init__(self, support_files_path = "data/processed", key = "ZEST_KEY", first_name = "first_name", middle_name = "middle_name", last_name = "last_name", house_number = "house_number", street_address = "street_address", city = "city", state = "state", zip_code = "zip_code", race = "race", census_tract =  None, block_group = None, file_path = None, year = "2019", span  = "5"):
+    def __init__(self, support_files_path = "data/processed", key = "ZEST_KEY", first_name = "first_name", middle_name = "middle_name", last_name = "last_name", house_number = "house_number", street_address = "street_address", city = "city", county="county", state = "state", zip_code = "zip_code", race = "race", census_tract =  None, block_group = None, file_path = None, year = "2019", span  = "5"):
         self.key = key
         self.first_name = first_name
         self.middle_name =  middle_name
@@ -65,6 +69,7 @@ class BaseValidate():
         self.house_number = house_number
         self.street_address = street_address
         self.city = city
+        self.county = county
         self.state = state
         self.zip_code = zip_code
         self.census_tract = census_tract
@@ -102,24 +107,38 @@ class BaseValidate():
             dataframe to make changes to or use for validation
         is_input: bool
             Indicator if validating raw input data
+        
+        Returns
+        -------
+        dict
+            Dictionary with column names as keys and missing percentages as values.            
         """
-        data_cols = list(data.columns)
-        possible_zrp_cols =  set(data_cols).intersection(set([
+        possible_zrp_cols =  set(data.columns).intersection({
             self.first_name, self.middle_name, self.last_name,
-            self.house_number, self.street_address, self.zip_code,
-            self.state, self.block_group, self.census_tract,
-        ]))
+            self.house_number, self.street_address, self.county,
+            self.state})
         na_dict = {}
         for col in possible_zrp_cols:
-            na_dict[col] = None
             if data[col].dtype == 'object':
-                na_dict[col] = data[col].str.upper().isin(['NONE', ' ', np.nan]).mean()
+                missing_pct = data[col].str.strip().str.upper().isin(['NONE', 'None', '', np.nan]).mean()
             else:
-                na_dict[col] = data[col].isna().mean()
-            if col in possible_zrp_cols:
-                if na_dict[col] > 0.10:
-                    print(f"       (Warning!!) {col} is {na_dict[col]*100}% missing")   
-        return(na_dict)
+                missing_pct = data[col].isna().mean()
+            
+            na_dict[col] = missing_pct
+    
+            if missing_pct > 0.10:
+                print(f"       (Warning!!) {col} is {missing_pct * 100:.2f}% missing")
+        # Create an aggregate missing for geo ids
+        potential_geo_ids = set(data.columns).intersection(set([self.block_group, "GEOID_BG", self.census_tract,"GEOID_CT", self.zip_code, 'GEOID_ZIP']))
+        all_idx = set(data.index)
+        num_idx= len(all_idx)
+        for gcol in potential_geo_ids:
+            all_idx = all_idx - set(data.index[data[gcol].notna()])
+        na_dict['geoids'] = len(all_idx)/num_idx
+        if na_dict['geoids'] > 0.10:
+                print(f"       (Warning!!) geoids are {na_dict['geoids'] * 100:.2f}% missing")
+        return na_dict
+
     
     def is_geocoded(self, data):
         """Calculates how much data is geocoded by geo-level
@@ -132,22 +151,15 @@ class BaseValidate():
         geocoded_cts = {}
         geocoded_cts["count"] = {}
         
-        geocoded_cts["count"]["GEOID"] = data[(data["GEOID"].str.len()>4)
-                                                       & (data.index.duplicated(keep = "first"))].shape[0]
-            
-        if data['GEOID_BG'].isna().all():
-            geocoded_cts["count"]["Block Group"] = 0
-        else:
-            geocoded_cts["count"]["Block Group"] = data[(data["GEOID_BG"].str.len()>11)  
-                                                        & (data["GEOID_BG"].notna())].shape[0]
-        if data['GEOID_CT'].isna().all():
-            geocoded_cts["count"]["Census Tract"] = 0
-        else:
-            geocoded_cts["count"]["Census Tract"] = data[(data["GEOID_CT"].str.len()>10) 
-                                                     & (data["GEOID_CT"].notna())].shape[0]
-        
-        geocoded_cts["count"]["Zip Code"] = data[(data["GEOID_ZIP"].str.len() == 5)  
-                                                 & (data["GEOID_ZIP"].notna())].shape[0]
+        geocoded_cts["count"]["Block Group"] = (
+            data["GEOID_BG"].str.len().gt(11).sum() if "GEOID_BG" in data else 0
+        )
+        geocoded_cts["count"]["Census Tract"] = (
+            data["GEOID_CT"].str.len().gt(10).sum() if "GEOID_CT" in data else 0
+        )
+        geocoded_cts["count"]["Zip Code"] = (
+            data["GEOID_ZIP"].str.len().eq(5).sum() if "GEOID_ZIP" in data else 0
+        )
         return(geocoded_cts)
         
     def check_states(self, data):
@@ -160,8 +172,9 @@ class BaseValidate():
         """
         return(data[self.state].value_counts(dropna = False).to_dict())
     
-    def is_zcta5(self, data):
-        """Determines if zip codes are provided as 5 digit zip codes
+
+    def is_geoid(self, data, geoid_name):
+        """Returns validation metrics, a length check to see if there is variation in geoid length typically look for zip to have 6 digits, census tract to have 11 digits (includes state and county code), and blockgroup to have atleast 12 digits.
                 
         Parameter
         ---------
@@ -169,36 +182,10 @@ class BaseValidate():
             dataframe to make changes to or use for validation
         """
         geo_dict = {}
-        geo_dict["length_check"] = data[self.zip_code].str.len().value_counts(dropna = False).to_dict()
-        geo_dict["numeric_check"] = bool(data[self.zip_code].str.isnumeric().all())
+        geo_dict["length_check"] = data[geoid_name].str.len().value_counts(dropna = False).to_dict()
+        geo_dict["numeric_check"] = bool(data[geoid_name].str.isnumeric().all())
         return(geo_dict)
-    
-    def is_census_tract(self, data):
-        """Determines if standard census tracts are provided
-                
-        Parameter
-        ---------
-        data: pd.dataframe
-            dataframe to make changes to or use for validation
-        """
-        geo_dict = {}
-        geo_dict["length_check"] = data[self.census_tract].str.len().value_counts(dropna = False).to_dict()
-        geo_dict["numeric_check"] = bool(data[self.census_tract].str.isnumeric().all())
-        return(geo_dict)
-    
-    def is_block_group(self, data):
-        """Determines if standard block groups are provided
-                
-        Parameter
-        ---------
-        data: pd.dataframe
-            dataframe to make changes to or use for validation
-        """
-        geo_dict = {}
-        geo_dict["length_check"] = data[self.block_group].str.len().value_counts(dropna = False).to_dict()
-        geo_dict["numeric_check"] = bool(data[self.block_group].str.isnumeric().all())
-        return(geo_dict)
-    
+        
     def is_mapped(self, data):
         """Determines how much data is mapped
                 
@@ -209,7 +196,6 @@ class BaseValidate():
         """
         mapped_dict = {}
         for acssrc in ["BG", "CT", "ZIP"]:
-            data["acs_source"]
             mapped_sum = data[data["acs_source"] == acssrc].sum()
             mapped_dict [acssrc] = None
             mapped_dict[acssrc]["count"] = mapped_sum
@@ -283,6 +269,8 @@ class ValidateGeo(BaseValidate):
         Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
     city: str
         Name of city column
+    county: str, default 'county'   
+        Name of the county column.
     state: str
         Name of state column
     zip_code: str
@@ -311,11 +299,11 @@ class ValidateGeo(BaseValidate):
     def transform(self, data):    
         validator = {}
         if self.zip_code in data.columns:
-            validator["is_zip_code"] = self.is_zcta5(data)
-        if self.is_census_tract in data.columns:
-            validator["is_census_tract"] = self.is_census_tract(data)
-        if self.is_block_group in data.columns:
-            validator["is_block_group"] = self.is_block_group(data)
+            validator["is_zip_code"] = self.is_geoid(data, self.zip_code)
+
+        # convert to serializable json
+        validator = convert_numpy(validator)
+
         return(validator)
         
 
@@ -343,6 +331,8 @@ class ValidateInput(BaseValidate):
         Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
     city: str
         Name of city column
+    county: str, default 'county'   
+        Name of the county column.
     state: str
         Name of state column
     zip_code: str
@@ -378,6 +368,8 @@ class ValidateInput(BaseValidate):
         validator["is_unique_key"] = self.is_unique_key(data)
         print("     Is key unique:", validator["is_unique_key"]) 
         validator["pct_na"] = self.check_missing_pct(data)
+        # convert to serializable json
+        validator = convert_numpy(validator)        
         return(validator)
             
 class ValidateGeocoded(BaseValidate):
@@ -404,6 +396,8 @@ class ValidateGeocoded(BaseValidate):
         Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
     city: str
         Name of city column
+    county: str, default 'county'   
+        Name of the county column.
     state: str
         Name of state column
     zip_code: str
@@ -446,6 +440,10 @@ class ValidateGeocoded(BaseValidate):
         except (KeyError, ValueError) as e:
             pass
         validator["is_geocoded"] = self.is_geocoded(data)
+        
+        # convert to serializable json
+        validator = convert_numpy(validator)
+
         return(validator)        
     
     
@@ -473,6 +471,8 @@ class ValidateACS(BaseValidate):
         Name of street address column. The street address is usually comprised of predirectional, street name, and street suffix. 
     city: str
         Name of city column
+    county: str, default 'county'   
+        Name of the county column.        
     state: str
         Name of state column
     zip_code: str
@@ -508,4 +508,6 @@ class ValidateACS(BaseValidate):
         validator["is_unique_key"] = self.is_unique_key(data)
         print("     Is key unique:", validator["is_unique_key"]) 
         validator["is_mapped"] = self.is_mapped(data)
+        # convert to serializable json
+        validator = convert_numpy(validator)
         return(validator)    

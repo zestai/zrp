@@ -358,8 +358,6 @@ class ProcessStrings(BaseZRP):
         List of missing values to replace 
     file_path: str, optional
         Input data file path
-    geocode: bool
-        Whether to geocode
     race: str
         Name of race column
     bisg: bool, default True
@@ -424,25 +422,31 @@ class ProcessStrings(BaseZRP):
         # Convert to uppercase & trim whitespace
         print("   Formatting P1")
         data = data.astype(str)
-        data = data.apply(lambda x: x.str.upper())
+        if ~(data.first_name.str.isupper()).all():
+            data = data.apply(lambda x: x.str.upper())
         
         data = reduce_whitespace(data)
         na_dict =  {"^\\s*$": None,
                     "^NAN$": None,
-                    "^NONE$": None}
+                    "^NONE$": None,
+                   "^None$": None} 
         data = data.replace(na_dict, regex=True)     
         data[self.house_number] = data[self.house_number].apply(lambda x: re.sub("[^0-9]$", "", str(x)))
         data = split_HN(data, [self.house_number])
         
         numeric_cols =  list(set([self.zip_code,
                                   self.census_tract,
+                                  self.block_group
                                  ]).intersection(set(data_cols)))
         
         # Remove/replace special characters
         for col in numeric_cols:
+            if self.zip_code:
+                # split to extract extension 
+                data[col] = data[col].str.split('[-| .]', n=1).str[0]
             data[col] = data[col].apply(lambda x: re.sub("[^0-9]",\
                                                      "",\
-                                                    str(x))) 
+                                                    str(x)))                 
         if self.last_name:
             name_cols = list(set([self.first_name,
                                   self.middle_name,
@@ -538,8 +542,6 @@ class  ProcessGeo(BaseZRP):
         List of missing values to replace 
     file_path: str
         Input data file path
-    geocode: bool
-        Whether to geocode
     race: str
         Name of race column
     bisg: bool, default True
@@ -560,9 +562,8 @@ class  ProcessGeo(BaseZRP):
             self.required_cols = [self.census_tract]
         elif (self.census_tract in data_cols) & (self.block_group in data_cols):
             self.required_cols = [self.census_tract, self.block_group]
-        elif (self.zip_code in data_cols) & (self.geocode==True):
+        elif (self.zip_code in data_cols):
             self.required_cols = [self.zip_code, self.house_number, self.street_address, self.city, self.state]
-        val_na = is_missing(data, self.required_cols)
         val_na = is_missing(data, self.required_cols)
         if val_na:
             raise ValueError(f"Missing required data {val_na}")
@@ -598,21 +599,27 @@ class  ProcessGeo(BaseZRP):
             
             numeric_cols =  list(set([self.zip_code,
                                       self.census_tract,
+                                      self.block_group,
                                       self.house_number
                                      ]).intersection(set(data_cols)))
             
 
             print("      ...formatting")
             data = data.astype(str)
-            data = data.apply(lambda x: x.str.upper())
+            if ~(data.first_name.str.isupper()).all():
+                data = data.apply(lambda x: x.str.upper())
             
             data = reduce_whitespace(data)
             na_dict =  {"^\\s*$": None,
-                       "^NAN$": None,
-                       "^NONE$": None}
+                        "^NAN$": None,
+                        "^NONE$": None,
+                       "^None$": None} 
             data = data.replace(na_dict, regex=True)
             # Remove/replace special characters
             for col in numeric_cols:
+                if self.zip_code:
+                    # split to extract extension 
+                    data[col] = data[col].str.split('[-| .]', n=1).str[0]                
                 data[col] = data[col].apply(lambda x: re.sub("[^0-9]",\
                                                          "",\
                                                         str(x))) 
@@ -630,9 +637,9 @@ class  ProcessGeo(BaseZRP):
         data_path = join(curpath, f'../data/processed')
                 
         if self.key in data.columns:
-            data["ZEST_KEY_COL"] = data[self.key]
+            data[f"{self.key}_COL"] = data[self.key]
         else:
-            data["ZEST_KEY_COL"] = data.index        
+            data[f"{self.key}_COL"] = data.index        
         
         print("      ...address cleaning")
         street_addr_dict = dict(zip(data.index, data[self.street_address])) 
@@ -649,16 +656,13 @@ class  ProcessGeo(BaseZRP):
                                  (data[self.zip_code].str.contains("None")),
                                   None,
                                   data[self.zip_code].apply(lambda x: x.zfill(5)))
-        data[self.zip_code] = data[self.zip_code].astype(str).str[:5]
+        data[self.zip_code] = data[self.zip_code].astype(str).str[:5] 
         data['replicate_flg'] = '000000'
         if replicate:
             print("      ...replicating address")
             data = replicate_house_number(data, self.house_number, 1)
             data = replicate_address_2(data, self.street_address, street_suffix_mapping, 10, 1)
             data = replicate_north_n(data, self.street_address, 100, 1)
-#             data = replicate_address_3(data, self.street_address, street_suffix_mapping_new_only, 1000)
-#             data = replicate_n_north(data, self.street_address, 1000)
-#             data = replicate_n_norte(data, self.street_address, 2000)
         data = data.reset_index(drop=False)
         print("      ...formatting")
         addr_cols = list(set(list(data.columns)).intersection(set([self.zip_code, self.census_tract, self.house_number, self.city, self.state, self.street_address])))
@@ -707,8 +711,6 @@ class  ProcessGLookUp(BaseZRP):
         List of missing values to replace 
     file_path: str
         Input data file path
-    geocode: bool
-        Whether to geocode
     race: str
         Name of race column
     bisg: bool, default True
@@ -752,16 +754,21 @@ class  ProcessGLookUp(BaseZRP):
                                   self.county,
                                  ]).intersection(set(data_cols)))
         data = data.astype(str)
-        data = data.apply(lambda x: x.str.upper())
+        if ~(data.first_name.str.isupper()).all():
+            data = data.apply(lambda x: x.str.upper())
         
         data = reduce_whitespace(data)
         na_dict =  {"^\\s*$": None,
                     "^NAN$": None,
-                    "^NONE$": None} 
+                    "^NONE$": None,
+                   "^None$": None} 
         data = data.replace(na_dict, regex=True)
         
         # Remove/replace special characters
         for col in numeric_cols:
+            if self.zip_code:
+                # split to extract extension 
+                data[col] = data[col].str.split('[-| .]', n=1).str[0]            
             data[col] = data[col].apply(lambda x: re.sub("[^0-9]",\
                                                      "",\
                                                     str(x))) 
